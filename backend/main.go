@@ -1,13 +1,21 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"log"
+)
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run(":3001")
+	store, err := NewPostgresStore()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer store.db.Close()
+
+	if err := store.CreateUserTable(); err != nil {
+		fmt.Println("No se ha creado la tabla de users")
+	}
+
+	server := NewAPIServer(":3000", store)
+	server.Run()
 }
