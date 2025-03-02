@@ -12,7 +12,7 @@ func main() {
 	}
 	defer store.db.Close()
 
-	if err := store.CreateUserTable(); err != nil {
+	if err := store.Init(); err != nil {
 		fmt.Println("No se ha creado la tabla de users")
 	}
 
