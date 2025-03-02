@@ -1,7 +1,8 @@
-package main
+package models
 
 import (
 	"database/sql"
+	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"log"
 	"time"
 )
@@ -33,7 +34,7 @@ type User struct {
 
 func NewUser(userName, fullName, email, password string) *User {
 
-	hashedPassword, err := HashPassword(password)
+	hashedPassword, err := utils.HashPassword(password)
 	if err != nil {
 		log.Fatal("Could not hash the password")
 		return nil
