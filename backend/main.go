@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/routes"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/storage"
 	"log"
@@ -15,8 +14,10 @@ func main() {
 	defer store.Db.Close()
 
 	if err := store.Init(); err != nil {
-		fmt.Println("No se ha creado la tabla de users")
+		log.Fatal(err)
 	}
+
+	log.Println("Todas las tablas se han creado exitosamente!")
 
 	server := routes.NewAPIServer(":3000", store)
 	server.Run()

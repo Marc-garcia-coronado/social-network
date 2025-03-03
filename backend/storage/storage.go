@@ -6,11 +6,19 @@ import (
 )
 
 type Storage interface {
+	// User's methods
+	Login(username, password string) (*int, error)
+	GetUserByID(int) (*models.User, error)
 	CreateUser(*models.User) (*int, error)
 	UpdateUser(user map[string]interface{}, userID int) error
 	DeleteUser(int) error
-	GetUserByID(int) (*models.User, error)
-	Login(username, password string) (*int, error)
+
+	// Topics methods
+	GetTopics() ([]*models.Topic, error)
+	GetTopicByID(int) (*models.Topic, error)
+	CreateTopic(topic *models.Topic) (*int, error)
+	UpdateTopic(topic map[string]interface{}, topicID int) error
+	DeleteTopic(int) error
 }
 
 type PostgresStore struct {
@@ -35,8 +43,9 @@ func NewPostgresStore() (*PostgresStore, error) {
 }
 
 func (s *PostgresStore) Init() error {
-	if err := s.CreateUserTable(); err != nil {
+	if err := s.CreateTables(); err != nil {
 		return err
 	}
+
 	return nil
 }

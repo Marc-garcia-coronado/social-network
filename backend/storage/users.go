@@ -80,7 +80,7 @@ func (s *PostgresStore) DeleteUser(id int) error {
 
 func (s *PostgresStore) GetUserByID(id int) (*models.User, error) {
 
-	user := &models.User{}
+	user := new(models.User)
 	stmt := "SELECT id, user_name, full_name, email, profile_picture, bio, is_active, role, user_since FROM users WHERE id = $1"
 	if err := s.Db.QueryRow(stmt, id).Scan(&user.ID, &user.UserName, &user.FullName, &user.Email,
 		&user.ProfilePicture, &user.Bio, &user.IsActive, &user.Role, &user.UserSince); err != nil {

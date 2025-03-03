@@ -50,9 +50,19 @@ func (s *APIServer) Run() {
 	// Admin - User routes
 	adminRouter.Get("/user/{id}", utils.MakeHTTPHandleFunc(s.handleGetUserByID))
 	adminRouter.Post("/user", utils.MakeHTTPHandleFunc(s.handleCreateUser))
-	adminRouter.Delete("/user/{id}", utils.MakeHTTPHandleFunc(s.handleDeleteUser))
 	adminRouter.Patch("/user/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateUser))
+	adminRouter.Delete("/user/{id}", utils.MakeHTTPHandleFunc(s.handleDeleteUser))
 
+	// Admin - Topics routes
+	//adminRouter.Get("/topic", utils.MakeHTTPHandleFunc(s.))
+	//adminRouter.Get("/topic/{id}", utils.MakeHTTPHandleFunc(s.))
+	//adminRouter.Post("/topic", utils.MakeHTTPHandleFunc(s.))
+	//adminRouter.Patch("/topic/{id}", utils.MakeHTTPHandleFunc(s.))
+	//adminRouter.Delete("/topic/{id}", utils.MakeHTTPHandleFunc(s.))
+
+	// Defining the start of the url to match the patterns and then redirecting
+	// to protected router ( if it starts with /api )
+	// or admin router ( if it starts with /api/admin )
 	router.Mount("/api", protectedRouter)
 	router.Mount("/api/admin", adminRouter)
 
