@@ -192,11 +192,9 @@ func (s *PostgresStore) createUsersTable() error {
 
 	_, err = s.Db.Exec(queryTable)
 	if err != nil {
-		log.Println("Error creating users table:", err)
 		return err
 	}
 
-	log.Println("Users table is active!")
 	return nil
 }
 

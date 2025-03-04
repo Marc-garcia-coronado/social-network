@@ -10,72 +10,44 @@ import (
 	"strconv"
 )
 
-func (s *PostgresStore) CreateUser(u *models.User) (*int, error) {
+func (s *PostgresStore) CreateUser(u *models.User) (*models.User, error) {
 	stmt := `
 	INSERT INTO users (user_name, full_name, email, password_hash, role)
 	VALUES ($1, $2, $3, $4, $5)
-	RETURNING id;
+	RETURNING id, user_name, full_name, email, profile_picture, bio, is_active, role, user_since;
 	`
 
-	var id *int
+	newUser := new(models.User)
 
-	if err := s.Db.QueryRow(stmt, u.UserName, u.FullName, u.Email, u.Password, u.Role).Scan(&id); err != nil {
-		fmt.Errorf("No se ha podido insertar un user: ", err)
+	if err := s.Db.QueryRow(stmt, u.UserName, u.FullName, u.Email, u.Password, u.Role).Scan(&newUser.ID, &newUser.UserName, &newUser.FullName, &newUser.Email,
+		&newUser.ProfilePicture, &newUser.Bio, &newUser.IsActive, &newUser.Role, &newUser.UserSince); err != nil {
 		return nil, err
 	}
 
-	return id, nil
+	return newUser, nil
 }
 
-func (s *PostgresStore) Login(username, password string) (*int, error) {
-	var id *int
+func (s *PostgresStore) Login(username, password string) (*models.User, error) {
 	var hash string
-	stmt := `SELECT id, password_hash FROM users WHERE user_name = $1;`
-	err := s.Db.QueryRow(stmt, username).Scan(&id, &hash)
+	newUser := new(models.User)
+
+	stmt := `
+	SELECT id, user_name, full_name, email, profile_picture, bio, is_active, role, user_since, password_hash 
+	FROM users 
+	WHERE user_name = $1;
+	`
+	err := s.Db.QueryRow(stmt, username).Scan(&newUser.ID, &newUser.UserName, &newUser.FullName, &newUser.Email,
+		&newUser.ProfilePicture, &newUser.Bio, &newUser.IsActive, &newUser.Role, &newUser.UserSince, &hash)
 	if err != nil {
 		return nil, err
 	}
 
 	ok := utils.CheckPassword(hash, password)
 	if !ok {
-		return nil, fmt.Errorf("Las password no coincide")
+		return nil, fmt.Errorf("Las contraseñas no coinciden")
 	}
 
-	return id, nil
-}
-
-func (s *PostgresStore) UpdateUser(user map[string]interface{}, userID int) error {
-
-	// Build dynamic SQL query
-	stmt := "UPDATE users SET "
-	values := []interface{}{}
-	i := 1
-
-	for key, value := range user {
-		stmt += key + " = $" + strconv.Itoa(i) + ", "
-		values = append(values, value)
-		i++
-	}
-
-	stmt = stmt[:len(stmt)-2] // Remove last comma
-	stmt += " WHERE id = $" + strconv.Itoa(i)
-	values = append(values, userID)
-
-	// Execute stmt
-	err := s.Db.QueryRow(stmt, values...)
-	if err.Err() != nil {
-		return err.Err()
-	}
-
-	return nil
-}
-
-func (s *PostgresStore) DeleteUser(id int) error {
-	stmt := "DELETE FROM users WHERE id = $1"
-	if err := s.Db.QueryRow(stmt, id); err.Err() != nil {
-		return err.Err()
-	}
-	return nil
+	return newUser, nil
 }
 
 func (s *PostgresStore) GetUserByID(id int) (*models.User, error) {
@@ -91,4 +63,40 @@ func (s *PostgresStore) GetUserByID(id int) (*models.User, error) {
 	}
 
 	return user, nil
+}
+
+func (s *PostgresStore) UpdateUser(user map[string]interface{}, userID int) (*models.User, error) {
+
+	// Build dynamic SQL query
+	stmt := "UPDATE users SET "
+	values := []interface{}{}
+	i := 1
+
+	for key, value := range user {
+		stmt += key + " = $" + strconv.Itoa(i) + ", "
+		values = append(values, value)
+		i++
+	}
+
+	stmt = stmt[:len(stmt)-2] // Remove last comma
+	stmt += " WHERE id = $" + strconv.Itoa(i) + " RETURNING id, user_name, full_name, email, profile_picture, bio, is_active, role, user_since"
+	values = append(values, userID)
+
+	updatedUser := new(models.User)
+	// Execute stmt
+	err := s.Db.QueryRow(stmt, values...).Scan(&updatedUser.ID, &updatedUser.UserName, &updatedUser.FullName, &updatedUser.Email,
+		&updatedUser.ProfilePicture, &updatedUser.Bio, &updatedUser.IsActive, &updatedUser.Role, &updatedUser.UserSince)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedUser, nil
+}
+
+func (s *PostgresStore) DeleteUser(id int) error {
+	stmt := "DELETE FROM users WHERE id = $1"
+	if err := s.Db.QueryRow(stmt, id); err.Err() != nil {
+		return err.Err()
+	}
+	return nil
 }

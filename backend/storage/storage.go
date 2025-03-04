@@ -7,18 +7,23 @@ import (
 
 type Storage interface {
 	// User's methods
-	Login(username, password string) (*int, error)
-	GetUserByID(int) (*models.User, error)
-	CreateUser(*models.User) (*int, error)
-	UpdateUser(user map[string]interface{}, userID int) error
-	DeleteUser(int) error
+	Login(username, password string) (*models.User, error)
+	GetUserByID(id int) (*models.User, error)
+	CreateUser(user *models.User) (*models.User, error)
+	UpdateUser(user map[string]interface{}, userID int) (*models.User, error)
+	DeleteUser(id int) error
 
 	// Topics methods
-	GetTopics() ([]*models.Topic, error)
-	GetTopicByID(int) (*models.Topic, error)
-	CreateTopic(topic *models.Topic) (*int, error)
-	UpdateTopic(topic map[string]interface{}, topicID int) error
-	DeleteTopic(int) error
+	GetTopics() ([]models.Topic, error)
+	GetTopicByID(id int) (*models.Topic, error)
+	CreateTopic(topic *models.Topic) (*models.Topic, error)
+	UpdateTopic(topic map[string]interface{}, topicID int) (*models.Topic, error)
+	DeleteTopic(id int) error
+
+	// User - Topic methods
+	GetUserTopics(userID int) ([]models.UserTopic, error)
+	FollowTopics(ids []int, userID int) error
+	UnfollowTopics(ids []int, userID int) error
 }
 
 type PostgresStore struct {

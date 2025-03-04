@@ -40,7 +40,15 @@ func (s *APIServer) Run() {
 	protectedRouter.Use(middleware.JWTMiddleware)
 
 	// User - Users routes
-	protectedRouter.Patch("/user/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateUser))
+	protectedRouter.Get("/users/{id}", utils.MakeHTTPHandleFunc(s.handleGetUserByID))
+	protectedRouter.Patch("/users/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateUser))
+
+	// User - Topics routes
+	protectedRouter.Get("/users/{userID}/topics", utils.MakeHTTPHandleFunc(s.handleGetUserTopics))
+	protectedRouter.Get("/topics", utils.MakeHTTPHandleFunc(s.handleGetAllTopics))
+	protectedRouter.Get("/topics/{id}", utils.MakeHTTPHandleFunc(s.handleGetTopicByID))
+	protectedRouter.Post("/topics/follow", utils.MakeHTTPHandleFunc(s.handleFollowTopics))
+	protectedRouter.Delete("/topics/unfollow", utils.MakeHTTPHandleFunc(s.handleUnfollowTopics))
 
 	// Protected router for admin
 	adminRouter := chi.NewRouter()
@@ -48,17 +56,13 @@ func (s *APIServer) Run() {
 	adminRouter.Use(middleware.AdminMiddleware)
 
 	// Admin - User routes
-	adminRouter.Get("/user/{id}", utils.MakeHTTPHandleFunc(s.handleGetUserByID))
-	adminRouter.Post("/user", utils.MakeHTTPHandleFunc(s.handleCreateUser))
-	adminRouter.Patch("/user/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateUser))
-	adminRouter.Delete("/user/{id}", utils.MakeHTTPHandleFunc(s.handleDeleteUser))
+	adminRouter.Post("/users", utils.MakeHTTPHandleFunc(s.handleCreateUser))
+	adminRouter.Delete("/users/{id}", utils.MakeHTTPHandleFunc(s.handleDeleteUser))
 
 	// Admin - Topics routes
-	//adminRouter.Get("/topic", utils.MakeHTTPHandleFunc(s.))
-	//adminRouter.Get("/topic/{id}", utils.MakeHTTPHandleFunc(s.))
-	//adminRouter.Post("/topic", utils.MakeHTTPHandleFunc(s.))
-	//adminRouter.Patch("/topic/{id}", utils.MakeHTTPHandleFunc(s.))
-	//adminRouter.Delete("/topic/{id}", utils.MakeHTTPHandleFunc(s.))
+	adminRouter.Post("/topics", utils.MakeHTTPHandleFunc(s.handleCreateTopic))
+	adminRouter.Patch("/topics/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateTopic))
+	adminRouter.Delete("/topics/{id}", utils.MakeHTTPHandleFunc(s.handleDeleteTopic))
 
 	// Defining the start of the url to match the patterns and then redirecting
 	// to protected router ( if it starts with /api )

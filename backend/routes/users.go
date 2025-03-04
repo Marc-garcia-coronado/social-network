@@ -17,14 +17,12 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	id, err := s.store.Login(loginUserReq.UserName, loginUserReq.Password)
+	loggedUser, err := s.store.Login(loginUserReq.UserName, loginUserReq.Password)
 	if err != nil {
 		return err
 	}
 
-	loggedUser, err := s.store.GetUserByID(*id)
-
-	token, err := utils.GenerateJWT(*id, loggedUser.Role)
+	token, err := utils.GenerateJWT(loggedUser.ID, loggedUser.Role)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return err
@@ -62,17 +60,12 @@ func (s *APIServer) handleCreateUser(w http.ResponseWriter, r *http.Request) err
 
 	user := models.NewUser(createUserReq.UserName, createUserReq.FullName, createUserReq.Email, createUserReq.Password)
 
-	id, err := s.store.CreateUser(user)
+	newUser, err := s.store.CreateUser(user)
 	if err != nil {
 		return err
 	}
 
-	insertedUser, err := s.store.GetUserByID(*id)
-	if err != nil {
-		return err
-	}
-
-	return utils.WriteJSON(w, http.StatusCreated, insertedUser)
+	return utils.WriteJSON(w, http.StatusCreated, newUser)
 }
 
 func (s *APIServer) handleUpdateUser(w http.ResponseWriter, r *http.Request) error {
@@ -104,12 +97,12 @@ func (s *APIServer) handleUpdateUser(w http.ResponseWriter, r *http.Request) err
 		return fmt.Errorf("no fields to update")
 	}
 
-	err = s.store.UpdateUser(user, id)
-	if err != nil {
-		return err
+	_, exists := user["role"]
+	if role != "admin" && exists {
+		return fmt.Errorf("you cannot change the role field")
 	}
 
-	updatedUser, err := s.store.GetUserByID(id)
+	updatedUser, err := s.store.UpdateUser(user, id)
 	if err != nil {
 		return err
 	}
@@ -118,12 +111,27 @@ func (s *APIServer) handleUpdateUser(w http.ResponseWriter, r *http.Request) err
 }
 
 func (s *APIServer) handleDeleteUser(w http.ResponseWriter, r *http.Request) error {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	role, ok := r.Context().Value(middleware.UserRoleKey).(string)
+	if !ok {
+		return fmt.Errorf("failed to get user role from JWT")
+	}
+
+	id, ok := r.Context().Value(middleware.UserIDKey).(int) // Get the user id from the JWT
+	if !ok {
+		return fmt.Errorf("failed to get user id from JWT")
+	}
+
+	paramID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		return err
 	}
 
-	err = s.store.DeleteUser(id)
+	// Check if the user id is the same as the JWT which means is updating itself but if is an admin he can update
+	if paramID != id && role != "admin" {
+		return fmt.Errorf("you can't update another user that is not you")
+	}
+
+	err = s.store.DeleteUser(paramID)
 	if err != nil {
 		return err
 	}
