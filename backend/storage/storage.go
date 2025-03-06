@@ -13,6 +13,11 @@ type Storage interface {
 	UpdateUser(user map[string]interface{}, userID int) (*models.User, error)
 	DeleteUser(id int) error
 
+	// Follow methods
+	FollowUser(userToFollowID, userID int) error
+	UnfollowUser(userToFollowID, userID int) error
+	GetFollowers(id int) ([]models.User, error)
+
 	// Topics methods
 	GetTopics() ([]models.Topic, error)
 	GetTopicByID(id int) (*models.Topic, error)

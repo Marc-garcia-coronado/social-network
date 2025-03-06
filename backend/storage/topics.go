@@ -3,7 +3,6 @@ package storage
 import (
 	"fmt"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
-	"log"
 	"strconv"
 )
 
@@ -130,8 +129,7 @@ func (s *PostgresStore) FollowTopics(ids []int, userID int) error {
 
 	query = query[:len(query)-2] // Remove last comma
 	query += ";"
-	log.Println(query)
-	log.Println(values...)
+
 	if _, err := s.Db.Exec(query, values...); err != nil {
 		return err
 	}
@@ -140,5 +138,14 @@ func (s *PostgresStore) FollowTopics(ids []int, userID int) error {
 }
 
 func (s *PostgresStore) UnfollowTopics(ids []int, userID int) error {
+	stmt := "DELETE FROM topics_user WHERE user_id = $1 AND topic_id = $2;"
+
+	for _, topicID := range ids {
+		err := s.Db.QueryRow(stmt, userID, topicID).Err()
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

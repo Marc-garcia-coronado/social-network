@@ -7,7 +7,6 @@ import (
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
-	"go/types"
 	"net/http"
 	"strconv"
 )
@@ -125,11 +124,24 @@ func (s *APIServer) handleFollowTopics(w http.ResponseWriter, r *http.Request) e
 }
 
 func (s *APIServer) handleUnfollowTopics(w http.ResponseWriter, r *http.Request) error {
-	topicsToUnfollow := new(types.Array)
+	topicsToUnfollow := new(models.FollowTopicsReq)
 	if err := json.NewDecoder(r.Body).Decode(&topicsToUnfollow); err != nil {
 		return err
 	}
-	fmt.Println(topicsToUnfollow)
+
+	if len(topicsToUnfollow.Topics) == 0 {
+		return fmt.Errorf("no topics provided")
+	}
+
+	id, ok := r.Context().Value(middleware.UserIDKey).(int) // Get the user id from the JWT
+	if !ok {
+		return fmt.Errorf("failed to get user id from JWT")
+	}
+
+	err := s.store.UnfollowTopics(topicsToUnfollow.Topics, id)
+	if err != nil {
+		return err
+	}
 
 	return utils.WriteJSON(w, http.StatusNoContent, nil)
 }

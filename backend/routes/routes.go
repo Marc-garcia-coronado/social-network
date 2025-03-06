@@ -43,6 +43,12 @@ func (s *APIServer) Run() {
 	protectedRouter.Get("/users/{id}", utils.MakeHTTPHandleFunc(s.handleGetUserByID))
 	protectedRouter.Patch("/users/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateUser))
 
+	// User - Follows
+	protectedRouter.Get("/users/{id}/followers", utils.MakeHTTPHandleFunc(s.handleGetFollowers))
+	protectedRouter.Get("/users/{id}/follows", utils.MakeHTTPHandleFunc(s.handleGetUserFollows))
+	protectedRouter.Post("/users/follow/{id}", utils.MakeHTTPHandleFunc(s.handleFollowUser))
+	protectedRouter.Delete("/users/unfollow/{id}", utils.MakeHTTPHandleFunc(s.handleUnfollowUser))
+
 	// User - Topics routes
 	protectedRouter.Get("/users/{userID}/topics", utils.MakeHTTPHandleFunc(s.handleGetUserTopics))
 	protectedRouter.Get("/topics", utils.MakeHTTPHandleFunc(s.handleGetAllTopics))

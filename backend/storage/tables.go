@@ -116,7 +116,8 @@ func (s *PostgresStore) createFollowsTables() error {
 	  followed_at TIMESTAMPTZ DEFAULT now(),
 	  
 	  FOREIGN KEY (user_following_id) REFERENCES users(id) ON DELETE CASCADE,
-	  FOREIGN KEY (user_followed_id) REFERENCES users(id) ON DELETE CASCADE
+	  FOREIGN KEY (user_followed_id) REFERENCES users(id) ON DELETE CASCADE,
+	  UNIQUE (user_followed_id, user_following_id)
 	);`
 
 	if _, err := s.Db.Exec(query); err != nil {
