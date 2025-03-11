@@ -6,7 +6,7 @@ import (
 )
 
 type Storage interface {
-	// User's methods
+	// User methods
 	Login(username, password string) (*models.User, error)
 	GetUserByID(id int) (*models.User, error)
 	CreateUser(user *models.User) (*models.User, error)
@@ -28,10 +28,27 @@ type Storage interface {
 	UpdateTopic(topic map[string]interface{}, topicID int) (*models.Topic, error)
 	DeleteTopic(id int) error
 
-	// User - Topic methods
+	// User - Topics methods
 	GetUserTopics(userID int) ([]models.UserTopic, error)
 	FollowTopics(ids []int, userID int) error
 	UnfollowTopics(ids []int, userID int) error
+
+	// Posts methods
+	CreatePost(post *models.PostReq) (*models.Post, error)
+	GetUserPosts(id int) ([]models.Post, error)
+	UpdatePost(post map[string]interface{}, postID int) (*models.Post, error)
+	DeletePost(id int) error
+
+	// Events methods
+	CreateEvent(event *models.EventReq) (*models.Event, error)
+	GetAllEventsWithCount(limit, offset int) ([]models.Event, int, error)
+	//GetUserEvents(userID, limit, offset int) ([]models.Event, error)
+	//UpdateEvent(event map[string]interface{}, eventID int) (*models.Event, error)
+	//DeleteEvent(id int) error
+
+	// Users join Events methods
+	//SubscribeEvent(eventID, userID int) error
+	//UnsubscribeEvent(eventID, userID int) error
 }
 
 type PostgresStore struct {

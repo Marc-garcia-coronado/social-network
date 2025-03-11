@@ -6,7 +6,7 @@ import (
 
 func (s *PostgresStore) createLikesTable() error {
 	query := `
-	CREATE TABLE IF NOT EXISTS events (
+	CREATE TABLE IF NOT EXISTS likes (
 	  id SERIAL PRIMARY KEY,
 	  user_id INT NOT NULL,
 	  post_id INT NOT NULL,

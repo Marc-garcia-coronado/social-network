@@ -95,8 +95,8 @@ func (s *PostgresStore) UpdateUser(user map[string]interface{}, userID int) (*mo
 
 func (s *PostgresStore) DeleteUser(id int) error {
 	stmt := "DELETE FROM users WHERE id = $1"
-	if err := s.Db.QueryRow(stmt, id); err.Err() != nil {
-		return err.Err()
+	if err := s.Db.QueryRow(stmt, id).Err(); err != nil {
+		return err
 	}
 	return nil
 }

@@ -85,7 +85,7 @@ func (s *APIServer) handleUpdateUser(w http.ResponseWriter, r *http.Request) err
 
 	// Check if the user id is the same as the JWT which means is updating itself but if is an admin he can update
 	if paramID != id && role != "admin" {
-		return fmt.Errorf("you can't update another user that is not you")
+		return utils.WriteJSON(w, http.StatusForbidden, &utils.APIError{Error: "you cannot update a post that is not yours"})
 	}
 
 	var user map[string]interface{}

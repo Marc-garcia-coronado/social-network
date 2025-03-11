@@ -5,7 +5,6 @@ import (
 	"github.com/Marc-Garcia-Coronado/socialNetwork/middleware"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -59,8 +58,6 @@ func (s *APIServer) handleGetFollowers(w http.ResponseWriter, r *http.Request) e
 		return err
 	}
 
-	log.Println(followers)
-
 	return utils.WriteJSON(w, http.StatusOK, followers)
 }
 
@@ -75,8 +72,6 @@ func (s *APIServer) handleGetUserFollows(w http.ResponseWriter, r *http.Request)
 		return err
 	}
 
-	log.Println(follows)
-
 	return utils.WriteJSON(w, http.StatusOK, follows)
 }
 
@@ -90,7 +85,7 @@ func (s *APIServer) handleGetCountFollowers(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		return err
 	}
-	return utils.WriteJSON(w, http.StatusOK, count)
+	return utils.WriteJSON(w, http.StatusOK, map[string]int{"followers_count": *count})
 }
 
 func (s *APIServer) handleGetUserCountFollows(w http.ResponseWriter, r *http.Request) error {
@@ -103,5 +98,5 @@ func (s *APIServer) handleGetUserCountFollows(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		return err
 	}
-	return utils.WriteJSON(w, http.StatusOK, count)
+	return utils.WriteJSON(w, http.StatusOK, map[string]int{"follows_count": *count})
 }

@@ -57,7 +57,7 @@ func (s *PostgresStore) GetFollowers(id int) ([]models.User, error) {
 
 func (s *PostgresStore) GetFollows(id int) ([]models.User, error) {
 	stmt := `
-	SELECT u.id, u.user_name, u.full_name, u.email, u.profile_picture 
+	SELECT u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.role
 	FROM users u
 	JOIN user_follow_user ufu ON u.id = ufu.user_following_id
 	WHERE ufu.user_following_id = $1
@@ -73,7 +73,7 @@ func (s *PostgresStore) GetFollows(id int) ([]models.User, error) {
 	var users []models.User
 	for rows.Next() {
 		user := new(models.User)
-		if err := rows.Scan(&user.ID, &user.UserName, &user.FullName, &user.Email, &user.ProfilePicture); err != nil {
+		if err := rows.Scan(&user.ID, &user.UserName, &user.FullName, &user.Email, &user.ProfilePicture, &user.Role); err != nil {
 			return nil, err
 		}
 		users = append(users, *user)

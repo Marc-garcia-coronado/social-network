@@ -43,7 +43,7 @@ func (s *APIServer) Run() {
 	protectedRouter.Get("/users/{id}", utils.MakeHTTPHandleFunc(s.handleGetUserByID))
 	protectedRouter.Patch("/users/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateUser))
 
-	// User - Follows
+	// User - Follows routes
 	protectedRouter.Post("/users/follow/{id}", utils.MakeHTTPHandleFunc(s.handleFollowUser))
 	protectedRouter.Delete("/users/unfollow/{id}", utils.MakeHTTPHandleFunc(s.handleUnfollowUser))
 	protectedRouter.Get("/users/{id}/followers", utils.MakeHTTPHandleFunc(s.handleGetFollowers))
@@ -57,6 +57,13 @@ func (s *APIServer) Run() {
 	protectedRouter.Get("/topics/{id}", utils.MakeHTTPHandleFunc(s.handleGetTopicByID))
 	protectedRouter.Post("/topics/follow", utils.MakeHTTPHandleFunc(s.handleFollowTopics))
 	protectedRouter.Delete("/topics/unfollow", utils.MakeHTTPHandleFunc(s.handleUnfollowTopics))
+
+	// User - Posts routes
+	protectedRouter.Get("/users/{id}/posts", utils.MakeHTTPHandleFunc(s.handleGetUserPosts))
+	protectedRouter.Get("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleGetUserPosts))
+	protectedRouter.Post("/posts", utils.MakeHTTPHandleFunc(s.handleCreatePost))
+	protectedRouter.Patch("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleUpdatePost))
+	protectedRouter.Delete("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleDeletePost))
 
 	// Protected router for admin
 	adminRouter := chi.NewRouter()
