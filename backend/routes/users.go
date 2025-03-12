@@ -17,7 +17,7 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	loggedUser, err := s.store.Login(loginUserReq.UserName, loginUserReq.Password)
+	loggedUser, err := s.store.Login(loginUserReq.Email, loginUserReq.Password)
 	if err != nil {
 		return err
 	}

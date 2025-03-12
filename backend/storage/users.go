@@ -27,16 +27,16 @@ func (s *PostgresStore) CreateUser(u *models.User) (*models.User, error) {
 	return newUser, nil
 }
 
-func (s *PostgresStore) Login(username, password string) (*models.User, error) {
+func (s *PostgresStore) Login(email, password string) (*models.User, error) {
 	var hash string
 	newUser := new(models.User)
 
 	stmt := `
 	SELECT id, user_name, full_name, email, profile_picture, bio, is_active, role, user_since, password_hash 
 	FROM users 
-	WHERE user_name = $1;
+	WHERE email = $1;
 	`
-	err := s.Db.QueryRow(stmt, username).Scan(&newUser.ID, &newUser.UserName, &newUser.FullName, &newUser.Email,
+	err := s.Db.QueryRow(stmt, email).Scan(&newUser.ID, &newUser.UserName, &newUser.FullName, &newUser.Email,
 		&newUser.ProfilePicture, &newUser.Bio, &newUser.IsActive, &newUser.Role, &newUser.UserSince, &hash)
 	if err != nil {
 		return nil, err
