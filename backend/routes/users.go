@@ -28,12 +28,18 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return utils.WriteJSON(w, http.StatusOK, struct {
-		User  *models.User `json:"user"`
-		Token string       `json:"token"`
-	}{
-		User:  loggedUser,
-		Token: token,
+	// Set cookie with environment-aware security settings
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		HttpOnly: true,
+		Secure:   r.TLS != nil, // Secure only if request is HTTPS
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+	})
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+		"user": loggedUser,
 	})
 }
 
@@ -85,7 +91,7 @@ func (s *APIServer) handleUpdateUser(w http.ResponseWriter, r *http.Request) err
 
 	// Check if the user id is the same as the JWT which means is updating itself but if is an admin he can update
 	if paramID != id && role != "admin" {
-		return fmt.Errorf("you can't update another user that is not you")
+		return utils.WriteJSON(w, http.StatusForbidden, &utils.APIError{Error: "you cannot update a post that is not yours"})
 	}
 
 	var user map[string]interface{}

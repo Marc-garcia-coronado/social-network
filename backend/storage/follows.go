@@ -28,7 +28,7 @@ func (s *PostgresStore) UnfollowUser(userToFollowID, userID int) error {
 
 func (s *PostgresStore) GetFollowers(id int) ([]models.User, error) {
 	stmt := `
-	SELECT u.id, u.user_name, u.full_name, u.email, u.profile_picture 
+	SELECT u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.role
 	FROM users u
 	JOIN user_follow_user ufu ON u.id = ufu.user_following_id
 	WHERE ufu.user_followed_id = $1
@@ -43,7 +43,7 @@ func (s *PostgresStore) GetFollowers(id int) ([]models.User, error) {
 	var users []models.User
 	for rows.Next() {
 		user := new(models.User)
-		if err := rows.Scan(&user.ID, &user.UserName, &user.FullName, &user.Email, &user.ProfilePicture); err != nil {
+		if err := rows.Scan(&user.ID, &user.UserName, &user.FullName, &user.Email, &user.ProfilePicture, &user.Role); err != nil {
 			return nil, err
 		}
 		users = append(users, *user)
@@ -53,4 +53,58 @@ func (s *PostgresStore) GetFollowers(id int) ([]models.User, error) {
 		return nil, err
 	}
 	return users, nil
+}
+
+func (s *PostgresStore) GetFollows(id int) ([]models.User, error) {
+	stmt := `
+	SELECT u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.role
+	FROM users u
+	JOIN user_follow_user ufu ON u.id = ufu.user_following_id
+	WHERE ufu.user_following_id = $1
+	ORDER BY ufu.followed_at DESC;
+	`
+
+	rows, err := s.Db.Query(stmt, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		user := new(models.User)
+		if err := rows.Scan(&user.ID, &user.UserName, &user.FullName, &user.Email, &user.ProfilePicture, &user.Role); err != nil {
+			return nil, err
+		}
+		users = append(users, *user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (s *PostgresStore) GetCountFollowers(id int) (*int, error) {
+	stmt := `
+	SELECT count(*) FROM user_follow_user WHERE user_following_id = $1;
+	`
+	var count *int
+	if err := s.Db.QueryRow(stmt, id).Scan(&count); err != nil {
+		return nil, err
+	}
+
+	return count, nil
+}
+
+func (s *PostgresStore) GetCountFollows(id int) (*int, error) {
+	stmt := `
+	SELECT count(*) FROM user_follow_user WHERE user_followed_id = $1;
+	`
+	var count *int
+	if err := s.Db.QueryRow(stmt, id).Scan(&count); err != nil {
+		return nil, err
+	}
+
+	return count, nil
 }

@@ -6,16 +6,17 @@ import (
 
 func (s *PostgresStore) createLikesTable() error {
 	query := `
-	CREATE TABLE IF NOT EXISTS events (
+	CREATE TABLE IF NOT EXISTS likes (
 	  id SERIAL PRIMARY KEY,
 	  user_id INT NOT NULL,
-	  post_id INT NOT NULL,
-	  comment_id INT NOT NULL,
+	  post_id INT NULL,
+	  comment_id INT NULL,
 	  created_at TIMESTAMPTZ DEFAULT now(),
 	      
 	  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 	  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-	  FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE
+	  FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+	  UNIQUE (user_id, post_id, comment_id)
 	);`
 
 	if _, err := s.Db.Exec(query); err != nil {
@@ -34,7 +35,8 @@ func (s *PostgresStore) createUserEventTable() error {
 	  subscribed_at TIMESTAMPTZ DEFAULT now(),
 
 	  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-	  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+	  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+	  UNIQUE (user_id, event_id)
 	);`
 
 	if _, err := s.Db.Exec(query); err != nil {

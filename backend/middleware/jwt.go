@@ -20,18 +20,27 @@ const (
 // JWTMiddleware validates the JWT token and extracts user info
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var tokenString string
+
+		// Try to get token from Authorization header
 		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+		} else {
+			// Try to get token from cookie
+			cookie, err := r.Cookie("token")
+			if err == nil {
+				tokenString = cookie.Value
+			}
+		}
+
+		// If no token is found, return Unauthorized
+		if tokenString == "" {
+			http.Error(w, "Missing token", http.StatusUnauthorized)
 			return
 		}
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		if tokenString == authHeader {
-			http.Error(w, "Invalid token format", http.StatusUnauthorized)
-			return
-		}
-
+		// Validate the JWT
 		secret := os.Getenv("JWT_SECRET")
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -45,26 +54,21 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		// Extract claims
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
 			return
 		}
 
-		sub, ok := claims["sub"].(map[string]interface{})
-		if !ok {
-			http.Error(w, "Invalid sub claim format", http.StatusUnauthorized)
-			return
-		}
-
-		userIDFloat, ok := sub["id"].(float64)
+		userIDFloat, ok := claims["sub"].(float64)
 		if !ok {
 			http.Error(w, "Invalid user ID in token", http.StatusUnauthorized)
 			return
 		}
 		userID := int(userIDFloat)
 
-		userRole, ok := sub["role"].(string)
+		userRole, ok := claims["role"].(string)
 		if !ok {
 			http.Error(w, "Invalid user role in token", http.StatusUnauthorized)
 			return
