@@ -28,12 +28,18 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return utils.WriteJSON(w, http.StatusOK, struct {
-		User  *models.User `json:"user"`
-		Token string       `json:"token"`
-	}{
-		User:  loggedUser,
-		Token: token,
+	// Set cookie with environment-aware security settings
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		HttpOnly: true,
+		Secure:   r.TLS != nil, // Secure only if request is HTTPS
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+	})
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+		"user": loggedUser,
 	})
 }
 

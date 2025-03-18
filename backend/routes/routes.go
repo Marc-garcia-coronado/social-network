@@ -65,6 +65,30 @@ func (s *APIServer) Run() {
 	protectedRouter.Patch("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleUpdatePost))
 	protectedRouter.Delete("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleDeletePost))
 
+	// User - Events routes
+	protectedRouter.Post("/events", utils.MakeHTTPHandleFunc(s.handleCreateEvent))
+	protectedRouter.Get("/events", utils.MakeHTTPHandleFunc(s.handleGetAllEvents))
+	protectedRouter.Get("/events/topics/{topicID}", utils.MakeHTTPHandleFunc(s.handleGetAllEventsByTopic))
+	protectedRouter.Get("/users/{id}/events", utils.MakeHTTPHandleFunc(s.handleGetUserEvents))
+	protectedRouter.Patch("/users/{userID}/events/{eventID}", utils.MakeHTTPHandleFunc(s.handleUpdateUserEvent))
+	protectedRouter.Delete("/users/{userID}/events/{eventID}", utils.MakeHTTPHandleFunc(s.handleDeleteUserEvent))
+
+	// User - Subscribe/Unsubscribe to Events routes
+	protectedRouter.Post("/users/{userID}/events/{eventID}/subscribe", utils.MakeHTTPHandleFunc(s.handleSubscribeToEvent))
+	protectedRouter.Delete("/users/{userID}/events/{eventID}/unsubscribe", utils.MakeHTTPHandleFunc(s.handleUnsubscribeToEvent))
+	protectedRouter.Get("/users/{userID}/events/subscribed", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))
+
+	// User - Comments routes
+	protectedRouter.Get("/posts/{postID}/comments", utils.MakeHTTPHandleFunc(s.handleGetPostComments))
+	protectedRouter.Post("/posts/{postID}/comments", utils.MakeHTTPHandleFunc(s.handleCreatePostComment))
+	protectedRouter.Delete("/posts/{postID}/comments/{commentID}", utils.MakeHTTPHandleFunc(s.handleDeletePostComment))
+
+	// User - Likes routes
+	protectedRouter.Post("/posts/{postID}/like", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))
+	protectedRouter.Post("/posts/{postID}/comment/{commentID}/like", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))
+	protectedRouter.Delete("/posts/{postID}/dislike", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))
+	protectedRouter.Delete("/posts/{postID}/comment/{commentID}/dislike", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))
+
 	// Protected router for admin
 	adminRouter := chi.NewRouter()
 	adminRouter.Use(middleware.JWTMiddleware)

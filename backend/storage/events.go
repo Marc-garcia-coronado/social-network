@@ -1,17 +1,32 @@
 package storage
 
-import "github.com/Marc-Garcia-Coronado/socialNetwork/models"
+import (
+	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
+	"strconv"
+)
 
-func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.Event, error) {
+func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUser, error) {
 	stmt := `
-	INSERT INTO events (name, description, creator_id, location, topic_id)
-	VALUES ($1, $2, $3, $4, $5)
-	RETURNING id, name, description, creator_id, location, topic_id;
+	WITH inserted_event AS (
+    INSERT INTO events (name, description, creator_id, location, topic_id)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id, name, description, location, created_at, creator_id, topic_id
+	)
+	SELECT e.id, e.name, e.description, e.location, e.created_at,
+		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture,
+		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
+	FROM inserted_event e
+	JOIN users u ON u.id = e.creator_id
+	JOIN topics t ON t.id = e.topic_id;
 	`
 
-	newEvent := new(models.Event)
+	newEvent := new(models.EventWithUser)
 	row := s.Db.QueryRow(stmt, event.Name, event.Description, event.CreatorID, event.Location, event.TopicID)
-	err := row.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.CreatorID, &newEvent.Location, &newEvent.TopicID)
+	err := row.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt,
+		&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
+		&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture,
+		&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +34,7 @@ func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.Event, erro
 	return newEvent, nil
 }
 
-func (s *PostgresStore) GetAllEventsWithCount(limit, offset int) ([]models.Event, int, error) {
+func (s *PostgresStore) GetAllEventsWithCount(limit, offset int) ([]models.EventWithUser, int, error) {
 	var totalCount int
 	queryCount := "SELECT COUNT(*) FROM events;"
 	if err := s.Db.QueryRow(queryCount).Scan(&totalCount); err != nil {
@@ -27,8 +42,13 @@ func (s *PostgresStore) GetAllEventsWithCount(limit, offset int) ([]models.Event
 	}
 
 	stmt := `
-	SELECT id, name, description, creator_id, location, topic_id
-	FROM events
+	SELECT e.id, e.name, e.description, e.location, e.created_at,
+		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture,
+		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
+	FROM events e
+	JOIN users u ON u.id = e.creator_id
+	JOIN topics t ON t.id = e.topic_id
+	ORDER BY e.created_at DESC
 	LIMIT $1 OFFSET $2;
 	`
 
@@ -37,11 +57,229 @@ func (s *PostgresStore) GetAllEventsWithCount(limit, offset int) ([]models.Event
 		return nil, 0, err
 	}
 
-	var arrayEvents []models.Event
+	var arrayEvents []models.EventWithUser
 
 	for rows.Next() {
-		newEvent := new(models.Event)
-		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.CreatorID, &newEvent.Location, &newEvent.TopicID)
+		newEvent := new(models.EventWithUser)
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt,
+			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
+			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture,
+			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+
+		arrayEvents = append(arrayEvents, *newEvent)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
+	}
+
+	return arrayEvents, totalCount, nil
+}
+
+func (s *PostgresStore) GetAllEventsByTopicWithCount(topicID, limit, offset int) ([]models.EventWithUser, int, error) {
+	var totalCount int
+	queryCount := "SELECT COUNT(*) FROM events WHERE topic_id = $1;"
+	if err := s.Db.QueryRow(queryCount, topicID).Scan(&totalCount); err != nil {
+		return nil, 0, err
+	}
+
+	stmt := `
+	SELECT e.id, e.name, e.description, e.location, e.created_at,
+		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture,
+		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
+	FROM events e
+	JOIN users u ON u.id = e.creator_id
+	JOIN topics t ON t.id = e.topic_id
+	WHERE e.topic_id = $1
+	ORDER BY e.created_at DESC
+	LIMIT $2 OFFSET $3;
+	`
+
+	rows, err := s.Db.Query(stmt, topicID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var arrayEvents []models.EventWithUser
+
+	for rows.Next() {
+		newEvent := new(models.EventWithUser)
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt,
+			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
+			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture,
+			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+
+		arrayEvents = append(arrayEvents, *newEvent)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
+	}
+
+	return arrayEvents, totalCount, nil
+}
+
+func (s *PostgresStore) GetUserEventsWithCount(userID, limit, offset int) ([]models.EventWithUser, int, error) {
+	var totalCount int
+	queryCount := "SELECT COUNT(*) FROM events WHERE creator_id = $1;"
+	if err := s.Db.QueryRow(queryCount, userID).Scan(&totalCount); err != nil {
+		return nil, 0, err
+	}
+
+	stmt := `
+	SELECT e.id, e.name, e.description, e.location, e.created_at,
+		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture,
+		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
+	FROM events e
+	JOIN users u ON u.id = e.creator_id
+	JOIN topics t ON t.id = e.topic_id
+	WHERE e.creator_id = $1
+	ORDER BY e.created_at DESC
+	LIMIT $2 OFFSET $3;
+	`
+	rows, err := s.Db.Query(stmt, userID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var arrayEvents []models.EventWithUser
+
+	for rows.Next() {
+		newEvent := new(models.EventWithUser)
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt,
+			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
+			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture,
+			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+
+		arrayEvents = append(arrayEvents, *newEvent)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
+	}
+
+	return arrayEvents, totalCount, nil
+}
+
+func (s *PostgresStore) UpdateEvent(event map[string]interface{}, eventID int) (*models.EventWithUser, error) {
+	// Build dynamic SQL query
+	stmt := "UPDATE events SET "
+	values := []interface{}{}
+	i := 1
+
+	for key, value := range event {
+		stmt += key + " = $" + strconv.Itoa(i) + ", "
+		values = append(values, value)
+		i++
+	}
+
+	stmt = stmt[:len(stmt)-2] // Remove last comma
+	stmt += " FROM users u JOIN topics t ON events.topic_id = t.id"
+	stmt += " WHERE events.id = $" + strconv.Itoa(i)
+	stmt += " AND events.creator_id = u.id"
+	stmt += " RETURNING events.id, events.name, events.description, events.location, events.created_at,"
+	stmt += " u.id, u.user_name, u.full_name, u.email, u.profile_picture,"
+	stmt += " t.id, t.name, t.description, t.created_at;"
+	values = append(values, eventID)
+
+	updatedEvent := new(models.EventWithUser)
+	// Execute stmt
+	err := s.Db.QueryRow(stmt, values...).Scan(
+		&updatedEvent.ID, &updatedEvent.Name, &updatedEvent.Description,
+		&updatedEvent.Location, &updatedEvent.CreatedAt,
+		&updatedEvent.Creator.ID, &updatedEvent.Creator.UserName,
+		&updatedEvent.Creator.FullName, &updatedEvent.Creator.Email, &updatedEvent.Creator.ProfilePicture,
+		&updatedEvent.Topic.ID, &updatedEvent.Topic.Name, &updatedEvent.Topic.Description, &updatedEvent.Topic.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedEvent, nil
+}
+
+func (s *PostgresStore) DeleteEvent(id int) error {
+	stmt := "DELETE FROM events WHERE id = $1;"
+
+	if err := s.Db.QueryRow(stmt, id).Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Subscription to Events methods
+func (s *PostgresStore) SubscribeEvent(eventID, userID int) error {
+	stmt := `
+	INSERT INTO user_event (user_id, event_id)
+	VALUES ($1, $2);
+	`
+
+	if err := s.Db.QueryRow(stmt, userID, eventID).Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *PostgresStore) UnsubscribeEvent(eventID, userID int) error {
+	stmt := "DELETE FROM user_event WHERE event_id = $1 AND user_id = $2;"
+
+	if err := s.Db.QueryRow(stmt, eventID, userID).Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *PostgresStore) GetUserSubscribedEventsWithCount(userID, limit, offset int) ([]models.SubscribedEvent, int, error) {
+	var totalCount int
+	queryCount := "SELECT COUNT(*) FROM user_event WHERE user_id = $1;"
+	if err := s.Db.QueryRow(queryCount, userID).Scan(&totalCount); err != nil {
+		return nil, 0, err
+	}
+
+	stmt := `
+	SELECT e.id, e.name, e.description, u.id, u.user_name, u.full_name, u.email, u.profile_picture, e.location, 
+	       t.id, t.name, t.description, t.created_at, e.created_at, ue.subscribed_at
+	FROM user_event ue
+	JOIN events e ON e.id = ue.event_id
+	JOIN users u ON u.id = e.creator_id 
+	JOIN topics t ON t.id = e.topic_id
+	WHERE ue.user_id = $1
+	ORDER BY ue.subscribed_at DESC
+	LIMIT $2 OFFSET $3;
+	`
+
+	rows, err := s.Db.Query(stmt, userID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var arrayEvents []models.SubscribedEvent
+
+	for rows.Next() {
+		newEvent := new(models.SubscribedEvent)
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description,
+			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
+			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Location,
+			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
+			&newEvent.CreatedAt, &newEvent.SubscribedAt,
+		)
 		if err != nil {
 			return nil, 0, err
 		}

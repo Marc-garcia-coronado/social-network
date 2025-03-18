@@ -13,7 +13,7 @@ type Post struct {
 	ID        int            `json:"id"`
 	Picture   sql.NullString `json:"picture"`
 	Title     string         `json:"title"`
-	UserID    int            `json:"user_id"`
-	TopicID   int            `json:"topic_id"`
+	User      User           `json:"user"`
+	Topic     Topic          `json:"topic"`
 	CreatedAt string         `json:"created_at"`
 }

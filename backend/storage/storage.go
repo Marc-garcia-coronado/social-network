@@ -40,15 +40,22 @@ type Storage interface {
 	DeletePost(id int) error
 
 	// Events methods
-	CreateEvent(event *models.EventReq) (*models.Event, error)
-	GetAllEventsWithCount(limit, offset int) ([]models.Event, int, error)
-	//GetUserEvents(userID, limit, offset int) ([]models.Event, error)
-	//UpdateEvent(event map[string]interface{}, eventID int) (*models.Event, error)
-	//DeleteEvent(id int) error
+	CreateEvent(event *models.EventReq) (*models.EventWithUser, error)
+	GetAllEventsWithCount(limit, offset int) ([]models.EventWithUser, int, error)
+	GetAllEventsByTopicWithCount(topicID, limit, offset int) ([]models.EventWithUser, int, error)
+	GetUserEventsWithCount(userID, limit, offset int) ([]models.EventWithUser, int, error)
+	UpdateEvent(event map[string]interface{}, eventID int) (*models.EventWithUser, error)
+	DeleteEvent(id int) error
 
-	// Users join Events methods
-	//SubscribeEvent(eventID, userID int) error
-	//UnsubscribeEvent(eventID, userID int) error
+	// Subscription to Events methods
+	SubscribeEvent(eventID, userID int) error
+	UnsubscribeEvent(eventID, userID int) error
+	GetUserSubscribedEventsWithCount(userID, limit, offset int) ([]models.SubscribedEvent, int, error)
+
+	// Comments methods
+	CreateComment(comment *models.CommentReq) (*models.Comment, error)
+	DeleteComment(postID, userID int) error
+	GetPostComments(postID, limit, offset int) ([]models.Comment, int, error)
 }
 
 type PostgresStore struct {
