@@ -22,7 +22,7 @@ export default function Login() {
         e.preventDefault();
         const result = await login({ email: formData.email, password: formData.password });
         if (result) {
-          redirect("/")
+          redirect("/home")
         }
     };
 
