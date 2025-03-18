@@ -60,3 +60,43 @@ func (s *APIServer) handleGetFollowers(w http.ResponseWriter, r *http.Request) e
 
 	return utils.WriteJSON(w, http.StatusOK, followers)
 }
+
+func (s *APIServer) handleGetUserFollows(w http.ResponseWriter, r *http.Request) error {
+	userToFollowID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		return err
+	}
+
+	follows, err := s.store.GetFollows(userToFollowID)
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusOK, follows)
+}
+
+func (s *APIServer) handleGetCountFollowers(w http.ResponseWriter, r *http.Request) error {
+	userID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		return err
+	}
+
+	count, err := s.store.GetCountFollowers(userID)
+	if err != nil {
+		return err
+	}
+	return utils.WriteJSON(w, http.StatusOK, map[string]int{"followers_count": *count})
+}
+
+func (s *APIServer) handleGetUserCountFollows(w http.ResponseWriter, r *http.Request) error {
+	userID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		return err
+	}
+
+	count, err := s.store.GetCountFollows(userID)
+	if err != nil {
+		return err
+	}
+	return utils.WriteJSON(w, http.StatusOK, map[string]int{"follows_count": *count})
+}
