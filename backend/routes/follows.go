@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/middleware"
+	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -53,12 +54,44 @@ func (s *APIServer) handleGetFollowers(w http.ResponseWriter, r *http.Request) e
 		return err
 	}
 
-	followers, err := s.store.GetFollowers(userToFollowID)
+	// Get pagination query params
+	limitStr := r.URL.Query().Get("limit")
+	pageStr := r.URL.Query().Get("page")
+
+	// Set default values if params are missing
+	limit := 10 // Default limit
+	page := 1   // Default page
+
+	if limitStr != "" {
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil || limit <= 0 {
+			return utils.WriteJSON(w, http.StatusBadRequest, utils.APIError{Error: "Invalid limit"})
+		}
+	}
+
+	if pageStr != "" {
+		page, err = strconv.Atoi(pageStr)
+		if err != nil || page <= 0 {
+			return utils.WriteJSON(w, http.StatusBadRequest, utils.APIError{Error: "Invalid page"})
+		}
+	}
+
+	// Calculate offset
+	offset := (page - 1) * limit
+
+	followers, count, err := s.store.GetFollowers(userToFollowID, limit, offset)
 	if err != nil {
 		return err
 	}
 
-	return utils.WriteJSON(w, http.StatusOK, followers)
+	return utils.WriteJSON(w, http.StatusOK, models.UserWithPagination{
+		Users: followers,
+		Pagination: models.Pagination{
+			Page:       page,
+			Limit:      limit,
+			TotalCount: count,
+		},
+	})
 }
 
 func (s *APIServer) handleGetUserFollows(w http.ResponseWriter, r *http.Request) error {
@@ -67,12 +100,44 @@ func (s *APIServer) handleGetUserFollows(w http.ResponseWriter, r *http.Request)
 		return err
 	}
 
-	follows, err := s.store.GetFollows(userToFollowID)
+	// Get pagination query params
+	limitStr := r.URL.Query().Get("limit")
+	pageStr := r.URL.Query().Get("page")
+
+	// Set default values if params are missing
+	limit := 10 // Default limit
+	page := 1   // Default page
+
+	if limitStr != "" {
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil || limit <= 0 {
+			return utils.WriteJSON(w, http.StatusBadRequest, utils.APIError{Error: "Invalid limit"})
+		}
+	}
+
+	if pageStr != "" {
+		page, err = strconv.Atoi(pageStr)
+		if err != nil || page <= 0 {
+			return utils.WriteJSON(w, http.StatusBadRequest, utils.APIError{Error: "Invalid page"})
+		}
+	}
+
+	// Calculate offset
+	offset := (page - 1) * limit
+
+	follows, count, err := s.store.GetFollows(userToFollowID, limit, offset)
 	if err != nil {
 		return err
 	}
 
-	return utils.WriteJSON(w, http.StatusOK, follows)
+	return utils.WriteJSON(w, http.StatusOK, models.UserWithPagination{
+		Users: follows,
+		Pagination: models.Pagination{
+			Page:       page,
+			Limit:      limit,
+			TotalCount: count,
+		},
+	})
 }
 
 func (s *APIServer) handleGetCountFollowers(w http.ResponseWriter, r *http.Request) error {

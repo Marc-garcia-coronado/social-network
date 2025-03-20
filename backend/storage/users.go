@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
@@ -95,8 +96,18 @@ func (s *PostgresStore) UpdateUser(user map[string]interface{}, userID int) (*mo
 
 func (s *PostgresStore) DeleteUser(id int) error {
 	stmt := "DELETE FROM users WHERE id = $1"
-	if err := s.Db.QueryRow(stmt, id).Err(); err != nil {
+	res, err := s.Db.Exec(stmt, id)
+	if err != nil {
 		return err
 	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("no user found to delete")
+	}
+
 	return nil
 }

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"fmt"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"strconv"
@@ -81,8 +82,17 @@ func (s *PostgresStore) UpdateTopic(topic map[string]interface{}, topicID int) (
 
 func (s *PostgresStore) DeleteTopic(id int) error {
 	stmt := "DELETE FROM topics WHERE id = $1"
-	if err := s.Db.QueryRow(stmt, id); err.Err() != nil {
-		return err.Err()
+	res, err := s.Db.Exec(stmt, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("no topic found to delete")
 	}
 
 	return nil
@@ -141,10 +151,20 @@ func (s *PostgresStore) UnfollowTopics(ids []int, userID int) error {
 	stmt := "DELETE FROM topics_user WHERE user_id = $1 AND topic_id = $2;"
 
 	for _, topicID := range ids {
-		err := s.Db.QueryRow(stmt, userID, topicID).Err()
+		res, err := s.Db.Exec(stmt, userID, topicID)
 		if err != nil {
 			return err
 		}
+
+		rowsAffected, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if rowsAffected == 0 {
+			return errors.New("no topic found to delete")
+		}
+
+		return nil
 	}
 
 	return nil

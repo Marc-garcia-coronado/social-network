@@ -1,6 +1,9 @@
 package storage
 
-import "github.com/Marc-Garcia-Coronado/socialNetwork/models"
+import (
+	"errors"
+	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
+)
 
 func (s *PostgresStore) CreateComment(comment *models.CommentReq) (*models.Comment, error) {
 	stmt := `
@@ -92,9 +95,17 @@ func (s *PostgresStore) GetPostComments(postID, limit, offset int) ([]models.Com
 
 func (s *PostgresStore) DeleteComment(id int) error {
 	stmt := `DELETE FROM comments WHERE id = $1`
-
-	if err := s.Db.QueryRow(stmt, id).Err(); err != nil {
+	res, err := s.Db.Exec(stmt, id)
+	if err != nil {
 		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("no comment found to delete")
 	}
 
 	return nil

@@ -84,10 +84,12 @@ func (s *APIServer) Run() {
 	protectedRouter.Delete("/comments/{commentID}", utils.MakeHTTPHandleFunc(s.handleDeletePostComment))
 
 	// User - Likes routes
-	protectedRouter.Post("/posts/{postID}/like", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))
-	protectedRouter.Post("/posts/{postID}/comment/{commentID}/like", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))
-	protectedRouter.Delete("/posts/{postID}/dislike", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))
-	protectedRouter.Delete("/posts/{postID}/comment/{commentID}/dislike", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))
+	protectedRouter.Post("/posts/{postID}/like", utils.MakeHTTPHandleFunc(s.handleLikePost))
+	protectedRouter.Post("/comments/{commentID}/like", utils.MakeHTTPHandleFunc(s.handleLikeComment))
+	protectedRouter.Delete("/posts/{postID}/dislike", utils.MakeHTTPHandleFunc(s.handleDislikePost))
+	protectedRouter.Delete("/comments/{commentID}/dislike", utils.MakeHTTPHandleFunc(s.handleDislikeComment))
+	protectedRouter.Get("/likes/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleGetPostLikes))
+	protectedRouter.Get("/likes/comments/{commentID}", utils.MakeHTTPHandleFunc(s.handleGetCommentLikes))
 
 	// Protected router for admin
 	adminRouter := chi.NewRouter()

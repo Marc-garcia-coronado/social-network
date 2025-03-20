@@ -37,12 +37,44 @@ func (s *APIServer) handleGetUserPosts(w http.ResponseWriter, r *http.Request) e
 		return err
 	}
 
-	posts, err := s.store.GetUserPosts(paramID)
+	// Get pagination query params
+	limitStr := r.URL.Query().Get("limit")
+	pageStr := r.URL.Query().Get("page")
+
+	// Set default values if params are missing
+	limit := 10 // Default limit
+	page := 1   // Default page
+
+	if limitStr != "" {
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil || limit <= 0 {
+			return utils.WriteJSON(w, http.StatusBadRequest, utils.APIError{Error: "Invalid limit"})
+		}
+	}
+
+	if pageStr != "" {
+		page, err = strconv.Atoi(pageStr)
+		if err != nil || page <= 0 {
+			return utils.WriteJSON(w, http.StatusBadRequest, utils.APIError{Error: "Invalid page"})
+		}
+	}
+
+	// Calculate offset
+	offset := (page - 1) * limit
+
+	posts, count, err := s.store.GetUserPosts(paramID, limit, offset)
 	if err != nil {
 		return err
 	}
 
-	return utils.WriteJSON(w, http.StatusOK, posts)
+	return utils.WriteJSON(w, http.StatusOK, models.PostsWithPagination{
+		Posts: posts,
+		Pagination: models.Pagination{
+			TotalCount: count,
+			Limit:      limit,
+			Page:       page,
+		},
+	})
 }
 
 func (s *APIServer) handleDeletePost(w http.ResponseWriter, r *http.Request) error {

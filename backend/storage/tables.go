@@ -16,7 +16,8 @@ func (s *PostgresStore) createLikesTable() error {
 	  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 	  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
 	  FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
-	  UNIQUE (user_id, post_id, comment_id)
+	  UNIQUE (user_id, post_id),
+	  UNIQUE (user_id, comment_id)
 	);`
 
 	if _, err := s.Db.Exec(query); err != nil {
