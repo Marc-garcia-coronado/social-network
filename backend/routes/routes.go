@@ -81,7 +81,7 @@ func (s *APIServer) Run() {
 	// User - Comments routes
 	protectedRouter.Get("/posts/{postID}/comments", utils.MakeHTTPHandleFunc(s.handleGetPostComments))
 	protectedRouter.Post("/posts/{postID}/comments", utils.MakeHTTPHandleFunc(s.handleCreatePostComment))
-	protectedRouter.Delete("/posts/{postID}/comments/{commentID}", utils.MakeHTTPHandleFunc(s.handleDeletePostComment))
+	protectedRouter.Delete("/comments/{commentID}", utils.MakeHTTPHandleFunc(s.handleDeletePostComment))
 
 	// User - Likes routes
 	protectedRouter.Post("/posts/{postID}/like", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))

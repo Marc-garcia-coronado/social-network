@@ -54,8 +54,9 @@ type Storage interface {
 
 	// Comments methods
 	CreateComment(comment *models.CommentReq) (*models.Comment, error)
-	DeleteComment(postID, userID int) error
 	GetPostComments(postID, limit, offset int) ([]models.Comment, int, error)
+	DeleteComment(id int) error
+	GetIfUserOwnsComment(commentID, userID int) bool
 }
 
 type PostgresStore struct {

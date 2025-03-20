@@ -96,21 +96,16 @@ func (s *APIServer) handleDeletePostComment(w http.ResponseWriter, r *http.Reque
 		return fmt.Errorf("failed to get user id from JWT")
 	}
 
-	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
+	commentID, err := strconv.Atoi(chi.URLParam(r, "commentID"))
 	if err != nil {
 		return err
 	}
 
-	postID, err := strconv.Atoi(chi.URLParam(r, "postID"))
-	if err != nil {
-		return err
-	}
-
-	if userID != id && role != "admin" {
+	if !s.store.GetIfUserOwnsComment(commentID, id) && role != "admin" {
 		return utils.WriteJSON(w, http.StatusForbidden, &utils.APIError{Error: "you cannot delete a comment that is not yours"})
 	}
 
-	if err := s.store.DeleteComment(postID, userID); err != nil {
+	if err := s.store.DeleteComment(commentID); err != nil {
 		return err
 	}
 
