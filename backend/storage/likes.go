@@ -29,6 +29,7 @@ func (s *PostgresStore) LikeComment(userID, commentID int) error {
 	return nil
 }
 
+
 func (s *PostgresStore) DislikePost(userID, postID int) error {
 	stmt := `DELETE FROM likes WHERE post_id = $1 AND user_id = $2;`
 	res, err := s.Db.Exec(stmt, postID, userID)

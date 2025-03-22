@@ -137,3 +137,15 @@ func (s *PostgresStore) DeletePost(id int) error {
 
 	return nil
 }
+
+func (s *PostgresStore) GetUserPostsCount(userID int) (*int, error) {
+	stmt := `
+	SELECT count(*) FROM posts WHERE user_id = $1;
+	`
+	var count *int
+	if err := s.Db.QueryRow(stmt, userID).Scan(&count); err != nil {
+		return nil, err
+	}
+
+	return count, nil
+}

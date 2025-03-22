@@ -154,3 +154,19 @@ func (s *APIServer) handleUpdatePost(w http.ResponseWriter, r *http.Request) err
 
 	return utils.WriteJSON(w, http.StatusOK, updatedPost)
 }
+
+func (s *APIServer) handleGetUserPostsCount(w http.ResponseWriter, r *http.Request) error {
+	userID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		return err
+	}
+
+	count, err := s.store.GetUserPostsCount(userID)
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+		"user_posts_count": *count,
+	})
+}

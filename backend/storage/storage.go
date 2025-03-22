@@ -32,12 +32,14 @@ type Storage interface {
 	GetUserTopics(userID int) ([]models.UserTopic, error)
 	FollowTopics(ids []int, userID int) error
 	UnfollowTopics(ids []int, userID int) error
+	GetUserFollowTopicsCount(userID int) (*int, error)
 
 	// Posts methods
 	CreatePost(post *models.PostReq) (*models.Post, error)
 	GetUserPosts(id, limit, offset int) ([]models.Post, int, error)
 	UpdatePost(post map[string]interface{}, postID int) (*models.Post, error)
 	DeletePost(id int) error
+	GetUserPostsCount(userID int) (*int, error)
 
 	// Events methods
 	CreateEvent(event *models.EventReq) (*models.EventWithUser, error)

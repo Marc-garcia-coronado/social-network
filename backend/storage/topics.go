@@ -169,3 +169,15 @@ func (s *PostgresStore) UnfollowTopics(ids []int, userID int) error {
 
 	return nil
 }
+
+func (s *PostgresStore) GetUserFollowTopicsCount(userID int) (*int, error) {
+	stmt := `
+	SELECT count(*) FROM topics_user WHERE user_id = $1;
+	`
+	var count *int
+	if err := s.Db.QueryRow(stmt, userID).Scan(&count); err != nil {
+		return nil, err
+	}
+
+	return count, nil
+}

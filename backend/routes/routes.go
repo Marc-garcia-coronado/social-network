@@ -44,52 +44,58 @@ func (s *APIServer) Run() {
 	protectedRouter.Patch("/users/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateUser))
 
 	// User - Follows routes
-	protectedRouter.Post("/users/follow/{id}", utils.MakeHTTPHandleFunc(s.handleFollowUser))
-	protectedRouter.Delete("/users/unfollow/{id}", utils.MakeHTTPHandleFunc(s.handleUnfollowUser))
 	protectedRouter.Get("/users/{id}/followers", utils.MakeHTTPHandleFunc(s.handleGetFollowers))
 	protectedRouter.Get("/users/{id}/follows", utils.MakeHTTPHandleFunc(s.handleGetUserFollows))
 	protectedRouter.Get("/users/{id}/followers/count", utils.MakeHTTPHandleFunc(s.handleGetCountFollowers))
 	protectedRouter.Get("/users/{id}/follows/count", utils.MakeHTTPHandleFunc(s.handleGetUserCountFollows))
+	protectedRouter.Post("/users/follow/{id}", utils.MakeHTTPHandleFunc(s.handleFollowUser))
+	protectedRouter.Delete("/users/unfollow/{id}", utils.MakeHTTPHandleFunc(s.handleUnfollowUser))
 
 	// User - Topics routes
 	protectedRouter.Get("/users/{userID}/topics", utils.MakeHTTPHandleFunc(s.handleGetUserTopics))
 	protectedRouter.Get("/topics", utils.MakeHTTPHandleFunc(s.handleGetAllTopics))
 	protectedRouter.Get("/topics/{id}", utils.MakeHTTPHandleFunc(s.handleGetTopicByID))
+	protectedRouter.Get("/users/{userID}/topics/follow/count", utils.MakeHTTPHandleFunc(s.handleGetFollowTopicsCount))
 	protectedRouter.Post("/topics/follow", utils.MakeHTTPHandleFunc(s.handleFollowTopics))
 	protectedRouter.Delete("/topics/unfollow", utils.MakeHTTPHandleFunc(s.handleUnfollowTopics))
 
 	// User - Posts routes
 	protectedRouter.Get("/users/{id}/posts", utils.MakeHTTPHandleFunc(s.handleGetUserPosts))
-	protectedRouter.Get("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleGetUserPosts))
+	protectedRouter.Get("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleGetUserPost))
+	protectedRouter.Get("/users/{userID}/posts/count", utils.MakeHTTPHandleFunc(s.handleGetUserPostsCount))
 	protectedRouter.Post("/posts", utils.MakeHTTPHandleFunc(s.handleCreatePost))
 	protectedRouter.Patch("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleUpdatePost))
 	protectedRouter.Delete("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleDeletePost))
 
 	// User - Events routes
-	protectedRouter.Post("/events", utils.MakeHTTPHandleFunc(s.handleCreateEvent))
 	protectedRouter.Get("/events", utils.MakeHTTPHandleFunc(s.handleGetAllEvents))
 	protectedRouter.Get("/events/topics/{topicID}", utils.MakeHTTPHandleFunc(s.handleGetAllEventsByTopic))
+	protectedRouter.Get("/events/topics/{topicID}/count", utils.MakeHTTPHandleFunc(s.handleGetAllEventsByTopicCount))
 	protectedRouter.Get("/users/{id}/events", utils.MakeHTTPHandleFunc(s.handleGetUserEvents))
+	protectedRouter.Get("/users/{id}/events/count", utils.MakeHTTPHandleFunc(s.handleGetUserEventsCount))
+	protectedRouter.Post("/events", utils.MakeHTTPHandleFunc(s.handleCreateEvent))
 	protectedRouter.Patch("/users/{userID}/events/{eventID}", utils.MakeHTTPHandleFunc(s.handleUpdateUserEvent))
 	protectedRouter.Delete("/users/{userID}/events/{eventID}", utils.MakeHTTPHandleFunc(s.handleDeleteUserEvent))
 
 	// User - Subscribe/Unsubscribe to Events routes
+	protectedRouter.Get("/users/{userID}/events/subscribed", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))
+	protectedRouter.Get("/users/{userID}/events/subscribed/count", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEventsCount))
 	protectedRouter.Post("/users/{userID}/events/{eventID}/subscribe", utils.MakeHTTPHandleFunc(s.handleSubscribeToEvent))
 	protectedRouter.Delete("/users/{userID}/events/{eventID}/unsubscribe", utils.MakeHTTPHandleFunc(s.handleUnsubscribeToEvent))
-	protectedRouter.Get("/users/{userID}/events/subscribed", utils.MakeHTTPHandleFunc(s.handleGetUserSubscribedEvents))
 
 	// User - Comments routes
 	protectedRouter.Get("/posts/{postID}/comments", utils.MakeHTTPHandleFunc(s.handleGetPostComments))
+	protectedRouter.Get("/posts/{postID}/comments/count", utils.MakeHTTPHandleFunc(s.handleGetPostCommentsCount))
 	protectedRouter.Post("/posts/{postID}/comments", utils.MakeHTTPHandleFunc(s.handleCreatePostComment))
 	protectedRouter.Delete("/comments/{commentID}", utils.MakeHTTPHandleFunc(s.handleDeletePostComment))
 
 	// User - Likes routes
+	protectedRouter.Get("/likes/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleGetPostLikes))
+	protectedRouter.Get("/likes/comments/{commentID}", utils.MakeHTTPHandleFunc(s.handleGetCommentLikes))
 	protectedRouter.Post("/posts/{postID}/like", utils.MakeHTTPHandleFunc(s.handleLikePost))
 	protectedRouter.Post("/comments/{commentID}/like", utils.MakeHTTPHandleFunc(s.handleLikeComment))
 	protectedRouter.Delete("/posts/{postID}/dislike", utils.MakeHTTPHandleFunc(s.handleDislikePost))
 	protectedRouter.Delete("/comments/{commentID}/dislike", utils.MakeHTTPHandleFunc(s.handleDislikeComment))
-	protectedRouter.Get("/likes/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleGetPostLikes))
-	protectedRouter.Get("/likes/comments/{commentID}", utils.MakeHTTPHandleFunc(s.handleGetCommentLikes))
 
 	// Protected router for admin
 	adminRouter := chi.NewRouter()
