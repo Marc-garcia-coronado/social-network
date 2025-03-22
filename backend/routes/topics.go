@@ -145,3 +145,19 @@ func (s *APIServer) handleUnfollowTopics(w http.ResponseWriter, r *http.Request)
 
 	return utils.WriteJSON(w, http.StatusNoContent, nil)
 }
+
+func (s *APIServer) handleGetFollowTopicsCount(w http.ResponseWriter, r *http.Request) error {
+	userID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		return err
+	}
+
+	count, err := s.store.GetUserFollowTopicsCount(userID)
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+		"user_following_topics_count": *count,
+	})
+}

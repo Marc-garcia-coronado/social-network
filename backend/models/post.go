@@ -17,3 +17,8 @@ type Post struct {
 	Topic     Topic          `json:"topic"`
 	CreatedAt string         `json:"created_at"`
 }
+
+type PostsWithPagination struct {
+	Posts      []Post     `json:"posts"`
+	Pagination Pagination `json:"pagination"`
+}

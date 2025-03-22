@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"log"
 	"time"
@@ -20,16 +19,21 @@ type LoginUserReq struct {
 }
 
 type User struct {
-	ID             int            `json:"id"`
-	UserName       string         `json:"user_name"`
-	FullName       string         `json:"full_name"`
-	Email          string         `json:"email"`
-	Password       string         `json:"password,omitempty"`
-	UserSince      time.Time      `json:"user_since"`
-	ProfilePicture sql.NullString `json:"profile_picture,omitempty"`
-	Bio            sql.NullString `json:"bio,omitempty"`
-	IsActive       bool           `json:"is_active"`
-	Role           string         `json:"role"`
+	ID             int       `json:"id"`
+	UserName       string    `json:"user_name"`
+	FullName       string    `json:"full_name"`
+	Email          string    `json:"email"`
+	Password       string    `json:"password,omitempty"`
+	UserSince      time.Time `json:"user_since"`
+	ProfilePicture *string   `json:"profile_picture,omitempty"`
+	Bio            *string   `json:"bio,omitempty"`
+	IsActive       bool      `json:"is_active"`
+	Role           string    `json:"role"`
+}
+
+type UserWithPagination struct {
+	Users      []User     `json:"users"`
+	Pagination Pagination `json:"pagination"`
 }
 
 func NewUser(userName, fullName, email, password string) *User {

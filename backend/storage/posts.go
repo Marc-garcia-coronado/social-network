@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"strconv"
 )
@@ -34,21 +35,28 @@ func (s *PostgresStore) CreatePost(post *models.PostReq) (*models.Post, error) {
 	return newPost, nil
 }
 
-func (s *PostgresStore) GetUserPosts(id int) ([]models.Post, error) {
+func (s *PostgresStore) GetUserPosts(id, limit, offset int) ([]models.Post, int, error) {
+	var totalCount int
+	queryCount := "SELECT COUNT(*) FROM posts WHERE user_id = $1;"
+	if err := s.Db.QueryRow(queryCount, id).Scan(&totalCount); err != nil {
+		return nil, 0, err
+	}
+
 	stmt := `
-	SELECT p.id, p.picture, p.title, p.user_id, p.topic_id, p.created_at,
-		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture,
+	SELECT p.id, p.picture, p.title, p.user_id, p.created_at,
+		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 	       t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM posts p
 	JOIN users u ON u.id = p.user_id
 	JOIN topics t ON t.id = p.topic_id
 	WHERE p.user_id = $1
-	ORDER BY p.created_at DESC;
+	ORDER BY p.created_at DESC
+	LIMIT $2 OFFSET $3;
 	`
 
-	rows, err := s.Db.Query(stmt, id)
+	rows, err := s.Db.Query(stmt, id, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -57,21 +65,21 @@ func (s *PostgresStore) GetUserPosts(id int) ([]models.Post, error) {
 	for rows.Next() {
 		var newPost models.Post
 		if err := rows.Scan(
-			&newPost.ID, &newPost.Picture, &newPost.Title, &newPost.CreatedAt,
+			&newPost.ID, &newPost.Picture, &newPost.Title, &newPost.User.ID, &newPost.CreatedAt,
 			&newPost.User.ID, &newPost.User.UserName, &newPost.User.FullName,
-			&newPost.User.Email, &newPost.User.ProfilePicture,
+			&newPost.User.Email, &newPost.User.ProfilePicture, &newPost.User.IsActive, &newPost.User.Role,
 			&newPost.Topic.ID, &newPost.Topic.Name, &newPost.Topic.Description, &newPost.Topic.CreatedAt,
 		); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		postsArray = append(postsArray, newPost)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return postsArray, nil
+	return postsArray, totalCount, nil
 }
 
 func (s *PostgresStore) UpdatePost(post map[string]interface{}, postID int) (*models.Post, error) {
@@ -114,9 +122,30 @@ func (s *PostgresStore) UpdatePost(post map[string]interface{}, postID int) (*mo
 func (s *PostgresStore) DeletePost(id int) error {
 	stmt := "DELETE FROM posts WHERE id = $1;"
 
-	if err := s.Db.QueryRow(stmt, id).Err(); err != nil {
+	res, err := s.Db.Exec(stmt, id)
+	if err != nil {
 		return err
 	}
 
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("no post found to delete")
+	}
+
 	return nil
+}
+
+func (s *PostgresStore) GetUserPostsCount(userID int) (*int, error) {
+	stmt := `
+	SELECT count(*) FROM posts WHERE user_id = $1;
+	`
+	var count *int
+	if err := s.Db.QueryRow(stmt, userID).Scan(&count); err != nil {
+		return nil, err
+	}
+
+	return count, nil
 }

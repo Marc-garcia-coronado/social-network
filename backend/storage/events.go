@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"strconv"
 )
@@ -13,7 +14,7 @@ func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUs
     RETURNING id, name, description, location, created_at, creator_id, topic_id
 	)
 	SELECT e.id, e.name, e.description, e.location, e.created_at,
-		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture,
+		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM inserted_event e
 	JOIN users u ON u.id = e.creator_id
@@ -24,7 +25,7 @@ func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUs
 	row := s.Db.QueryRow(stmt, event.Name, event.Description, event.CreatorID, event.Location, event.TopicID)
 	err := row.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt,
 		&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
-		&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture,
+		&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 		&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
 	)
 	if err != nil {
@@ -43,7 +44,7 @@ func (s *PostgresStore) GetAllEventsWithCount(limit, offset int) ([]models.Event
 
 	stmt := `
 	SELECT e.id, e.name, e.description, e.location, e.created_at,
-		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture,
+		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM events e
 	JOIN users u ON u.id = e.creator_id
@@ -63,7 +64,7 @@ func (s *PostgresStore) GetAllEventsWithCount(limit, offset int) ([]models.Event
 		newEvent := new(models.EventWithUser)
 		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
-			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture,
+			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
 		)
 		if err != nil {
@@ -89,7 +90,7 @@ func (s *PostgresStore) GetAllEventsByTopicWithCount(topicID, limit, offset int)
 
 	stmt := `
 	SELECT e.id, e.name, e.description, e.location, e.created_at,
-		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture,
+		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM events e
 	JOIN users u ON u.id = e.creator_id
@@ -110,7 +111,7 @@ func (s *PostgresStore) GetAllEventsByTopicWithCount(topicID, limit, offset int)
 		newEvent := new(models.EventWithUser)
 		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
-			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture,
+			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
 		)
 		if err != nil {
@@ -136,7 +137,7 @@ func (s *PostgresStore) GetUserEventsWithCount(userID, limit, offset int) ([]mod
 
 	stmt := `
 	SELECT e.id, e.name, e.description, e.location, e.created_at,
-		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture,
+		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM events e
 	JOIN users u ON u.id = e.creator_id
@@ -157,7 +158,7 @@ func (s *PostgresStore) GetUserEventsWithCount(userID, limit, offset int) ([]mod
 		newEvent := new(models.EventWithUser)
 		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
-			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture,
+			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
 		)
 		if err != nil {
@@ -191,7 +192,7 @@ func (s *PostgresStore) UpdateEvent(event map[string]interface{}, eventID int) (
 	stmt += " WHERE events.id = $" + strconv.Itoa(i)
 	stmt += " AND events.creator_id = u.id"
 	stmt += " RETURNING events.id, events.name, events.description, events.location, events.created_at,"
-	stmt += " u.id, u.user_name, u.full_name, u.email, u.profile_picture,"
+	stmt += " u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role"
 	stmt += " t.id, t.name, t.description, t.created_at;"
 	values = append(values, eventID)
 
@@ -201,7 +202,7 @@ func (s *PostgresStore) UpdateEvent(event map[string]interface{}, eventID int) (
 		&updatedEvent.ID, &updatedEvent.Name, &updatedEvent.Description,
 		&updatedEvent.Location, &updatedEvent.CreatedAt,
 		&updatedEvent.Creator.ID, &updatedEvent.Creator.UserName,
-		&updatedEvent.Creator.FullName, &updatedEvent.Creator.Email, &updatedEvent.Creator.ProfilePicture,
+		&updatedEvent.Creator.FullName, &updatedEvent.Creator.Email, &updatedEvent.Creator.ProfilePicture, &updatedEvent.Creator.IsActive, &updatedEvent.Creator.Role,
 		&updatedEvent.Topic.ID, &updatedEvent.Topic.Name, &updatedEvent.Topic.Description, &updatedEvent.Topic.CreatedAt,
 	)
 	if err != nil {
@@ -214,8 +215,17 @@ func (s *PostgresStore) UpdateEvent(event map[string]interface{}, eventID int) (
 func (s *PostgresStore) DeleteEvent(id int) error {
 	stmt := "DELETE FROM events WHERE id = $1;"
 
-	if err := s.Db.QueryRow(stmt, id).Err(); err != nil {
+	res, err := s.Db.Exec(stmt, id)
+	if err != nil {
 		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("no event found to delete")
 	}
 
 	return nil
@@ -253,7 +263,7 @@ func (s *PostgresStore) GetUserSubscribedEventsWithCount(userID, limit, offset i
 	}
 
 	stmt := `
-	SELECT e.id, e.name, e.description, u.id, u.user_name, u.full_name, u.email, u.profile_picture, e.location, 
+	SELECT e.id, e.name, e.description, u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role, e.location, 
 	       t.id, t.name, t.description, t.created_at, e.created_at, ue.subscribed_at
 	FROM user_event ue
 	JOIN events e ON e.id = ue.event_id
@@ -276,7 +286,7 @@ func (s *PostgresStore) GetUserSubscribedEventsWithCount(userID, limit, offset i
 		newEvent := new(models.SubscribedEvent)
 		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
-			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Location,
+			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role, &newEvent.Location,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
 			&newEvent.CreatedAt, &newEvent.SubscribedAt,
 		)

@@ -16,8 +16,8 @@ type Storage interface {
 	// User Follow methods
 	FollowUser(userToFollowID, userID int) error
 	UnfollowUser(userToFollowID, userID int) error
-	GetFollowers(id int) ([]models.User, error)
-	GetFollows(id int) ([]models.User, error)
+	GetFollowers(id, limit, offset int) ([]models.User, int, error)
+	GetFollows(id, limit, offset int) ([]models.User, int, error)
 	GetCountFollowers(id int) (*int, error)
 	GetCountFollows(id int) (*int, error)
 
@@ -28,16 +28,18 @@ type Storage interface {
 	UpdateTopic(topic map[string]interface{}, topicID int) (*models.Topic, error)
 	DeleteTopic(id int) error
 
-	// User - Topics methods
+	// User Topics methods
 	GetUserTopics(userID int) ([]models.UserTopic, error)
 	FollowTopics(ids []int, userID int) error
 	UnfollowTopics(ids []int, userID int) error
+	GetUserFollowTopicsCount(userID int) (*int, error)
 
 	// Posts methods
 	CreatePost(post *models.PostReq) (*models.Post, error)
-	GetUserPosts(id int) ([]models.Post, error)
+	GetUserPosts(id, limit, offset int) ([]models.Post, int, error)
 	UpdatePost(post map[string]interface{}, postID int) (*models.Post, error)
 	DeletePost(id int) error
+	GetUserPostsCount(userID int) (*int, error)
 
 	// Events methods
 	CreateEvent(event *models.EventReq) (*models.EventWithUser, error)
@@ -54,8 +56,17 @@ type Storage interface {
 
 	// Comments methods
 	CreateComment(comment *models.CommentReq) (*models.Comment, error)
-	DeleteComment(postID, userID int) error
 	GetPostComments(postID, limit, offset int) ([]models.Comment, int, error)
+	DeleteComment(id int) error
+	GetIfUserOwnsComment(commentID, userID int) bool
+
+	// Likes methods
+	LikePost(userID, postID int) error
+	LikeComment(userID, commentID int) error
+	DislikePost(userID, postID int) error
+	DislikeComment(userID, commentID int) error
+	GetPostLikes(postID, limit, offset int) ([]models.LikePost, int, error)
+	GetCommentLikes(commentID, limit, offset int) ([]models.LikeComment, int, error)
 }
 
 type PostgresStore struct {
