@@ -2,8 +2,9 @@ package storage
 
 import (
 	"errors"
-	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"strconv"
+
+	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 )
 
 func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUser, error) {
@@ -35,7 +36,7 @@ func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUs
 	return newEvent, nil
 }
 
-func (s *PostgresStore) GetAllEventsWithCount(limit, offset int) ([]models.EventWithUser, int, error) {
+func (s *PostgresStore) GetAllEvents(limit, offset int) ([]models.EventWithUser, int, error) {
 	var totalCount int
 	queryCount := "SELECT COUNT(*) FROM events;"
 	if err := s.Db.QueryRow(queryCount).Scan(&totalCount); err != nil {
@@ -81,7 +82,17 @@ func (s *PostgresStore) GetAllEventsWithCount(limit, offset int) ([]models.Event
 	return arrayEvents, totalCount, nil
 }
 
-func (s *PostgresStore) GetAllEventsByTopicWithCount(topicID, limit, offset int) ([]models.EventWithUser, int, error) {
+func (s *PostgresStore) GetAllEventsCount() (*int, error) {
+	var totalCount *int
+	queryCount := "SELECT COUNT(*) FROM events;"
+	if err := s.Db.QueryRow(queryCount).Scan(&totalCount); err != nil {
+		return nil, err
+	}
+
+	return totalCount, nil
+}
+
+func (s *PostgresStore) GetAllEventsByTopic(topicID, limit, offset int) ([]models.EventWithUser, int, error) {
 	var totalCount int
 	queryCount := "SELECT COUNT(*) FROM events WHERE topic_id = $1;"
 	if err := s.Db.QueryRow(queryCount, topicID).Scan(&totalCount); err != nil {
@@ -128,7 +139,27 @@ func (s *PostgresStore) GetAllEventsByTopicWithCount(topicID, limit, offset int)
 	return arrayEvents, totalCount, nil
 }
 
-func (s *PostgresStore) GetUserEventsWithCount(userID, limit, offset int) ([]models.EventWithUser, int, error) {
+func (s *PostgresStore) GetAllEventsByTopicCount(topicID int) (*int, error) {
+	var totalCount *int
+	queryCount := "SELECT COUNT(*) FROM events WHERE topic_id = $1;"
+	if err := s.Db.QueryRow(queryCount, topicID).Scan(&totalCount); err != nil {
+		return nil, err
+	}
+
+	return totalCount, nil
+}
+
+func (s *PostgresStore) GetUserEventsCount(userID int) (*int, error) {
+	var totalCount *int
+	queryCount := "SELECT COUNT(*) FROM events WHERE creator_id = $1;"
+	if err := s.Db.QueryRow(queryCount, userID).Scan(&totalCount); err != nil {
+		return nil, err
+	}
+
+	return totalCount, nil
+}
+
+func (s *PostgresStore) GetUserEvents(userID, limit, offset int) ([]models.EventWithUser, int, error) {
 	var totalCount int
 	queryCount := "SELECT COUNT(*) FROM events WHERE creator_id = $1;"
 	if err := s.Db.QueryRow(queryCount, userID).Scan(&totalCount); err != nil {
@@ -175,10 +206,10 @@ func (s *PostgresStore) GetUserEventsWithCount(userID, limit, offset int) ([]mod
 	return arrayEvents, totalCount, nil
 }
 
-func (s *PostgresStore) UpdateEvent(event map[string]interface{}, eventID int) (*models.EventWithUser, error) {
+func (s *PostgresStore) UpdateEvent(event map[string]any, eventID int) (*models.EventWithUser, error) {
 	// Build dynamic SQL query
 	stmt := "UPDATE events SET "
-	values := []interface{}{}
+	values := []any{}
 	i := 1
 
 	for key, value := range event {
@@ -255,7 +286,7 @@ func (s *PostgresStore) UnsubscribeEvent(eventID, userID int) error {
 	return nil
 }
 
-func (s *PostgresStore) GetUserSubscribedEventsWithCount(userID, limit, offset int) ([]models.SubscribedEvent, int, error) {
+func (s *PostgresStore) GetUserSubscribedEvents(userID, limit, offset int) ([]models.SubscribedEvent, int, error) {
 	var totalCount int
 	queryCount := "SELECT COUNT(*) FROM user_event WHERE user_id = $1;"
 	if err := s.Db.QueryRow(queryCount, userID).Scan(&totalCount); err != nil {
@@ -302,4 +333,14 @@ func (s *PostgresStore) GetUserSubscribedEventsWithCount(userID, limit, offset i
 	}
 
 	return arrayEvents, totalCount, nil
+}
+
+func (s *PostgresStore) GetUserSubscribedEventsCount(userID int) (*int, error) {
+	var totalCount *int
+	queryCount := "SELECT COUNT(*) FROM user_event WHERE user_id = $1;"
+	if err := s.Db.QueryRow(queryCount, userID).Scan(&totalCount); err != nil {
+		return nil, err
+	}
+
+	return totalCount, nil
 }

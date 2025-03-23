@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 )
 
@@ -120,4 +121,14 @@ func (s *PostgresStore) GetIfUserOwnsComment(commentID, userID int) bool {
 	}
 
 	return user_id == userID
+}
+
+func (s *PostgresStore) GetPostCommentsCount(postID int) (*int, error) {
+	var totalCount *int
+	queryCount := "SELECT COUNT(*) FROM comments WHERE post_id = $1;"
+	if err := s.Db.QueryRow(queryCount, postID).Scan(&totalCount); err != nil {
+		return nil, err
+	}
+
+	return totalCount, nil
 }

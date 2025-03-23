@@ -3,8 +3,9 @@ package storage
 import (
 	"errors"
 	"fmt"
-	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"strconv"
+
+	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 )
 
 func (s *PostgresStore) GetTopics() ([]models.Topic, error) {
@@ -53,11 +54,11 @@ func (s *PostgresStore) CreateTopic(topic *models.Topic) (*models.Topic, error) 
 	return newTopic, nil
 }
 
-func (s *PostgresStore) UpdateTopic(topic map[string]interface{}, topicID int) (*models.Topic, error) {
+func (s *PostgresStore) UpdateTopic(topic map[string]any, topicID int) (*models.Topic, error) {
 
 	// Build dynamic SQL query
 	stmt := "UPDATE topics SET "
-	values := []interface{}{}
+	values := []any{}
 	i := 1
 
 	for key, value := range topic {
@@ -130,7 +131,7 @@ func (s *PostgresStore) GetUserTopics(userID int) ([]models.UserTopic, error) {
 
 func (s *PostgresStore) FollowTopics(ids []int, userID int) error {
 	query := "INSERT INTO topics_user (user_id, topic_id) VALUES "
-	values := []interface{}{}
+	values := []any{}
 
 	for i, topicID := range ids {
 		query += fmt.Sprintf("($%d, $%d), ", i*2+1, i*2+2)

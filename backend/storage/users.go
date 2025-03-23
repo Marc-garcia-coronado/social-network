@@ -5,10 +5,11 @@ import (
 	"errors"
 	"fmt"
 
+	"strconv"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	_ "github.com/lib/pq"
-	"strconv"
 )
 
 func (s *PostgresStore) CreateUser(u *models.User) (*models.User, error) {
@@ -45,7 +46,7 @@ func (s *PostgresStore) Login(username, password string) (*models.User, error) {
 
 	ok := utils.CheckPassword(hash, password)
 	if !ok {
-		return nil, fmt.Errorf("Las contraseñas no coinciden")
+		return nil, fmt.Errorf("las contraseñas no coinciden")
 	}
 
 	return newUser, nil
@@ -66,11 +67,11 @@ func (s *PostgresStore) GetUserByID(id int) (*models.User, error) {
 	return user, nil
 }
 
-func (s *PostgresStore) UpdateUser(user map[string]interface{}, userID int) (*models.User, error) {
+func (s *PostgresStore) UpdateUser(user map[string]any, userID int) (*models.User, error) {
 
 	// Build dynamic SQL query
 	stmt := "UPDATE users SET "
-	values := []interface{}{}
+	values := []any{}
 	i := 1
 
 	for key, value := range user {

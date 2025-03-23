@@ -3,12 +3,13 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/middleware"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
-	"net/http"
-	"strconv"
 )
 
 func (s *APIServer) handleGetAllTopics(w http.ResponseWriter, r *http.Request) error {
@@ -55,7 +56,7 @@ func (s *APIServer) handleUpdateTopic(w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 
-	var topic map[string]interface{}
+	var topic map[string]any
 	if err := json.NewDecoder(r.Body).Decode(&topic); err != nil {
 		return err
 	}
@@ -69,7 +70,9 @@ func (s *APIServer) handleUpdateTopic(w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 
-	return utils.WriteJSON(w, http.StatusOK, updatedTopic)
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
+		"updated_topic": updatedTopic,
+	})
 }
 
 func (s *APIServer) handleDeleteTopic(w http.ResponseWriter, r *http.Request) error {
@@ -157,7 +160,7 @@ func (s *APIServer) handleGetFollowTopicsCount(w http.ResponseWriter, r *http.Re
 		return err
 	}
 
-	return utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
 		"user_following_topics_count": *count,
 	})
 }

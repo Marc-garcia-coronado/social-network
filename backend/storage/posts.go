@@ -2,8 +2,9 @@ package storage
 
 import (
 	"errors"
-	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"strconv"
+
+	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 )
 
 func (s *PostgresStore) CreatePost(post *models.PostReq) (*models.Post, error) {
@@ -82,11 +83,11 @@ func (s *PostgresStore) GetUserPosts(id, limit, offset int) ([]models.Post, int,
 	return postsArray, totalCount, nil
 }
 
-func (s *PostgresStore) UpdatePost(post map[string]interface{}, postID int) (*models.Post, error) {
+func (s *PostgresStore) UpdatePost(post map[string]any, postID int) (*models.Post, error) {
 
 	// Build dynamic SQL query
 	stmt := "UPDATE posts SET "
-	values := []interface{}{}
+	values := []any{}
 	i := 1
 
 	for key, value := range post {

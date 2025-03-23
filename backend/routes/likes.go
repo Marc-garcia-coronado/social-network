@@ -2,12 +2,13 @@ package routes
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/middleware"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
-	"net/http"
-	"strconv"
 )
 
 func (s *APIServer) handleLikePost(w http.ResponseWriter, r *http.Request) error {
@@ -175,5 +176,39 @@ func (s *APIServer) handleGetCommentLikes(w http.ResponseWriter, r *http.Request
 			Limit:      limit,
 			Page:       page,
 		},
+	})
+}
+
+func (s *APIServer) handleGetPostLikesCount(w http.ResponseWriter, r *http.Request) error {
+
+	postID, err := strconv.Atoi(chi.URLParam(r, "postID"))
+	if err != nil {
+		return err
+	}
+
+	count, err := s.store.GetPostLikesCount(postID)
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
+		"post_likes_count": count,
+	})
+}
+
+func (s *APIServer) handleGetCommentLikesCount(w http.ResponseWriter, r *http.Request) error {
+
+	commentID, err := strconv.Atoi(chi.URLParam(r, "commentID"))
+	if err != nil {
+		return err
+	}
+
+	count, err := s.store.GetCommentLikesCount(commentID)
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
+		"comment_likes_count": count,
 	})
 }

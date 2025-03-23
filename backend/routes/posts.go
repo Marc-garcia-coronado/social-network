@@ -3,12 +3,13 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/middleware"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
-	"net/http"
-	"strconv"
 )
 
 func (s *APIServer) handleCreatePost(w http.ResponseWriter, r *http.Request) error {
@@ -133,7 +134,7 @@ func (s *APIServer) handleUpdatePost(w http.ResponseWriter, r *http.Request) err
 		return utils.WriteJSON(w, http.StatusForbidden, &utils.APIError{Error: "you cannot update a post that is not yours"})
 	}
 
-	var post map[string]interface{}
+	var post map[string]any
 	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
 		return err
 	}
@@ -156,7 +157,7 @@ func (s *APIServer) handleUpdatePost(w http.ResponseWriter, r *http.Request) err
 }
 
 func (s *APIServer) handleGetUserPostsCount(w http.ResponseWriter, r *http.Request) error {
-	userID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
 	if err != nil {
 		return err
 	}
@@ -166,7 +167,7 @@ func (s *APIServer) handleGetUserPostsCount(w http.ResponseWriter, r *http.Reque
 		return err
 	}
 
-	return utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
 		"user_posts_count": *count,
 	})
 }
