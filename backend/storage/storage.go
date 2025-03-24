@@ -75,6 +75,10 @@ type Storage interface {
 	GetCommentLikes(commentID, limit, offset int) ([]models.LikeComment, int, error)
 	GetPostLikesCount(postID int) (*int, error)
 	GetCommentLikesCount(commentID int) (*int, error)
+
+	// Feed methods
+	GetUserFeed(userID, limit, offset int) ([]models.Post, int, error)
+	GetUserFeedByTopic(userID, topicID, limit, offset int) ([]models.Post, int, error)
 }
 
 type PostgresStore struct {

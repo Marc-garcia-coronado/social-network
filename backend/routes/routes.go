@@ -101,6 +101,10 @@ func (s *APIServer) Run() {
 	protectedRouter.Delete("/posts/{postID}/dislike", utils.MakeHTTPHandleFunc(s.handleDislikePost))
 	protectedRouter.Delete("/comments/{commentID}/dislike", utils.MakeHTTPHandleFunc(s.handleDislikeComment))
 
+	// User - Feed routes
+	protectedRouter.Get("/feed", utils.MakeHTTPHandleFunc(s.handleGetUserFeed))
+	protectedRouter.Get("/feed/topics/{topicID}", utils.MakeHTTPHandleFunc(s.handleGetUserFeedByTopic))
+
 	// Protected router for admin
 	adminRouter := chi.NewRouter()
 	adminRouter.Use(middleware.JWTMiddleware)
