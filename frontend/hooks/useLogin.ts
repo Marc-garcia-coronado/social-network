@@ -24,7 +24,6 @@ export default function useLogin() {
             }
 
             const data = await response.json();
-            localStorage.setItem("token", data.token);
             return data;
         } catch (err: any) {
             setError(err.message);
