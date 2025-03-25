@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 )
 
@@ -28,7 +29,6 @@ func (s *PostgresStore) LikeComment(userID, commentID int) error {
 	}
 	return nil
 }
-
 
 func (s *PostgresStore) DislikePost(userID, postID int) error {
 	stmt := `DELETE FROM likes WHERE post_id = $1 AND user_id = $2;`
@@ -167,4 +167,26 @@ func (s *PostgresStore) GetCommentLikes(commentID, limit, offset int) ([]models.
 	}
 
 	return likesArray, totalCount, nil
+}
+
+func (s *PostgresStore) GetPostLikesCount(postID int) (*int, error) {
+
+	var totalCount *int
+	queryCount := "SELECT COUNT(*) FROM likes WHERE post_id = $1;"
+	if err := s.Db.QueryRow(queryCount, postID).Scan(&totalCount); err != nil {
+		return nil, err
+	}
+
+	return totalCount, nil
+}
+
+func (s *PostgresStore) GetCommentLikesCount(commentID int) (*int, error) {
+
+	var totalCount *int
+	queryCount := "SELECT COUNT(*) FROM likes WHERE comment_id = $1;"
+	if err := s.Db.QueryRow(queryCount, commentID).Scan(&totalCount); err != nil {
+		return nil, err
+	}
+
+	return totalCount, nil
 }

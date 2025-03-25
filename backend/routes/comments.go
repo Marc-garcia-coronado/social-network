@@ -3,12 +3,13 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/middleware"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
-	"net/http"
-	"strconv"
 )
 
 func (s *APIServer) handleGetPostComments(w http.ResponseWriter, r *http.Request) error {
@@ -81,7 +82,7 @@ func (s *APIServer) handleCreatePostComment(w http.ResponseWriter, r *http.Reque
 		return utils.WriteJSON(w, http.StatusInternalServerError, utils.APIError{Error: fmt.Sprintf("could not commment the post: %s", err)})
 	}
 
-	return utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
 		"comment": comment,
 	})
 }
@@ -110,4 +111,20 @@ func (s *APIServer) handleDeletePostComment(w http.ResponseWriter, r *http.Reque
 	}
 
 	return utils.WriteJSON(w, http.StatusNoContent, nil)
+}
+
+func (s *APIServer) handleGetPostCommentsCount(w http.ResponseWriter, r *http.Request) error {
+	postID, err := strconv.Atoi(chi.URLParam(r, "postID"))
+	if err != nil {
+		return err
+	}
+
+	count, err := s.store.GetPostCommentsCount(postID)
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
+		"post_comments_count": *count,
+	})
 }

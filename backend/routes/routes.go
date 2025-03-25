@@ -1,14 +1,15 @@
 package routes
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/middleware"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/storage"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
-	"log"
-	"net/http"
 )
 
 type APIServer struct {
@@ -61,7 +62,7 @@ func (s *APIServer) Run() {
 
 	// User - Posts routes
 	protectedRouter.Get("/users/{id}/posts", utils.MakeHTTPHandleFunc(s.handleGetUserPosts))
-	protectedRouter.Get("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleGetUserPost))
+	protectedRouter.Get("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleGetUserPosts))
 	protectedRouter.Get("/users/{userID}/posts/count", utils.MakeHTTPHandleFunc(s.handleGetUserPostsCount))
 	protectedRouter.Post("/posts", utils.MakeHTTPHandleFunc(s.handleCreatePost))
 	protectedRouter.Patch("/users/{userID}/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleUpdatePost))
@@ -69,10 +70,11 @@ func (s *APIServer) Run() {
 
 	// User - Events routes
 	protectedRouter.Get("/events", utils.MakeHTTPHandleFunc(s.handleGetAllEvents))
+	protectedRouter.Get("/events/count", utils.MakeHTTPHandleFunc(s.handleGetAllEventsCount))
 	protectedRouter.Get("/events/topics/{topicID}", utils.MakeHTTPHandleFunc(s.handleGetAllEventsByTopic))
 	protectedRouter.Get("/events/topics/{topicID}/count", utils.MakeHTTPHandleFunc(s.handleGetAllEventsByTopicCount))
-	protectedRouter.Get("/users/{id}/events", utils.MakeHTTPHandleFunc(s.handleGetUserEvents))
-	protectedRouter.Get("/users/{id}/events/count", utils.MakeHTTPHandleFunc(s.handleGetUserEventsCount))
+	protectedRouter.Get("/users/{userID}/events", utils.MakeHTTPHandleFunc(s.handleGetUserEvents))
+	protectedRouter.Get("/users/{userID}/events/count", utils.MakeHTTPHandleFunc(s.handleGetUserEventsCount))
 	protectedRouter.Post("/events", utils.MakeHTTPHandleFunc(s.handleCreateEvent))
 	protectedRouter.Patch("/users/{userID}/events/{eventID}", utils.MakeHTTPHandleFunc(s.handleUpdateUserEvent))
 	protectedRouter.Delete("/users/{userID}/events/{eventID}", utils.MakeHTTPHandleFunc(s.handleDeleteUserEvent))
@@ -92,10 +94,16 @@ func (s *APIServer) Run() {
 	// User - Likes routes
 	protectedRouter.Get("/likes/posts/{postID}", utils.MakeHTTPHandleFunc(s.handleGetPostLikes))
 	protectedRouter.Get("/likes/comments/{commentID}", utils.MakeHTTPHandleFunc(s.handleGetCommentLikes))
+	protectedRouter.Get("/likes/posts/{postID}/count", utils.MakeHTTPHandleFunc(s.handleGetPostLikesCount))
+	protectedRouter.Get("/likes/comments/{commentID}/count", utils.MakeHTTPHandleFunc(s.handleGetCommentLikesCount))
 	protectedRouter.Post("/posts/{postID}/like", utils.MakeHTTPHandleFunc(s.handleLikePost))
 	protectedRouter.Post("/comments/{commentID}/like", utils.MakeHTTPHandleFunc(s.handleLikeComment))
 	protectedRouter.Delete("/posts/{postID}/dislike", utils.MakeHTTPHandleFunc(s.handleDislikePost))
 	protectedRouter.Delete("/comments/{commentID}/dislike", utils.MakeHTTPHandleFunc(s.handleDislikeComment))
+
+	// User - Feed routes
+	protectedRouter.Get("/feed", utils.MakeHTTPHandleFunc(s.handleGetUserFeed))
+	protectedRouter.Get("/feed/topics/{topicID}", utils.MakeHTTPHandleFunc(s.handleGetUserFeedByTopic))
 
 	// Protected router for admin
 	adminRouter := chi.NewRouter()

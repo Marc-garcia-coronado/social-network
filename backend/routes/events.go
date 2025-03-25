@@ -3,12 +3,13 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/middleware"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
-	"net/http"
-	"strconv"
 )
 
 func (s *APIServer) handleCreateEvent(w http.ResponseWriter, r *http.Request) error {
@@ -28,7 +29,7 @@ func (s *APIServer) handleCreateEvent(w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 
-	return utils.WriteJSON(w, http.StatusCreated, map[string]interface{}{
+	return utils.WriteJSON(w, http.StatusCreated, map[string]any{
 		"event": newEvent,
 	})
 }
@@ -62,7 +63,7 @@ func (s *APIServer) handleGetAllEvents(w http.ResponseWriter, r *http.Request) e
 	// Calculate offset
 	offset := (page - 1) * limit
 
-	events, count, err := s.store.GetAllEventsWithCount(limit, offset)
+	events, count, err := s.store.GetAllEvents(limit, offset)
 	if err != nil {
 		return err
 	}
@@ -108,7 +109,7 @@ func (s *APIServer) handleGetAllEventsByTopic(w http.ResponseWriter, r *http.Req
 	// Calculate offset
 	offset := (page - 1) * limit
 
-	events, count, err := s.store.GetAllEventsByTopicWithCount(topicID, limit, offset)
+	events, count, err := s.store.GetAllEventsByTopic(topicID, limit, offset)
 	if err != nil {
 		personalizedError := fmt.Sprintf("could not get the user events: %s", err)
 		return utils.WriteJSON(w, http.StatusInternalServerError, utils.APIError{Error: personalizedError})
@@ -124,7 +125,7 @@ func (s *APIServer) handleGetAllEventsByTopic(w http.ResponseWriter, r *http.Req
 }
 
 func (s *APIServer) handleGetUserEvents(w http.ResponseWriter, r *http.Request) error {
-	paramID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
 	if err != nil {
 		return err
 	}
@@ -154,7 +155,7 @@ func (s *APIServer) handleGetUserEvents(w http.ResponseWriter, r *http.Request) 
 	// Calculate offset
 	offset := (page - 1) * limit
 
-	events, count, err := s.store.GetUserEventsWithCount(paramID, limit, offset)
+	events, count, err := s.store.GetUserEvents(userID, limit, offset)
 	if err != nil {
 		personalizedError := fmt.Sprintf("could not get the user events: %s", err)
 		return utils.WriteJSON(w, http.StatusInternalServerError, utils.APIError{Error: personalizedError})
@@ -166,6 +167,49 @@ func (s *APIServer) handleGetUserEvents(w http.ResponseWriter, r *http.Request) 
 			TotalCount: count,
 			Limit:      limit,
 		},
+	})
+}
+
+func (s *APIServer) handleGetAllEventsCount(w http.ResponseWriter, r *http.Request) error {
+	count, err := s.store.GetAllEventsCount()
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusAccepted, map[string]any{
+		"events_count": *count,
+	})
+}
+
+func (s *APIServer) handleGetAllEventsByTopicCount(w http.ResponseWriter, r *http.Request) error {
+	topicID, err := strconv.Atoi(chi.URLParam(r, "topicID"))
+	if err != nil {
+		return err
+	}
+
+	count, err := s.store.GetAllEventsByTopicCount(topicID)
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
+		"topic_events_count": *count,
+	})
+}
+
+func (s *APIServer) handleGetUserEventsCount(w http.ResponseWriter, r *http.Request) error {
+	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
+	if err != nil {
+		return err
+	}
+
+	count, err := s.store.GetUserEventsCount(userID)
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
+		"user_events_count": *count,
 	})
 }
 
@@ -193,7 +237,7 @@ func (s *APIServer) handleUpdateUserEvent(w http.ResponseWriter, r *http.Request
 		return utils.WriteJSON(w, http.StatusForbidden, &utils.APIError{Error: "you cannot update an event that is not yours"})
 	}
 
-	var event map[string]interface{}
+	var event map[string]any
 	if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
 		return err
 	}
@@ -212,7 +256,7 @@ func (s *APIServer) handleUpdateUserEvent(w http.ResponseWriter, r *http.Request
 		return err
 	}
 
-	return utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
 		"event": updatedPost,
 	})
 }
@@ -347,7 +391,7 @@ func (s *APIServer) handleGetUserSubscribedEvents(w http.ResponseWriter, r *http
 	// Calculate offset
 	offset := (page - 1) * limit
 
-	events, count, err := s.store.GetUserSubscribedEventsWithCount(userID, limit, offset)
+	events, count, err := s.store.GetUserSubscribedEvents(userID, limit, offset)
 	if err != nil {
 		personalizedError := fmt.Sprintf("could not get the user events: %s", err)
 		return utils.WriteJSON(w, http.StatusInternalServerError, utils.APIError{Error: personalizedError})
@@ -359,5 +403,22 @@ func (s *APIServer) handleGetUserSubscribedEvents(w http.ResponseWriter, r *http
 			TotalCount: count,
 			Limit:      limit,
 		},
+	})
+}
+
+
+func (s *APIServer) handleGetUserSubscribedEventsCount(w http.ResponseWriter, r *http.Request) error {
+	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
+	if err != nil {
+		return err
+	}
+
+	count, err := s.store.GetUserSubscribedEventsCount(userID)
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
+		"user_subscribed_events_count": *count,
 	})
 }

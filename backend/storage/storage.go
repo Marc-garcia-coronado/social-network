@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 )
 
@@ -10,7 +11,7 @@ type Storage interface {
 	Login(username, password string) (*models.User, error)
 	GetUserByID(id int) (*models.User, error)
 	CreateUser(user *models.User) (*models.User, error)
-	UpdateUser(user map[string]interface{}, userID int) (*models.User, error)
+	UpdateUser(user map[string]any, userID int) (*models.User, error)
 	DeleteUser(id int) error
 
 	// User Follow methods
@@ -25,7 +26,7 @@ type Storage interface {
 	GetTopics() ([]models.Topic, error)
 	GetTopicByID(id int) (*models.Topic, error)
 	CreateTopic(topic *models.Topic) (*models.Topic, error)
-	UpdateTopic(topic map[string]interface{}, topicID int) (*models.Topic, error)
+	UpdateTopic(topic map[string]any, topicID int) (*models.Topic, error)
 	DeleteTopic(id int) error
 
 	// User Topics methods
@@ -37,26 +38,31 @@ type Storage interface {
 	// Posts methods
 	CreatePost(post *models.PostReq) (*models.Post, error)
 	GetUserPosts(id, limit, offset int) ([]models.Post, int, error)
-	UpdatePost(post map[string]interface{}, postID int) (*models.Post, error)
+	UpdatePost(post map[string]any, postID int) (*models.Post, error)
 	DeletePost(id int) error
 	GetUserPostsCount(userID int) (*int, error)
 
 	// Events methods
 	CreateEvent(event *models.EventReq) (*models.EventWithUser, error)
-	GetAllEventsWithCount(limit, offset int) ([]models.EventWithUser, int, error)
-	GetAllEventsByTopicWithCount(topicID, limit, offset int) ([]models.EventWithUser, int, error)
-	GetUserEventsWithCount(userID, limit, offset int) ([]models.EventWithUser, int, error)
-	UpdateEvent(event map[string]interface{}, eventID int) (*models.EventWithUser, error)
+	GetAllEvents(limit, offset int) ([]models.EventWithUser, int, error)
+	GetAllEventsByTopic(topicID, limit, offset int) ([]models.EventWithUser, int, error)
+	GetUserEvents(userID, limit, offset int) ([]models.EventWithUser, int, error)
+	UpdateEvent(event map[string]any, eventID int) (*models.EventWithUser, error)
 	DeleteEvent(id int) error
+	GetAllEventsCount() (*int, error)
+	GetAllEventsByTopicCount(topicID int) (*int, error)
+	GetUserEventsCount(userID int) (*int, error)
 
 	// Subscription to Events methods
 	SubscribeEvent(eventID, userID int) error
+	GetUserSubscribedEventsCount(userID int) (*int, error)
 	UnsubscribeEvent(eventID, userID int) error
-	GetUserSubscribedEventsWithCount(userID, limit, offset int) ([]models.SubscribedEvent, int, error)
+	GetUserSubscribedEvents(userID, limit, offset int) ([]models.SubscribedEvent, int, error)
 
 	// Comments methods
 	CreateComment(comment *models.CommentReq) (*models.Comment, error)
 	GetPostComments(postID, limit, offset int) ([]models.Comment, int, error)
+	GetPostCommentsCount(postID int) (*int, error)
 	DeleteComment(id int) error
 	GetIfUserOwnsComment(commentID, userID int) bool
 
@@ -67,6 +73,12 @@ type Storage interface {
 	DislikeComment(userID, commentID int) error
 	GetPostLikes(postID, limit, offset int) ([]models.LikePost, int, error)
 	GetCommentLikes(commentID, limit, offset int) ([]models.LikeComment, int, error)
+	GetPostLikesCount(postID int) (*int, error)
+	GetCommentLikesCount(commentID int) (*int, error)
+
+	// Feed methods
+	GetUserFeed(userID, limit, offset int) ([]models.Post, int, error)
+	GetUserFeedByTopic(userID, topicID, limit, offset int) ([]models.Post, int, error)
 }
 
 type PostgresStore struct {
