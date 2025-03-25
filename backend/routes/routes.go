@@ -8,7 +8,9 @@ import (
 	"github.com/Marc-Garcia-Coronado/socialNetwork/storage"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	chimw "github.com/go-chi/chi/v5/middleware"
+
 	"github.com/joho/godotenv"
 )
 
@@ -31,6 +33,12 @@ func (s *APIServer) Run() {
 	}
 	router := chi.NewRouter()
 	router.Use(chimw.Logger)
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowCredentials: true,
+	}))
 
 	// Public Routes
 	router.Post("/api/register", utils.MakeHTTPHandleFunc(s.handleCreateUser))
