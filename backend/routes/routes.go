@@ -8,8 +8,8 @@ import (
 	"github.com/Marc-Garcia-Coronado/socialNetwork/storage"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/cors"
 	chimw "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 
 	"github.com/joho/godotenv"
 )
