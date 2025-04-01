@@ -13,7 +13,7 @@ export default function Home() {
 
   const [postStats, setPostStats] = useState<Record<number, { likes: number; comments: number }>>({});
   const [postCreators, setPostCreators] = useState<Record<number, { name: string}>>({});
-  const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({}); // Estado para manejar likes por post
+  const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
 
   // Fetch likes and comments count for a specific post
   const fetchPostStats = async (postID: number) => {
@@ -133,14 +133,55 @@ export default function Home() {
     }
   };
 
+  const fetchUserLikes = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/users/${userID}/likes/posts`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(
+            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          )}`,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error fetching user likes");
+      }
+  
+      const likedPostsData = await response.json();
+  
+      // Convertimos la lista de post IDs en un mapa para un acceso más rápido
+      const likedPostsMap = likedPostsData.reduce(
+        (acc: Record<number, boolean>, postID: number) => {
+          acc[postID] = true;
+          return acc;
+        },
+        {}
+      );
+  
+      setLikedPosts(likedPostsMap);
+    } catch (error) {
+      console.error("Error fetching user likes:", error);
+    }
+  };
 // Fetch stats and creator info for all posts when homeData changes
 useEffect(() => {
-  if (homeData?.posts) {
-    homeData.posts.forEach((post: any) => {
-      fetchPostStats(post.id);
-      fetchPostCreator(post.user); // Assuming `creator_id` is available in the post data
-    });
-  }
+  const fetchData = async () => {
+    if (homeData?.posts) {
+      // Fetch stats and creator info for all posts
+      homeData.posts.forEach((post: any) => {
+        fetchPostStats(post.id);
+        fetchPostCreator(post.user);
+      });
+
+      // Fetch user likes
+      await fetchUserLikes();
+    }
+  };
+
+  fetchData();
 }, [homeData]);
 
 if (homeLoading || userLoading) {
@@ -154,7 +195,6 @@ if (homeError) {
 if (userError) {
   return <div>Error: {userError.message}</div>;
 }
-
 return (
   <div>
     <h1>Posts</h1>
