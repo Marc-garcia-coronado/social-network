@@ -190,3 +190,25 @@ func (s *PostgresStore) GetCommentLikesCount(commentID int) (*int, error) {
 
 	return totalCount, nil
 }
+func (s *PostgresStore) GetUserPostLikes(userID int) ([]int, error) {
+    stmt := `
+    SELECT post_id
+    FROM likes
+    WHERE user_id = $1;
+    `
+    rows, err := s.Db.Query(stmt, userID)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var likedPosts []int
+    for rows.Next() {
+        var postID int
+        if err := rows.Scan(&postID); err != nil {
+            return nil, err
+        }
+        likedPosts = append(likedPosts, postID)
+    }
+    return likedPosts, nil
+}
