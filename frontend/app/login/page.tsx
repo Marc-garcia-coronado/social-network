@@ -1,4 +1,6 @@
 "use client";
+
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,7 +35,7 @@ type FormData = z.infer<typeof schemaLogin>;
 type RegisterFormData = z.infer<typeof schemaRegister>;
 
 export default function Login() {
-  const [isLoginSelected, setIsLoginSelected] = useState<boolean>(false);
+  const [isLoginSelected, setIsLoginSelected] = useState<boolean>(true);
 
   return (
     <div className="h-screen w-full flex items-center justify-center bg-gray-100 text-black ">
@@ -61,11 +63,7 @@ export default function Login() {
             Registrarse
           </p>
         </div>
-        <LoginForm className={`${isLoginSelected ? "block" : "hidden"}`} />
-        <RegisterForm
-          className={`${isLoginSelected ? "hidden" : "block"}`}
-          setIsLoginSelected={setIsLoginSelected}
-        />
+        { isLoginSelected ? <LoginForm /> : <RegisterForm setIsLoginSelected={setIsLoginSelected} /> }
       </div>
     </div>
   );
@@ -124,7 +122,7 @@ const LoginForm = ({ className }: FormProps) => {
 
   return (
     <form
-      className={`space-y-6 ${className}`}
+      className={`flex flex-col gap-y-3 ${className}`}
       onSubmit={handleSubmit(onSubmit)}
     >
       <div>
@@ -136,14 +134,16 @@ const LoginForm = ({ className }: FormProps) => {
       </div>
       <div>
         <Label htmlFor="password" className="dark:text-black">
-          Contaseña
+          Contraseña
         </Label>
         <Input {...register("password")} type="password" />
         {errors.password && (
           <p className="text-red-500">{errors.password.message}</p>
         )}
       </div>
-      <Button type="submit">Enviar</Button>
+      <Button type="submit" className="mt-3">
+        Enviar
+      </Button>
     </form>
   );
 };
