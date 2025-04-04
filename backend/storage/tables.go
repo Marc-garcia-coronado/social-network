@@ -139,7 +139,8 @@ func (s *PostgresStore) createTopicsUserTable() error {
 	  followed_at TIMESTAMPTZ DEFAULT now(),
 
 	  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-	  FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE
+	  FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE,
+	  UNIQUE (user_id, topic_id)
 	);`
 
 	if _, err := s.Db.Exec(query); err != nil {

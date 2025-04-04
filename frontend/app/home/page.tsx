@@ -3,16 +3,29 @@ import { useEffect, useState } from "react";
 import { useUserContext } from "@/contexts/UserContext";
 import useHome from "@/hooks/useHome";
 import useUser from "@/hooks/useUser";
+import Link from "next/link";
 
 export default function Home() {
   const { user } = useUserContext();
   const userID: number = user?.id ?? 0;
 
-  const { data: homeData, error: homeError, isLoading: homeLoading } = useHome();
-  const { data: userData, error: userError, isLoading: userLoading } = useUser(userID);
+  const {
+    data: homeData,
+    error: homeError,
+    isLoading: homeLoading,
+  } = useHome();
+  const {
+    data: userData,
+    error: userError,
+    isLoading: userLoading,
+  } = useUser(userID);
 
-  const [postStats, setPostStats] = useState<Record<number, { likes: number; comments: number }>>({});
-  const [postCreators, setPostCreators] = useState<Record<number, { name: string}>>({});
+  const [postStats, setPostStats] = useState<
+    Record<number, { likes: number; comments: number }>
+  >({});
+  const [postCreators, setPostCreators] = useState<
+    Record<number, { name: string }>
+  >({});
   const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({}); // Estado para manejar likes por post
 
   // Fetch likes and comments count for a specific post
@@ -60,18 +73,21 @@ export default function Home() {
     }
   };
   // Fetch creator info for a specific post
-  const fetchPostCreator = async (user: any) => {
+  const fetchPostCreator = async (user: User) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/users/${user.id}`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:3000/api/users/${user.id}`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${document.cookie.replace(
+              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+              "$1"
+            )}`,
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error("Error fetching post creator");
       }
@@ -79,11 +95,10 @@ export default function Home() {
       setPostCreators((prevCreators) => ({
         ...prevCreators,
         [user.id]: {
-          name: creatorData.user_name
+          name: creatorData.user_name,
           //picture: creatorData.profile_picture,
         },
       }));
-      console.log(creatorData)
     } catch (error) {
       console.error(`Error fetching creator for post ${user.id}:`, error);
     }
@@ -111,7 +126,9 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error(isLiked ? "Error al quitar el like" : "Error al dar like");
+        throw new Error(
+          isLiked ? "Error al quitar el like" : "Error al dar like"
+        );
       }
 
       // Actualizar el estado de likes
@@ -133,70 +150,72 @@ export default function Home() {
     }
   };
 
-// Fetch stats and creator info for all posts when homeData changes
-useEffect(() => {
-  if (homeData?.posts) {
-    homeData.posts.forEach((post: any) => {
-      fetchPostStats(post.id);
-      fetchPostCreator(post.user); // Assuming `creator_id` is available in the post data
-    });
+  // Fetch stats and creator info for all posts when homeData changes
+  useEffect(() => {
+    if (homeData?.posts) {
+      homeData.posts.forEach((post: any) => {
+        fetchPostStats(post.id);
+        fetchPostCreator(post.user); // Assuming `creator_id` is available in the post data
+      });
+    }
+  }, [homeData]);
+
+  console.log(userID);
+
+  if (homeLoading || userLoading) {
+    return <div>Loading...</div>;
   }
-}, [homeData]);
 
-if (homeLoading || userLoading) {
-  return <div>Loading...</div>;
-}
+  if (homeError) {
+    return <div>Error: {homeError.message}</div>;
+  }
 
-if (homeError) {
-  return <div>Error: {homeError.message}</div>;
-}
+  if (userError) {
+    return <div>Error: {userError.message}</div>;
+  }
 
-if (userError) {
-  return <div>Error: {userError.message}</div>;
-}
-
-return (
-  <div>
-    <h1>Posts</h1>
-    <ul>
-      {homeData?.posts ? (
-        homeData.posts.map((post: any) => (
-          <li key={post.id}>
-            <div>
-              <strong>{post.title}</strong>
-            </div>
-            <div>
-              Creator:{" "}
-              {postCreators[post.user.id]?.name ?? "Loading..."}{" "}
-              {/* <img
+  return (
+    <div>
+      <h1>Posts</h1>
+      <ul>
+        {homeData?.posts ? (
+          homeData.posts.map((post: any) => (
+            <li key={post.id}>
+              <div>
+                <strong>{post.title}</strong>
+              </div>
+              <div>
+                Creator: {postCreators[post.user.id]?.name ?? "Loading..."}{" "}
+                {/* <img
                 src={postCreators[post.id]?.picture ?? ""}
                 alt="Creator"
                 style={{ width: "30px", height: "30px", borderRadius: "50%" }}
               /> */}
-            </div>
-            <div>
-              Likes: {postStats[post.id]?.likes ?? "Loading..."} - Comments:{" "}
-              {postStats[post.id]?.comments ?? "Loading..."}
-            </div>
-            <div>
-              <button onClick={() => toggleLike(post.id)}>
-                {likedPosts[post.id] ? "Quitar Like" : "Dar Like"}
-              </button>
-            </div>
-          </li>
-        ))
-      ) : (
-        <li>No posts available</li>
-      )}
-    </ul>
-    <h1>User Topics</h1>
-    <ul>
-      {userData ? (
-        userData.map((topic: any) => <li key={topic.id}>{topic.name}</li>)
-      ) : (
-        <li>No topics available</li>
-      )}
-    </ul>
-  </div>
-);
+              </div>
+              <div>
+                Likes: {postStats[post.id]?.likes ?? "Loading..."} - Comments:{" "}
+                {postStats[post.id]?.comments ?? "Loading..."}
+              </div>
+              <div>
+                <button onClick={() => toggleLike(post.id)}>
+                  {likedPosts[post.id] ? "Quitar Like" : "Dar Like"}
+                </button>
+              </div>
+            </li>
+          ))
+        ) : (
+          <li>No posts available</li>
+        )}
+      </ul>
+      <h1>User Topics</h1>
+      <ul>
+        {userData ? (
+          userData.map((topic: any) => <li key={topic.id}>{topic.name}</li>)
+        ) : (
+          <li>No topics available</li>
+        )}
+      </ul>
+      <Link href={"/post"}>Go to Post</Link>
+    </div>
+  );
 }

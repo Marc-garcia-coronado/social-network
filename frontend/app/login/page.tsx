@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Stepper, { Step } from "@/components/StepForm";
 import { motion } from "framer-motion";
+import { useUserContext } from "@/contexts/UserContext";
 
 const schemaLogin = z.object({
   email: z.string().email("Email no válido"),
@@ -75,6 +76,7 @@ type FormProps = {
 
 const LoginForm = ({ className }: FormProps) => {
   const router = useRouter();
+  const { setUser } = useUserContext();
   const {
     register,
     handleSubmit,
@@ -107,6 +109,7 @@ const LoginForm = ({ className }: FormProps) => {
     mutationFn: loginFn,
     onSuccess: (data) => {
       if (data) {
+        setUser(data.user);
         router.push("/home");
       }
     },
