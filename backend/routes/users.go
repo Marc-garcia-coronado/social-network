@@ -59,6 +59,18 @@ func (s *APIServer) handleGetUserByID(w http.ResponseWriter, r *http.Request) er
 	return utils.WriteJSON(w, http.StatusOK, user)
 }
 
+func (s *APIServer) handleGetUserByUserName(w http.ResponseWriter, r *http.Request) error {
+    user_name := chi.URLParam(r, "user_name")
+
+    user := new(models.User)
+    user, err := s.store.GetUserByUserName(user_name)
+    if err != nil {
+        return err
+    }
+
+    return utils.WriteJSON(w, http.StatusOK, user)
+}
+
 func (s *APIServer) handleCreateUser(w http.ResponseWriter, r *http.Request) error {
 	createUserReq := new(models.CreateUserReq)
 	if err := json.NewDecoder(r.Body).Decode(createUserReq); err != nil {

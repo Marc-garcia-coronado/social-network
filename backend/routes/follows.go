@@ -2,12 +2,13 @@ package routes
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/middleware"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/utils"
 	"github.com/go-chi/chi/v5"
-	"net/http"
-	"strconv"
 )
 
 func (s *APIServer) handleFollowUser(w http.ResponseWriter, r *http.Request) error {
@@ -164,4 +165,26 @@ func (s *APIServer) handleGetUserCountFollows(w http.ResponseWriter, r *http.Req
 		return err
 	}
 	return utils.WriteJSON(w, http.StatusOK, map[string]int{"follows_count": *count})
+}
+func (s *APIServer) handleCheckIfFollowing(w http.ResponseWriter, r *http.Request) error {
+    // Obtener el followerID del parámetro de la ruta
+    followerID, err := strconv.Atoi(chi.URLParam(r, "id"))
+    if err != nil {
+        return fmt.Errorf("invalid follower_id: %v", err)
+    }
+
+    // Obtener el followedID del token JWT
+    followedID, ok := r.Context().Value(middleware.UserIDKey).(int)
+    if !ok {
+        return fmt.Errorf("failed to get user id from JWT")
+    }
+
+    // Llamar a la función de almacenamiento
+    isFollowing, err := s.store.CheckIfFollowing(followerID, followedID)
+    if err != nil {
+        return fmt.Errorf("error checking follow status: %v", err)
+    }
+
+    // Responder con el estado
+    return utils.WriteJSON(w, http.StatusOK, map[string]bool{"is_following": isFollowing})
 }

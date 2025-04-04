@@ -15,6 +15,11 @@ export default function Home() {
   const [postCreators, setPostCreators] = useState<Record<number, { name: string}>>({});
   const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
 
+  const [comments, setComments] = useState<Record<number, any[]>>({});  const [newComment, setNewComment] = useState<Record<number, string>>({});
+  const [likedComments, setLikedComments] = useState<Record<number, boolean>>({});
+  const [commentLikesCount, setCommentLikesCount] = useState<Record<number, number>>({});
+  const [visibleComments, setVisibleComments] = useState<Record<number, boolean>>({});
+
   // Fetch likes and comments count for a specific post
   const fetchPostStats = async (postID: number) => {
     try {
@@ -135,7 +140,7 @@ export default function Home() {
 
   const fetchUserLikes = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/users/${userID}/likes/posts`, {
+      const response = await fetch(`http://localhost:3000/api/users/likes/posts`, {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
@@ -166,6 +171,201 @@ export default function Home() {
       console.error("Error fetching user likes:", error);
     }
   };
+
+  // Función para obtener los comentarios de un post
+  const fetchComments = async (postID: number) => {
+    if (visibleComments[postID]) {
+    // Si los comentarios ya están visibles, ocultarlos
+    setVisibleComments((prev) => ({
+      ...prev,
+      [postID]: false,
+    }));
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:3000/api/posts/${postID}/comments`, {
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${document.cookie.replace(
+          /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
+        )}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Error fetching comments");
+    }
+
+    const commentsData = await response.json();
+
+    // Actualiza el estado para almacenar solo el array de comentarios
+    setComments((prevComments) => ({
+      ...prevComments,
+      [postID]: commentsData.comments,
+    }));
+
+    // Marcar los comentarios como visibles
+    setVisibleComments((prev) => ({
+      ...prev,
+      [postID]: true,
+    }));
+
+    // Fetch likes count for each comment
+    commentsData.comments.forEach((comment: any) => {
+      fetchCommentLikesCount(comment.id);
+    });
+  } catch (error) {
+    console.error(`Error fetching comments for post ${postID}:`, error);
+  }
+};
+
+  // Fetch likes count for a specific comment
+  const fetchCommentLikesCount = async (commentID: number) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/likes/comments/${commentID}/count`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(
+            /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          )}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error fetching comment likes count");
+      }
+
+      const likesData = await response.json();
+
+      // Actualiza el estado para almacenar el conteo de likes de cada comentario
+      setCommentLikesCount((prevCount) => ({
+        ...prevCount,
+        [commentID]: likesData.comment_likes_count,
+      }));
+    } catch (error) {
+      console.error(`Error fetching likes count for comment ${commentID}:`, error);
+    }
+  }
+
+  // Función para agregar un nuevo comentario
+  const addComment = async (postID: number) => {
+    try {
+      const commentText = newComment[postID];
+      if (!commentText) return;
+  
+      const response = await fetch(`http://localhost:3000/api/posts/${postID}/comments`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(
+            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          )}`,
+        },
+        body: JSON.stringify({ body: commentText }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error adding comment");
+      }
+  
+      const newCommentData = await response.json();
+  
+      // Actualiza el estado para agregar el nuevo comentario al array existente
+      setComments((prevComments) => ({
+        ...prevComments,
+        [postID]: [...(prevComments[postID] || []), newCommentData],
+      }));
+  
+      // Limpia el campo de texto del comentario
+      setNewComment((prevNewComment) => ({
+        ...prevNewComment,
+        [postID]: "",
+      }));
+    } catch (error) {
+      console.error(`Error adding comment to post ${postID}:`, error);
+    }
+  };
+
+  // Función para manejar el toggle de likes en comentarios
+  const toggleCommentLike = async (commentID: number) => {
+    try {
+      const isLiked = likedComments[commentID];
+      const endpoint = isLiked
+        ? `http://localhost:3000/api/comments/${commentID}/dislike`
+        : `http://localhost:3000/api/comments/${commentID}/like`;
+
+      const method = isLiked ? "DELETE" : "POST";
+
+      const response = await fetch(endpoint, {
+        method,
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(
+            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          )}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(isLiked ? "Error al quitar el like" : "Error al dar like");
+      }
+
+      setLikedComments((prevLikedComments) => ({
+        ...prevLikedComments,
+        [commentID]: !isLiked,
+      }));
+      // Actualizar el contador de likes
+      setCommentLikesCount((prevCount) => ({
+      ...prevCount,
+      [commentID]: prevCount[commentID] + (isLiked ? -1 : 1),
+    }));
+    } catch (error) {
+      console.error(`Error toggling like for comment ${commentID}:`, error);
+    }
+  };
+
+  const fetchUserCommentLikes = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/users/likes/comments`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(
+            /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          )}`,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error fetching user comment likes");
+      }
+  
+      const likedCommentsData: number[] = await response.json();
+  
+      // Convertimos la lista de comment IDs en un mapa para un acceso más rápido
+      const likedCommentsMap = likedCommentsData.reduce(
+        (acc: Record<number, boolean>, commentID: number) => {
+          acc[commentID] = true;
+          return acc;
+        },
+        {}
+      );
+  
+      setLikedComments(likedCommentsMap);
+    } catch (error) {
+      console.error("Error fetching user comment likes:", error);
+    }
+  };
 // Fetch stats and creator info for all posts when homeData changes
 useEffect(() => {
   const fetchData = async () => {
@@ -178,6 +378,7 @@ useEffect(() => {
 
       // Fetch user likes
       await fetchUserLikes();
+      await fetchUserCommentLikes(); // Llamada para obtener los likes de los comentarios
     }
   };
 
@@ -195,6 +396,7 @@ if (homeError) {
 if (userError) {
   return <div>Error: {userError.message}</div>;
 }
+console.log(userID);
 return (
   <div>
     <h1>Posts</h1>
@@ -206,15 +408,6 @@ return (
               <strong>{post.title}</strong>
             </div>
             <div>
-              Creator:{" "}
-              {postCreators[post.user.id]?.name ?? "Loading..."}{" "}
-              {/* <img
-                src={postCreators[post.id]?.picture ?? ""}
-                alt="Creator"
-                style={{ width: "30px", height: "30px", borderRadius: "50%" }}
-              /> */}
-            </div>
-            <div>
               Likes: {postStats[post.id]?.likes ?? "Loading..."} - Comments:{" "}
               {postStats[post.id]?.comments ?? "Loading..."}
             </div>
@@ -222,6 +415,38 @@ return (
               <button onClick={() => toggleLike(post.id)}>
                 {likedPosts[post.id] ? "Quitar Like" : "Dar Like"}
               </button>
+            </div>
+            <div>
+              <button onClick={() => fetchComments(post.id)}>
+                {visibleComments[post.id] ? "Ocultar Comentarios" : "Mostrar Comentarios"}
+              </button>
+              {visibleComments[post.id] && (
+                <ul>
+                  {(comments[post.id] || []).map((comment: any) => (
+                    <li key={comment.id}>
+                      <div>{comment.body}</div>
+                      <div>Likes: {commentLikesCount[comment.id] ?? "Loading..."}</div>
+                      <button onClick={() => toggleCommentLike(comment.id)}>
+                        {likedComments[comment.id] ? "Quitar Like" : "Dar Like"}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div>
+              <input
+                type="text"
+                value={newComment[post.id] || ""}
+                onChange={(e) =>
+                  setNewComment((prevNewComment) => ({
+                    ...prevNewComment,
+                    [post.id]: e.target.value,
+                  }))
+                }
+                placeholder="Escribe un comentario..."
+              />
+              <button onClick={() => addComment(post.id)}>Enviar</button>
             </div>
           </li>
         ))

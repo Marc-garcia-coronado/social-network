@@ -134,3 +134,20 @@ func (s *PostgresStore) GetCountFollows(id int) (*int, error) {
 
 	return count, nil
 }
+func (s *PostgresStore) CheckIfFollowing(followerID, followedID int) (bool, error) {
+    stmt := `
+    SELECT EXISTS (
+        SELECT 1 
+        FROM user_follow_user 
+        WHERE user_following_id = $1 AND user_followed_id = $2
+    );
+    `
+
+    var isFollowing bool
+    err := s.Db.QueryRow(stmt, followerID, followedID).Scan(&isFollowing)
+    if err != nil {
+        return false, err
+    }
+
+    return isFollowing, nil
+}
