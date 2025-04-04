@@ -10,6 +10,7 @@ type Storage interface {
 	// User methods
 	Login(username, password string) (*models.User, error)
 	GetUserByID(id int) (*models.User, error)
+	GetUserByUserName(user_name string) (*models.User, error)
 	CreateUser(user *models.User) (*models.User, error)
 	UpdateUser(user map[string]any, userID int) (*models.User, error)
 	DeleteUser(id int) error
@@ -21,6 +22,7 @@ type Storage interface {
 	GetFollows(id, limit, offset int) ([]models.User, int, error)
 	GetCountFollowers(id int) (*int, error)
 	GetCountFollows(id int) (*int, error)
+	CheckIfFollowing(followerID, followedID int) (bool, error)
 
 	// Topics methods
 	GetTopics() ([]models.Topic, error)
@@ -75,7 +77,8 @@ type Storage interface {
 	GetCommentLikes(commentID, limit, offset int) ([]models.LikeComment, int, error)
 	GetPostLikesCount(postID int) (*int, error)
 	GetCommentLikesCount(commentID int) (*int, error)
-	GetUserPostLikes(userID int)([]int, error)
+	GetUserPostLikes(userID int) ([]int, error)
+	GetUserCommentLikes(userID int) ([]int, error)
 
 	// Feed methods
 	GetUserFeed(userID, limit, offset int) ([]models.Post, int, error)

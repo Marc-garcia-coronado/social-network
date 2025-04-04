@@ -67,6 +67,30 @@ func (s *PostgresStore) GetUserByID(id int) (*models.User, error) {
 	return user, nil
 }
 
+func (s *PostgresStore) GetUserByUserName(user_name string) (*models.User, error) {
+	if s.Db == nil {
+		return nil, fmt.Errorf("database connection is nil")
+	}
+
+	user := new(models.User)
+	query := `SELECT id, user_name, full_name, email, profile_picture, bio, is_active, role, user_since 
+			FROM users 
+			WHERE user_name = $1`
+
+	err := s.Db.QueryRow(query, user_name).Scan(
+		&user.ID, &user.UserName, &user.FullName, &user.Email,
+		&user.ProfilePicture, &user.Bio, &user.IsActive, &user.Role, &user.UserSince,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found: %s", user_name)
+		}
+		return nil, fmt.Errorf("query error: %v", err)
+	}
+
+	return user, nil
+}
+
 func (s *PostgresStore) UpdateUser(user map[string]any, userID int) (*models.User, error) {
 
 	// Build dynamic SQL query

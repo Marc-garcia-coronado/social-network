@@ -191,24 +191,46 @@ func (s *PostgresStore) GetCommentLikesCount(commentID int) (*int, error) {
 	return totalCount, nil
 }
 func (s *PostgresStore) GetUserPostLikes(userID int) ([]int, error) {
-    stmt := `
+	stmt := `
     SELECT post_id
     FROM likes
-    WHERE user_id = $1;
+    WHERE user_id = $1 AND post_id IS NOT NULL;;
     `
-    rows, err := s.Db.Query(stmt, userID)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
+	rows, err := s.Db.Query(stmt, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-    var likedPosts []int
-    for rows.Next() {
-        var postID int
-        if err := rows.Scan(&postID); err != nil {
-            return nil, err
-        }
-        likedPosts = append(likedPosts, postID)
-    }
-    return likedPosts, nil
+	var likedPosts []int
+	for rows.Next() {
+		var postID int
+		if err := rows.Scan(&postID); err != nil {
+			return nil, err
+		}
+		likedPosts = append(likedPosts, postID)
+	}
+	return likedPosts, nil
+}
+func (s *PostgresStore) GetUserCommentLikes(userID int) ([]int, error) {
+	stmt := `
+    SELECT comment_id
+    FROM likes
+    WHERE user_id = $1 AND comment_id IS NOT NULL;
+    `
+	rows, err := s.Db.Query(stmt, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var likedComments []int
+	for rows.Next() {
+		var commentID int
+		if err := rows.Scan(&commentID); err != nil {
+			return nil, err
+		}
+		likedComments = append(likedComments, commentID)
+	}
+	return likedComments, nil
 }
