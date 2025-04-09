@@ -1,11 +1,11 @@
-type Topic = {
-    id: number,
-    name: string,
-    description: string,
-    createdAt: Date,
-}
+export type Topic = {
+  id: number;
+  name: string;
+  description: string;
+  createdAt: Date;
+};
 
-type User = {
+export type User = {
   id: number;
   user_name: string;
   full_name: string;
@@ -15,7 +15,18 @@ type User = {
   role: string;
 };
 
-type DataHTTPResponse = {
+export type DataHTTPResponse = {
   status: number;
   message: string;
-}
+};
+
+export type Event = {
+  id: number;
+  name: string;
+  description: string;
+  picture: string;
+  location: string;
+  user: User;
+  topic: Topic;
+  createdAt: string;
+};

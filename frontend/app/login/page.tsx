@@ -64,7 +64,7 @@ export default function Login() {
             Registrarse
           </p>
         </div>
-        { isLoginSelected ? <LoginForm /> : <RegisterForm setIsLoginSelected={setIsLoginSelected} /> }
+        {isLoginSelected ? <LoginForm /> : <RegisterForm setIsLoginSelected={setIsLoginSelected} />}
       </div>
     </div>
   );
