@@ -50,6 +50,7 @@ func (s *APIServer) Run() {
 
 	// User - Users routes
 	protectedRouter.Get("/users/{id}", utils.MakeHTTPHandleFunc(s.handleGetUserByID))
+	protectedRouter.Get("/users/{user_name}", utils.MakeHTTPHandleFunc(s.handleGetUserByUserName))
 	protectedRouter.Patch("/users/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateUser))
 
 	// User - Follows routes
@@ -57,6 +58,7 @@ func (s *APIServer) Run() {
 	protectedRouter.Get("/users/{id}/follows", utils.MakeHTTPHandleFunc(s.handleGetUserFollows))
 	protectedRouter.Get("/users/{id}/followers/count", utils.MakeHTTPHandleFunc(s.handleGetCountFollowers))
 	protectedRouter.Get("/users/{id}/follows/count", utils.MakeHTTPHandleFunc(s.handleGetUserCountFollows))
+	protectedRouter.Get("/users/{id}/following", utils.MakeHTTPHandleFunc(s.handleCheckIfFollowing))
 	protectedRouter.Post("/users/follow/{id}", utils.MakeHTTPHandleFunc(s.handleFollowUser))
 	protectedRouter.Delete("/users/unfollow/{id}", utils.MakeHTTPHandleFunc(s.handleUnfollowUser))
 
@@ -108,6 +110,8 @@ func (s *APIServer) Run() {
 	protectedRouter.Post("/comments/{commentID}/like", utils.MakeHTTPHandleFunc(s.handleLikeComment))
 	protectedRouter.Delete("/posts/{postID}/dislike", utils.MakeHTTPHandleFunc(s.handleDislikePost))
 	protectedRouter.Delete("/comments/{commentID}/dislike", utils.MakeHTTPHandleFunc(s.handleDislikeComment))
+	protectedRouter.Get("/users/likes/posts", utils.MakeHTTPHandleFunc(s.handleGetUserPostsLikes))
+	protectedRouter.Get("/users/likes/comments", utils.MakeHTTPHandleFunc(s.handleGetUserCommentLikes))
 
 	// User - Feed routes
 	protectedRouter.Get("/feed", utils.MakeHTTPHandleFunc(s.handleGetUserFeed))

@@ -22,7 +22,7 @@ func (s *PostgresStore) FollowUser(userToFollowID, userID int) error {
 func (s *PostgresStore) UnfollowUser(userToFollowID, userID int) error {
 	stmt := `DELETE FROM user_follow_user WHERE user_following_id = $1 AND user_followed_id = $2;`
 
-	res, err := s.Db.Exec(stmt, userToFollowID, userID)
+	res, err := s.Db.Exec(stmt, userID ,userToFollowID)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func (s *PostgresStore) GetFollows(id, limit, offset int) ([]models.User, int, e
 
 func (s *PostgresStore) GetCountFollowers(id int) (*int, error) {
 	stmt := `
-	SELECT count(*) FROM user_follow_user WHERE user_following_id = $1;
+	SELECT count(*) FROM user_follow_user WHERE user_followed_id = $1;
 	`
 	var count *int
 	if err := s.Db.QueryRow(stmt, id).Scan(&count); err != nil {
@@ -125,7 +125,7 @@ func (s *PostgresStore) GetCountFollowers(id int) (*int, error) {
 
 func (s *PostgresStore) GetCountFollows(id int) (*int, error) {
 	stmt := `
-	SELECT count(*) FROM user_follow_user WHERE user_followed_id = $1;
+	SELECT count(*) FROM user_follow_user WHERE user_following_id = $1;
 	`
 	var count *int
 	if err := s.Db.QueryRow(stmt, id).Scan(&count); err != nil {
@@ -133,4 +133,21 @@ func (s *PostgresStore) GetCountFollows(id int) (*int, error) {
 	}
 
 	return count, nil
+}
+func (s *PostgresStore) CheckIfFollowing(followerID, followedID int) (bool, error) {
+    stmt := `
+    SELECT EXISTS (
+        SELECT 1 
+        FROM user_follow_user 
+        WHERE user_following_id = $1 AND user_followed_id = $2
+    );
+    `
+
+    var isFollowing bool
+    err := s.Db.QueryRow(stmt, followedID, followerID).Scan(&isFollowing)
+    if err != nil {
+        return false, err
+    }
+
+    return isFollowing, nil
 }

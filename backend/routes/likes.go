@@ -212,3 +212,29 @@ func (s *APIServer) handleGetCommentLikesCount(w http.ResponseWriter, r *http.Re
 		"comment_likes_count": count,
 	})
 }
+func (s *APIServer) handleGetUserPostsLikes(w http.ResponseWriter, r *http.Request) error {
+    userID, ok := r.Context().Value(middleware.UserIDKey).(int)
+    if !ok {
+        return fmt.Errorf("failed to get user id from JWT")
+    }
+
+    likes, err := s.store.GetUserPostLikes(userID)
+    if err != nil {
+        return utils.WriteJSON(w, http.StatusInternalServerError, utils.APIError{Error: fmt.Sprintf("could not fetch user likes: %s", err)})
+    }
+
+    return utils.WriteJSON(w, http.StatusOK, likes)
+}
+func (s *APIServer) handleGetUserCommentLikes(w http.ResponseWriter, r *http.Request) error {
+    userID, ok := r.Context().Value(middleware.UserIDKey).(int)
+    if !ok {
+        return fmt.Errorf("failed to get user id from JWT")
+    }
+
+    likes, err := s.store.GetUserCommentLikes(userID)
+    if err != nil {
+        return utils.WriteJSON(w, http.StatusInternalServerError, utils.APIError{Error: fmt.Sprintf("could not fetch user comment likes: %s", err)})
+    }
+
+    return utils.WriteJSON(w, http.StatusOK, likes)
+}
