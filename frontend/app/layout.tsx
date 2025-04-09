@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ClientProvider from "@/components/ClientProvider";
 import { UserProvider } from "@/contexts/UserContext";
 import DockComponent from "@/components/DockComponent";
-
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +29,7 @@ export default function RootLayout({
 }>) {
   const queryClient = new QueryClient();
   return (
-    <html lang="en">
+    <html lang="es">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >        
@@ -38,13 +37,8 @@ export default function RootLayout({
 
         <ClientProvider>
           {children}
-          <div className="max-h-14 fixed bottom-2 left-1/2 transform -translate-x-1/2 z-50 flex justify-center items-center w-full p-4">
-            <DockComponent/>
-          </div>
-          </ClientProvider>
+        </ClientProvider>
         </UserProvider>
-
-
       </body>
     </html>
   );

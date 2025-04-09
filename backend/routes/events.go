@@ -65,6 +65,7 @@ func (s *APIServer) handleGetAllEvents(w http.ResponseWriter, r *http.Request) e
 
 	events, count, err := s.store.GetAllEvents(limit, offset)
 	if err != nil {
+		fmt.Println("error aqui")
 		return err
 	}
 
