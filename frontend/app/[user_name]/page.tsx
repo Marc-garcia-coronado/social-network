@@ -383,6 +383,8 @@ export default function Profile() {
   if (error) {
     return <div>Error: {error}</div>;
   }
+  // Cambiar el user.?id para que se tome correctamente, haciendo el pull se solucionara diria
+  // Ya que marc lo corrigio en su branch
   return (
     <div className="min-h-screen p-8 pb-20">
       <header className="mb-8">

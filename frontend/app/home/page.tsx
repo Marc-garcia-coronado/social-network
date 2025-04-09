@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useUserContext } from "@/contexts/UserContext";
 import useHome from "@/hooks/useHome";
 import useUser from "@/hooks/useUser";
+import DockComponent from "@/components/DockComponent";
 
 export default function Home() {
   const { user } = useUserContext();
@@ -288,6 +289,14 @@ export default function Home() {
         ...prevNewComment,
         [postID]: "",
       }));
+      // Actualiza el contador de comentarios en postStats
+      setPostStats((prevStats) => ({
+        ...prevStats,
+        [postID]: {
+          ...prevStats[postID],
+          comments: (prevStats[postID]?.comments || 0) + 1,
+        },
+      }));
     } catch (error) {
       console.error(`Error adding comment to post ${postID}:`, error);
     }
@@ -378,7 +387,7 @@ useEffect(() => {
 
       // Fetch user likes
       await fetchUserLikes();
-      await fetchUserCommentLikes(); // Llamada para obtener los likes de los comentarios
+      await fetchUserCommentLikes(); 
     }
   };
 
