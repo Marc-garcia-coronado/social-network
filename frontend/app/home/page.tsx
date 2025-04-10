@@ -4,13 +4,22 @@ import { useUserContext } from "@/contexts/UserContext";
 import useHome from "@/hooks/useHome";
 import useUser from "@/hooks/useUser";
 import DockComponent from "@/components/DockComponent";
+import Link from "next/link";
 
 export default function Home() {
   const { user } = useUserContext();
   const userID: number = user?.id ?? 0;
 
-  const { data: homeData, error: homeError, isLoading: homeLoading } = useHome();
-  const { data: userData, error: userError, isLoading: userLoading } = useUser(userID);
+  const {
+    data: homeData,
+    error: homeError,
+    isLoading: homeLoading,
+  } = useHome();
+  const {
+    data: userData,
+    error: userError,
+    isLoading: userLoading,
+  } = useUser(userID);
 
   const [postStats, setPostStats] = useState<Record<number, { likes: number; comments: number }>>({});
   const [postCreators, setPostCreators] = useState<Record<number, { name: string}>>({});
@@ -66,18 +75,21 @@ export default function Home() {
     }
   };
   // Fetch creator info for a specific post
-  const fetchPostCreator = async (user: any) => {
+  const fetchPostCreator = async (user: User) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/users/${user.id}`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:3000/api/users/${user.id}`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${document.cookie.replace(
+              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+              "$1"
+            )}`,
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error("Error fetching post creator");
       }
@@ -85,11 +97,10 @@ export default function Home() {
       setPostCreators((prevCreators) => ({
         ...prevCreators,
         [user.id]: {
-          name: creatorData.user_name
+          name: creatorData.user_name,
           //picture: creatorData.profile_picture,
         },
       }));
-      console.log(creatorData)
     } catch (error) {
       console.error(`Error fetching creator for post ${user.id}:`, error);
     }
@@ -117,7 +128,9 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error(isLiked ? "Error al quitar el like" : "Error al dar like");
+        throw new Error(
+          isLiked ? "Error al quitar el like" : "Error al dar like"
+        );
       }
 
       // Actualizar el estado de likes
@@ -394,13 +407,13 @@ useEffect(() => {
   fetchData();
 }, [homeData]);
 
-if (homeLoading || userLoading) {
-  return <div>Loading...</div>;
-}
+  if (homeLoading || userLoading) {
+    return <div>Loading...</div>;
+  }
 
-if (homeError) {
-  return <div>Error: {homeError.message}</div>;
-}
+  if (homeError) {
+    return <div>Error: {homeError.message}</div>;
+  }
 
 if (userError) {
   return <div>Error: {userError.message}</div>;
