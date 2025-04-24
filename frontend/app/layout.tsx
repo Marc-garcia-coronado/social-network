@@ -37,7 +37,10 @@ export default function RootLayout({
 
         <ClientProvider>
           {children}
-        </ClientProvider>
+          <div className="max-h-14 fixed bottom-2 left-1/2 transform -translate-x-1/2 z-50 flex justify-center items-center w-full p-4">
+            <DockComponent/>
+          </div>
+          </ClientProvider>
         </UserProvider>
       </body>
     </html>

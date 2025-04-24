@@ -3,15 +3,50 @@ import { useUserContext } from "@/contexts/UserContext";
 import Dock from "@/src/blocks/Components/Dock/Dock";
 import { House, CalendarPlus2, Plus, UserRound } from 'lucide-react';
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const DockComponent = () => {
   const router = useRouter();
   const { user } = useUserContext();
+  const [activeLink, setActiveLink] = useState<string>("Home");
+
   const items = [
-    { icon: <House color="white"/>, label: 'Home', onClick: () => router.push("/home") },
-    { icon: <CalendarPlus2 color="white"/>, label: 'Events', onClick: () => router.push("/events") },
-    { icon: <Plus color="white"/>, label: 'Post', onClick: () => router.push("/post") },
-    { icon: <UserRound color="white"/>, label: 'Profile', onClick: () => router.push(user?.user_name || "/404") },
+    { 
+      icon: <House color={activeLink === "Home" ? "black" : "white"} />, 
+      label: 'Home', 
+      onClick: () => {
+        setActiveLink("Home");
+        router.push("/home");
+      },
+      className: activeLink === "Home" ? "bg-lime-400" : ""
+    },
+    { 
+      icon: <CalendarPlus2 color={activeLink === "Events" ? "black" : "white"} />, 
+      label: 'Events', 
+      onClick: () => {
+        setActiveLink("Events");
+        router.push("/events");
+      },
+      className: activeLink === "Events" ? "bg-lime-400" : ""
+    },
+    { 
+      icon: <Plus color={activeLink === "Post" ? "black" : "white"} />, 
+      label: 'Post', 
+      onClick: () => {
+        setActiveLink("Post");
+        router.push("/post");
+      },
+      className: activeLink === "Post" ? "bg-lime-400" : ""
+    },
+    { 
+      icon: <UserRound color={activeLink === "Profile" ? "black" : "white"} />, 
+      label: 'Profile', 
+      onClick: () => {
+        setActiveLink("Profile");
+        router.push(user?.user_name || "/404");
+      },
+      className: activeLink === "Profile" ? "bg-lime-400" : ""
+    },
   ];
 
   return (
