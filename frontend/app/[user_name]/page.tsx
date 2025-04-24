@@ -2,6 +2,7 @@
 import { useUserContext } from "@/contexts/UserContext";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import PostCard from "@/components/PostCard";
 
 export default function Profile() {
   const { user } = useUserContext();
@@ -13,7 +14,12 @@ export default function Profile() {
   
   const [postStats, setPostStats] = useState<Record<number, { likes: number; comments: number }>>({});
   const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
-  
+  const [visibleComments, setVisibleComments] = useState<Record<number, boolean>>({});
+  const [comments, setComments] = useState<Record<number, any[]>>({});
+  const [newComment, setNewComment] = useState<Record<number, string>>({});
+  const [likedComments, setLikedComments] = useState<Record<number, boolean>>({});
+  const [commentLikesCount, setCommentLikesCount] = useState<Record<number, number>>({});
+
   const [followersCount, setFollowersCount] = useState<number>(0);
   const [followingCount, setFollowingCount] = useState<number>(0);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
@@ -123,9 +129,7 @@ export default function Profile() {
       const endpoint = isLiked
         ? `http://localhost:3000/api/posts/${postID}/dislike`
         : `http://localhost:3000/api/posts/${postID}/like`;
-  
       const method = isLiked ? "DELETE" : "POST";
-  
       const response = await fetch(endpoint, {
         method,
         credentials: "include",
@@ -137,17 +141,17 @@ export default function Profile() {
           )}`,
         },
       });
-  
+
       if (!response.ok) {
         throw new Error(isLiked ? "Error al quitar el like" : "Error al dar like");
       }
-  
+
       // Actualizar el estado de likes
       setLikedPosts((prevLikes) => ({
         ...prevLikes,
         [postID]: !isLiked,
       }));
-  
+
       // Actualizar el contador de likes
       setPostStats((prevStats) => ({
         ...prevStats,
@@ -160,6 +164,113 @@ export default function Profile() {
       console.error(error);
     }
   };
+
+  // Función para obtener los comentarios de un post
+  const fetchComments = async (postID: number) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/posts/${postID}/comments`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1")}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Error fetching comments");
+      }
+      const commentsData = await response.json();
+      setComments((prevComments) => ({
+        ...prevComments,
+        [postID]: commentsData.comments,
+      }));
+      setVisibleComments((prev) => ({
+        ...prev,
+        [postID]: true,
+      }));
+      // Fetch likes count for each comment
+      commentsData.comments.forEach((comment: any) => {
+        fetchCommentLikesCount(comment.id);
+      });
+    } catch (error) {
+      console.error(`Error fetching comments for post ${postID}:`, error);
+    }
+  };
+  
+  // Función para agregar un nuevo comentario
+  const addComment = async (postID: number) => {
+    try {
+      const commentText = newComment[postID];
+      if (!commentText) return;
+  
+      const response = await fetch(`http://localhost:3000/api/posts/${postID}/comments`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(
+            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          )}`,
+        },
+        body: JSON.stringify({ body: commentText }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Error adding comment");
+      }
+  
+      const newCommentData = await response.json();
+  
+      await fetchComments(postID);
+  
+      // Limpia el campo de entrada del comentario
+      setNewComment((prevNewComment) => ({
+        ...prevNewComment,
+        [postID]: "",
+      }));
+  
+      // Opcional: Actualiza el contador de comentarios si es necesario
+      setPostStats((prevStats) => ({
+        ...prevStats,
+        [postID]: {
+          ...prevStats[postID],
+          comments: (prevStats[postID]?.comments || 0) + 1,
+        },
+      }));
+    } catch (error) {
+      console.error(`Error adding comment to post ${postID}:`, error);
+    }
+  };
+  
+  const fetchCommentLikesCount = async (commentID: number) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/likes/comments/${commentID}/count`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(
+            /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          )}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error fetching comment likes count");
+      }
+
+      const likesData = await response.json();
+
+      // Actualiza el estado para almacenar el conteo de likes de cada comentario
+      setCommentLikesCount((prevCount) => ({
+        ...prevCount,
+        [commentID]: likesData.comment_likes_count,
+      }));
+    } catch (error) {
+      console.error(`Error fetching likes count for comment ${commentID}:`, error);
+    }
+  }
+
   useEffect(() => {
     const fetchPostStats = async (postID: number) => {
       try {
@@ -342,6 +453,78 @@ export default function Profile() {
       console.error("Error unfollowing user:", error);
     }
   };
+  // Función para manejar el toggle de likes en comentarios
+  const toggleCommentLike = async (commentID: number) => {
+    try {
+      const isLiked = likedComments[commentID];
+      const endpoint = isLiked
+        ? `http://localhost:3000/api/comments/${commentID}/dislike`
+        : `http://localhost:3000/api/comments/${commentID}/like`;
+
+      const method = isLiked ? "DELETE" : "POST";
+
+      const response = await fetch(endpoint, {
+        method,
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(
+            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          )}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(isLiked ? "Error al quitar el like" : "Error al dar like");
+      }
+
+      setLikedComments((prevLikedComments) => ({
+        ...prevLikedComments,
+        [commentID]: !isLiked,
+      }));
+      // Actualizar el contador de likes
+      setCommentLikesCount((prevCount) => ({
+      ...prevCount,
+      [commentID]: prevCount[commentID] + (isLiked ? -1 : 1),
+    }));
+    } catch (error) {
+      console.error(`Error toggling like for comment ${commentID}:`, error);
+    }
+  };
+
+  const fetchUserCommentLikes = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/users/likes/comments`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(
+            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          )}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Error fetching user comment likes");
+      }
+      const likedCommentsData = await response.json();
+      // Convertimos la lista de comment IDs en un mapa para un acceso más rápido
+      const likedCommentsMap = likedCommentsData.reduce((acc: Record<number, boolean>, commentID: number) => {
+        acc[commentID] = true;
+        return acc;
+      }, {});
+      setLikedComments(likedCommentsMap);
+    } catch (error) {
+      console.error("Error fetching user comment likes:", error);
+    }
+  };
+
+  // Llama a fetchUserCommentLikes al cargar el componente
+  useEffect(() => {
+    fetchUserCommentLikes();
+  }, []);
+  
   useEffect(() => {
     if (userData?.id) {
       fetchFollowersCount(userData.id);
@@ -376,6 +559,9 @@ export default function Profile() {
       checkIfFollowing();
     }
   }, [userData]);
+
+  
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -407,20 +593,25 @@ export default function Profile() {
       </section>
       <section>
         <h2 className="text-2xl font-semibold">Publicaciones</h2>
-        <ul className="mt-4 space-y-4">
-          {userPosts?.posts?.length > 0 ? (
+        <ul className="flex flex-wrap gap-4 justify-center">
+        {userPosts?.posts?.length > 0 ? (
             userPosts.posts.map((post) => (
-              <li key={post.id} className="p-4 border rounded-lg shadow-sm">
-                <h3 className="text-lg font-bold">{post.title}</h3>
-                <p className="text-gray-600">{post.body}</p>
-                <div className="mt-2 text-sm text-gray-500">
-                  <span>Likes: {postStats[post.id]?.likes ?? "Cargando..."}</span> |{" "}
-                  <span>Comentarios: {postStats[post.id]?.comments ?? "Cargando..."}</span>
-                </div>
-                <button onClick={() => toggleLike(post.id)} className="mt-2 px-4 py-2  rounded">
-                  {likedPosts[post.id] ? "Quitar Like" : "Dar Like"}
-                </button>
-              </li>
+              <PostCard
+                key={post.id}
+                post={post}
+                postStats={postStats}
+                likedPosts={likedPosts}
+                visibleComments={visibleComments}
+                comments={comments}
+                newComment={newComment}
+                toggleLike={toggleLike}
+                fetchComments={fetchComments}
+                toggleCommentLike={toggleCommentLike}
+                setNewComment={setNewComment}
+                commentLikesCount={commentLikesCount}
+                likedComments={likedComments}
+                addComment={addComment}
+              />
             ))
           ) : (
             <li>No hay publicaciones aún.</li>

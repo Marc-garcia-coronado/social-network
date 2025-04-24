@@ -5,6 +5,11 @@ import useHome from "@/hooks/useHome";
 import useUser from "@/hooks/useUser";
 import DockComponent from "@/components/DockComponent";
 import Link from "next/link";
+import { User } from "@/lib/types";
+import PostCard from "@/components/PostCard";
+import { MessageSquare } from 'lucide-react';
+import { useRouter } from "next/navigation";
+
 
 export default function Home() {
   const { user } = useUserContext();
@@ -20,6 +25,11 @@ export default function Home() {
     error: userError,
     isLoading: userLoading,
   } = useUser(userID);
+  const router = useRouter();
+
+  const [searchTerm, setSearchTerm] = useState(""); // Estado para la barra de búsqueda
+  const [filteredUsers, setFilteredUsers] = useState<any[]>([]); // Estado para los usuarios filtrados
+  const [isSearching, setIsSearching] = useState(false); // Estado para mostrar un indicador de búsqueda
 
   const [postStats, setPostStats] = useState<Record<number, { likes: number; comments: number }>>({});
   const [postCreators, setPostCreators] = useState<Record<number, { name: string}>>({});
@@ -188,53 +198,34 @@ export default function Home() {
 
   // Función para obtener los comentarios de un post
   const fetchComments = async (postID: number) => {
-    if (visibleComments[postID]) {
-    // Si los comentarios ya están visibles, ocultarlos
-    setVisibleComments((prev) => ({
-      ...prev,
-      [postID]: false,
-    }));
-    return;
-  }
-
-  try {
-    const response = await fetch(`http://localhost:3000/api/posts/${postID}/comments`, {
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${document.cookie.replace(
-          /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
-          "$1"
-        )}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Error fetching comments");
+    try {
+      const response = await fetch(`http://localhost:3000/api/posts/${postID}/comments`, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1")}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Error fetching comments");
+      }
+      const commentsData = await response.json();
+      setComments((prevComments) => ({
+        ...prevComments,
+        [postID]: commentsData.comments,
+      }));
+      setVisibleComments((prev) => ({
+        ...prev,
+        [postID]: true,
+      }));
+      // Fetch likes count for each comment
+      commentsData.comments.forEach((comment: any) => {
+        fetchCommentLikesCount(comment.id);
+      });
+    } catch (error) {
+      console.error(`Error fetching comments for post ${postID}:`, error);
     }
-
-    const commentsData = await response.json();
-
-    // Actualiza el estado para almacenar solo el array de comentarios
-    setComments((prevComments) => ({
-      ...prevComments,
-      [postID]: commentsData.comments,
-    }));
-
-    // Marcar los comentarios como visibles
-    setVisibleComments((prev) => ({
-      ...prev,
-      [postID]: true,
-    }));
-
-    // Fetch likes count for each comment
-    commentsData.comments.forEach((comment: any) => {
-      fetchCommentLikesCount(comment.id);
-    });
-  } catch (error) {
-    console.error(`Error fetching comments for post ${postID}:`, error);
-  }
-};
+  };
 
   // Fetch likes count for a specific comment
   const fetchCommentLikesCount = async (commentID: number) => {
@@ -291,11 +282,7 @@ export default function Home() {
   
       const newCommentData = await response.json();
   
-      // Actualiza el estado para agregar el nuevo comentario al array existente
-      setComments((prevComments) => ({
-        ...prevComments,
-        [postID]: [...(prevComments[postID] || []), newCommentData],
-      }));
+      await fetchComments(postID);
   
       // Limpia el campo de texto del comentario
       setNewComment((prevNewComment) => ({
@@ -303,7 +290,8 @@ export default function Home() {
         [postID]: "",
       }));
       // Actualiza el contador de comentarios en postStats
-      setPostStats((prevStats) => ({
+       // Opcional: Actualiza el contador de comentarios si es necesario
+       setPostStats((prevStats) => ({
         ...prevStats,
         [postID]: {
           ...prevStats[postID],
@@ -406,6 +394,46 @@ useEffect(() => {
 
   fetchData();
 }, [homeData]);
+ 
+// Función para buscar usuarios en el backend
+const fetchFilteredUsers = async (term: string) => {
+  try {
+    setIsSearching(true); // Mostrar indicador de búsqueda
+    const response = await fetch(`http://localhost:3000/api/users/search?query=${term}`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1")}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Error fetching users");
+    }
+
+    const data = await response.json();
+    setFilteredUsers(data.users); // Actualizar el estado con los resultados
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    setFilteredUsers([]); // Limpiar resultados en caso de error
+  } finally {
+    setIsSearching(false); // Ocultar indicador de búsqueda
+  }
+};
+
+// useEffect para buscar usuarios cada vez que cambia el término de búsqueda
+useEffect(() => {
+  if (searchTerm.trim() === "") {
+    setFilteredUsers([]); // Si no hay texto, no mostramos resultados
+  } else {
+    const delayDebounceFn = setTimeout(() => {
+      fetchFilteredUsers(searchTerm); // Llamar a la función de búsqueda
+    }, 500); // Agregar un debounce de 500ms para evitar demasiadas solicitudes
+
+    return () => clearTimeout(delayDebounceFn); // Limpiar el timeout si el término cambia
+  }
+}, [searchTerm]);
 
   if (homeLoading || userLoading) {
     return <div>Loading...</div>;
@@ -418,72 +446,97 @@ useEffect(() => {
 if (userError) {
   return <div>Error: {userError.message}</div>;
 }
-console.log(userID);
+
 return (
   <div>
-    <h1>Posts</h1>
-    <ul>
-      {homeData?.posts ? (
-        homeData.posts.map((post: any) => (
-          <li key={post.id}>
-            <div>
-              <strong>{post.title}</strong>
-            </div>
-            <div>
-              Likes: {postStats[post.id]?.likes ?? "Loading..."} - Comments:{" "}
-              {postStats[post.id]?.comments ?? "Loading..."}
-            </div>
-            <div>
-              <button onClick={() => toggleLike(post.id)}>
-                {likedPosts[post.id] ? "Quitar Like" : "Dar Like"}
-              </button>
-            </div>
-            <div>
-              <button onClick={() => fetchComments(post.id)}>
-                {visibleComments[post.id] ? "Ocultar Comentarios" : "Mostrar Comentarios"}
-              </button>
-              {visibleComments[post.id] && (
-                <ul>
-                  {(comments[post.id] || []).map((comment: any) => (
-                    <li key={comment.id}>
-                      <div>{comment.body}</div>
-                      <div>Likes: {commentLikesCount[comment.id] ?? "Loading..."}</div>
-                      <button onClick={() => toggleCommentLike(comment.id)}>
-                        {likedComments[comment.id] ? "Quitar Like" : "Dar Like"}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <div>
-              <input
-                type="text"
-                value={newComment[post.id] || ""}
-                onChange={(e) =>
-                  setNewComment((prevNewComment) => ({
-                    ...prevNewComment,
-                    [post.id]: e.target.value,
-                  }))
-                }
-                placeholder="Escribe un comentario..."
-              />
-              <button onClick={() => addComment(post.id)}>Enviar</button>
-            </div>
+    <div className="header flex items-center justify-between px-4 py-2 mt-20">
+      {/* Logo */}
+      <div className="logo">
+        <img src="/logo.png" alt="Logo" className="h-8 cursor-pointer" />
+      </div>
+
+      {/* Barra de búsqueda */}
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Buscar usuarios..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-2 border rounded-full bg-gray-100 focus:outline-none focus:ring-1 focus:ring-black text-center text-black"
+        />
+      </div>
+
+      {/* Messages Icon */}
+      <div className="messages">
+        <button
+          onClick={() => router.push('/messages')}
+          className="relative"
+        >
+        <MessageSquare size={32}/>
+        </button>
+      </div>
+    </div>
+    {/* Lista de resultados */}
+    {filteredUsers.length > 0 && (
+        <ul className="mt-4 bg-white border rounded-md shadow">
+          {filteredUsers.map((user) => (
+            <li
+              key={user.id}
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            >
+              {user.name}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Mensaje si no hay resultados */}
+      {searchTerm && filteredUsers.length === 0 && (
+        <p className="mt-4 text-gray-500">No se encontraron usuarios.</p>
+      )}
+
+    <ul className="flex flex-wrap gap-2 px-4 py-2">
+      {userData ? (
+        userData.map((topic: any) => (
+          <li
+            key={topic.id}
+            className="px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-medium shadow"
+          >
+            {topic.name}
           </li>
         ))
       ) : (
-        <li>No posts available</li>
+        <li className="text-gray-500">No topics available</li>
       )}
     </ul>
-    <h1>User Topics</h1>
-    <ul>
-      {userData ? (
-        userData.map((topic: any) => <li key={topic.id}>{topic.name}</li>)
-      ) : (
-        <li>No topics available</li>
-      )}
-    </ul>
+    <div className="stories">
+    {/*Aqui irçan las historias */}
+
+    </div>
+    <ul className="flex flex-wrap gap-4 justify-center">
+        {homeData?.posts ? (
+          homeData.posts.map((post: any) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              postStats={postStats}
+              likedPosts={likedPosts}
+              visibleComments={visibleComments}
+              comments={comments}
+              newComment={newComment}
+              toggleLike={toggleLike}
+              fetchComments={fetchComments}
+              toggleCommentLike={toggleCommentLike}
+              setNewComment={setNewComment}
+              commentLikesCount={commentLikesCount}
+              likedComments={likedComments}      
+              addComment={addComment}            
+            />
+          ))
+        ) : (
+          <p>No hay publicaciones disponibles.</p>
+        )}
+      </ul>    
   </div>
 );
 }
