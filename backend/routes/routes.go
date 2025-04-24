@@ -49,6 +49,7 @@ func (s *APIServer) Run() {
 	protectedRouter.Use(middleware.JWTMiddleware)
 
 	// User - Users routes
+	protectedRouter.Get("/auth", utils.MakeHTTPHandleFunc(s.handleAuth))
 	protectedRouter.Get("/users/{id}", utils.MakeHTTPHandleFunc(s.handleGetUserByID))
 	protectedRouter.Get("/users/{user_name}", utils.MakeHTTPHandleFunc(s.handleGetUserByUserName))
 	protectedRouter.Patch("/users/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateUser))

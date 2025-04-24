@@ -44,6 +44,22 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 	})
 }
 
+func (s *APIServer) handleAuth(w http.ResponseWriter, r *http.Request) error {
+	id, ok := r.Context().Value(middleware.UserIDKey).(int) // Get the user id from the JWT
+	if !ok {
+		return fmt.Errorf("failed to get user id from JWT")
+	}
+
+	user, err := s.store.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
+		"user": user,
+	})
+}
+
 func (s *APIServer) handleGetUserByID(w http.ResponseWriter, r *http.Request) error {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
