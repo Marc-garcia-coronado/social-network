@@ -26,16 +26,7 @@ async function getEvents(): Promise<Event[]> {
   return data.events as Event[];
 }
 
-async function getUserSubscribedEvents(): Promise<Event[]> {
-  const cookiesStore = await cookies();
-  const token = cookiesStore.get("token")?.value;
-
-  const headers = new Headers();
-  headers.append("Content-Type", "application/json");
-  if (token) {
-    headers.append("Authorization", "Bearer " + token);
-  }
-
+async function getAuth(headers: Headers | HeadersInit): Promise<number> {
   const resUser = await fetch("http://localhost:3000/api/auth", {
     method: "GET",
     credentials: "include",
@@ -47,7 +38,20 @@ async function getUserSubscribedEvents(): Promise<Event[]> {
   }
 
   const dataUser = await resUser.json();
-  const userId = dataUser.user.id;
+  return dataUser.user.id;
+}
+
+async function getUserSubscribedEvents(): Promise<Event[]> {
+  const cookiesStore = await cookies();
+  const token = cookiesStore.get("token")?.value;
+
+  const headers = new Headers();
+  headers.append("Content-Type", "application/json");
+  if (token) {
+    headers.append("Authorization", "Bearer " + token);
+  }
+
+  const userId = await getAuth(headers);
 
   const res = await fetch(
     `http://localhost:3000/api/users/${userId}/events/subscribed`,
@@ -71,24 +75,32 @@ async function getUserSubscribedEvents(): Promise<Event[]> {
 export default async function Page() {
   const events: Event[] = await getEvents();
   const subscribedEvents: Event[] = await getUserSubscribedEvents();
-  const subscribedEventsIds: number[] = subscribedEvents.map(
-    (event: Event) => event.id,
-  );
+  const subscribedEventsIds: number[] = subscribedEvents
+    ? subscribedEvents?.map((event: Event) => event.id)
+    : [];
 
   const cookiesStore = await cookies();
   const token = cookiesStore.get("token")?.value;
 
+  const headers = new Headers();
+  headers.append("Content-Type", "application/json");
+  if (token) {
+    headers.append("Authorization", "Bearer " + token);
+  }
+
   return (
     <>
-      <h1>Eventos Disponibles</h1>
+      <h1 className="text-3xl font-bold text-center mt-5 mb-10">
+        Eventos Disponibles
+      </h1>
       {events.length > 0 && (
-        <ul className="flex flex-col space-y-4">
+        <ul className="flex flex-col space-y-4 mt-5 mb-24">
           {events.map((event) => (
             <EventComponent
               key={event.id}
               event={event}
               apuntado={subscribedEventsIds.includes(event.id)}
-              token={token}
+              token={token ?? ""}
             />
           ))}
         </ul>

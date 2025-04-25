@@ -1,4 +1,5 @@
 "use client";
+import { User } from "@/lib/types";
 import React, {
   createContext,
   useContext,
@@ -13,7 +14,7 @@ type UserContextType = {
 };
 
 export const UserContext = createContext<UserContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -27,9 +28,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem("user", JSON.stringify(user)); 
+      localStorage.setItem("user", JSON.stringify(user));
     } else {
-      localStorage.removeItem("user"); 
+      localStorage.removeItem("user");
     }
   }, [user]);
 

@@ -5,11 +5,12 @@ import Image from "next/image";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { useMutation } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
+import { useUserContext } from "@/contexts/UserContext";
 
 type EventComponentProps = {
   event: Event;
   apuntado?: boolean;
-  userID: number;
   token: string;
 };
 
@@ -17,7 +18,7 @@ type UpdateSubscribedToEventType = {
   state: boolean;
   eventID: number;
   userID: number;
-  token: string | undefined;
+  token: string;
 };
 
 const updateSubscribedToEvent = async ({
@@ -42,6 +43,13 @@ const updateSubscribedToEvent = async ({
     headers,
   });
 
+  if (!res.ok) {
+    const msg = state
+      ? "no se ha podido suscribir al evento"
+      : "no se ha podido desuscribir al evento";
+    throw new Error(msg);
+  }
+
   return res.json();
 };
 
@@ -49,17 +57,18 @@ export default function EventComponent({
   event,
   apuntado = false,
   token,
-  userID,
 }: EventComponentProps) {
   const [isApuntado, setIsApuntado] = useState<boolean>(apuntado);
+  const { user } = useUserContext();
 
   const mutation = useMutation({
     mutationFn: updateSubscribedToEvent,
-    onSuccess: () => {
-      console.log("tutto correcto");
-    },
     onError: () => {
-      console.log("tutto incorrecto");
+      return toast({
+        variant: "destructive",
+        description:
+          "Ha habido un error al cambiar el estado de la suscripcion",
+      });
     },
   });
 
@@ -69,29 +78,40 @@ export default function EventComponent({
     mutation.mutate({
       state: newState,
       eventID: event.id,
-      userID,
+      userID: user?.id ?? 0,
       token,
     });
   };
 
   return (
-    <li className="flex flex-col w-5/6 mx-auto border-transparent rounded-md shadow shadow-black">
+    <li className="flex flex-col w-5/6 mx-auto border-transparent rounded-md shadow ">
       <Image
         src={event.picture ? event.picture : "/globe.svg"}
         alt={event.description}
         width={30}
         height={30}
-        className="w-full max-h-40"
+        className="w-full max-h-40 rounded-t-md object-cover"
       />
-      <h2>{event.name}</h2>
-      <p>{event.description}</p>
-      <p>{event.topic.name}</p>
-      <p>{event.user?.email}</p>
-      <p>{event.location}</p>
-      <p>{event.createdAt}</p>
+      <div className="px-2 py-3">
+        <h2 className="capitalize font-bold">{event.name}</h2>
+        <div className="flex gap-2">
+          <label htmlFor="desc">Descripción:</label>
+          <p id="desc">{event.description}</p>
+        </div>
+        <p>{event.topic.name}</p>
+        <p>{event.user?.email}</p>
+        <p>{event.location}</p>
+        <p>{event.createdAt}</p>
+      </div>
       <Button
         type="button"
-        className={isApuntado ? "bg-green-500" : ""}
+        className={`w-5/6 self-center mb-3
+          ${
+            isApuntado
+              ? "border-green-500 border-2 bg-transparent text-black hover:bg-transparent hover:border-green-700"
+              : ""
+          }
+        `}
         onClick={() => handleChangeIsApuntado()}
       >
         {isApuntado ? "esta apuntado" : "no esta apuntado"}
