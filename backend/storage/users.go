@@ -91,6 +91,33 @@ func (s *PostgresStore) GetUserByUserName(user_name string) (*models.User, error
 	return user, nil
 }
 
+func (s *PostgresStore) SearchUsers(query string, limit int) ([]*models.User, error) {
+    stmt := `
+        SELECT id, user_name, full_name, email, profile_picture 
+        FROM users 
+        WHERE user_name ILIKE $1
+        LIMIT $2;
+    `
+
+    rows, err := s.Db.Query(stmt, "%"+query+"%", limit)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var users []*models.User
+    for rows.Next() {
+        user := new(models.User)
+        err := rows.Scan(&user.ID, &user.UserName, &user.FullName, &user.Email, &user.ProfilePicture)
+        if err != nil {
+            return nil, err
+        }
+        users = append(users, user)
+    }
+
+    return users, nil
+}
+
 func (s *PostgresStore) UpdateUser(user map[string]any, userID int) (*models.User, error) {
 
 	// Build dynamic SQL query
