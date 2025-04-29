@@ -30,6 +30,8 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState(""); // Estado para la barra de búsqueda
   const [filteredUsers, setFilteredUsers] = useState<any[]>([]); // Estado para los usuarios filtrados
   const [isSearching, setIsSearching] = useState(false); // Estado para mostrar un indicador de búsqueda
+  const [showNoResults, setShowNoResults] = useState(false); // Nuevo estado
+
 
   const [postStats, setPostStats] = useState<Record<number, { likes: number; comments: number }>>({});
   const [postCreators, setPostCreators] = useState<Record<number, { name: string}>>({});
@@ -398,43 +400,66 @@ useEffect(() => {
 // Función para buscar usuarios en el backend
 const fetchFilteredUsers = async (term: string) => {
   try {
-    setIsSearching(true); // Mostrar indicador de búsqueda
-    const response = await fetch(`http://localhost:3000/api/users/search?query=${term}`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1")}`,
-      },
-    });
+    setIsSearching(true);
+    setShowNoResults(false); // Ocultar mensaje mientras se busca
+    const response = await fetch(
+      `http://localhost:3000/api/users/search?query=${term}&limit=10`,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${document.cookie.replace(
+            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+            "$1"
+          )}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Error fetching users");
     }
 
     const data = await response.json();
-    setFilteredUsers(data.users); // Actualizar el estado con los resultados
+    setFilteredUsers(data.users);
+
+    // Validar que data.users exista y sea un array
+    if (!data || !Array.isArray(data.users)) {
+      setFilteredUsers([]);
+      setShowNoResults(true);
+      return;
+    }
+    // Mostrar mensaje de "No se encontraron usuarios" después de un retraso si no hay resultados
+    if (data.users.length === 0) {
+      setTimeout(() => {
+        setShowNoResults(true);
+      }, 500); // Retraso de 500ms
+    } else {
+      setShowNoResults(false);
+    }
   } catch (error) {
     console.error("Error fetching users:", error);
-    setFilteredUsers([]); // Limpiar resultados en caso de error
+    setFilteredUsers([]);
+    setShowNoResults(true);
   } finally {
-    setIsSearching(false); // Ocultar indicador de búsqueda
+    setIsSearching(false);
   }
 };
 
-// useEffect para buscar usuarios cada vez que cambia el término de búsqueda
 useEffect(() => {
   if (searchTerm.trim() === "") {
-    setFilteredUsers([]); // Si no hay texto, no mostramos resultados
+    setFilteredUsers([]);
+    setShowNoResults(false); // Ocultar mensaje si no hay texto
   } else {
     const delayDebounceFn = setTimeout(() => {
-      fetchFilteredUsers(searchTerm); // Llamar a la función de búsqueda
-    }, 500); // Agregar un debounce de 500ms para evitar demasiadas solicitudes
-
-    return () => clearTimeout(delayDebounceFn); // Limpiar el timeout si el término cambia
+      fetchFilteredUsers(searchTerm);
+    }, 500); // Debounce de 500ms
+    return () => clearTimeout(delayDebounceFn);
   }
 }, [searchTerm]);
 
+  console.log(filteredUsers);
   if (homeLoading || userLoading) {
     return <div>Loading...</div>;
   }
@@ -478,20 +503,29 @@ return (
     </div>
     {/* Lista de resultados */}
     {filteredUsers.length > 0 && (
-        <ul className="mt-4 bg-white border rounded-md shadow">
+        <ul className="mt-4 bg-white border rounded-md shadow divide-y divide-gray-200">
           {filteredUsers.map((user) => (
-            <li
-              key={user.id}
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            <li 
+              key={user.id} 
+              className="flex items-center p-4 space-x-4 cursor-pointer" 
+              onClick={() => router.push(`/${user.user_name}`)}
             >
-              {user.name}
+              <img
+                src={user.profilePicture || "/teddy.webp"}
+                alt={`${user.full_name}'s avatar`}
+                className="w-10 h-10 rounded-full"
+              />
+              <div>
+                <p className="font-medium text-gray-900">{user.full_name}</p>
+                <p className="text-sm text-gray-500">@{user.user_name}</p>
+              </div>
             </li>
           ))}
         </ul>
       )}
 
       {/* Mensaje si no hay resultados */}
-      {searchTerm && filteredUsers.length === 0 && (
+      {showNoResults && searchTerm && filteredUsers.length === 0 && (
         <p className="mt-4 text-gray-500">No se encontraron usuarios.</p>
       )}
 

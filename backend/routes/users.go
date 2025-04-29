@@ -86,6 +86,29 @@ func (s *APIServer) handleGetUserByUserName(w http.ResponseWriter, r *http.Reque
 
     return utils.WriteJSON(w, http.StatusOK, user)
 }
+func (s *APIServer) handleSearchUsers(w http.ResponseWriter, r *http.Request) error {
+    query := r.URL.Query().Get("query")
+    limitStr := r.URL.Query().Get("limit")
+
+    if query == "" {
+        http.Error(w, "Query parameter is required", http.StatusBadRequest)
+        return nil
+    }
+
+    limit, err := strconv.Atoi(limitStr)
+    if err != nil || limit <= 0 {
+        limit = 10 // Default limit
+    }
+
+    users, err := s.store.SearchUsers(query, limit)
+    if err != nil {
+        return err
+    }
+
+    return utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+        "users": users,
+    })
+}
 
 func (s *APIServer) handleCreateUser(w http.ResponseWriter, r *http.Request) error {
 	createUserReq := new(models.CreateUserReq)

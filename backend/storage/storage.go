@@ -11,6 +11,7 @@ type Storage interface {
 	Login(username, password string) (*models.User, error)
 	GetUserByID(id int) (*models.User, error)
 	GetUserByUserName(user_name string) (*models.User, error)
+    SearchUsers(query string, limit int) ([]*models.User, error)
 	CreateUser(user *models.User) (*models.User, error)
 	UpdateUser(user map[string]any, userID int) (*models.User, error)
 	DeleteUser(id int) error
