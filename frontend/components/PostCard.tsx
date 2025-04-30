@@ -47,6 +47,7 @@ interface PostCardProps {
       <li
       key={post.id}
       className="relative bg-white shadow-md rounded-lg w-[350px] sm:w-[350px] md:w-[450px] h-[350px] sm:h-[350px] md:h-[450px] overflow-hidden"
+      onDoubleClick={() => toggleLike(post.id)}
     >
       {/* Post Image */}
       {post.picture && (
