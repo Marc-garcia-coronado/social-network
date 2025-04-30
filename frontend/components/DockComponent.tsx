@@ -8,18 +8,18 @@ import { useState } from "react";
 const DockComponent = () => {
   const router = useRouter();
   const { user } = useUserContext();
-  let currentRouter = window.location.pathname.slice(1);
+  let currentRouter = window.location.pathname.split('/')[2] || '';
   currentRouter =
     currentRouter.charAt(0).toUpperCase() + currentRouter.slice(1);
   const [activeLink, setActiveLink] = useState<string>(currentRouter);
-
+  console.log(activeLink)
   const items = [
     {
       icon: <House color={activeLink === "Home" ? "black" : "white"} />,
       label: "Home",
       onClick: () => {
         setActiveLink("Home");
-        router.push("/home");
+        router.push(`/${user?.user_name}/home`);
       },
       className: activeLink === "Home" ? "bg-lime-400" : "",
     },
@@ -30,7 +30,7 @@ const DockComponent = () => {
       label: "Events",
       onClick: () => {
         setActiveLink("Events");
-        router.push("/events");
+        router.push(`/${user?.user_name}/events`);
       },
       className: activeLink === "Events" ? "bg-lime-400" : "",
     },
@@ -39,7 +39,7 @@ const DockComponent = () => {
       label: "Post",
       onClick: () => {
         setActiveLink("Post");
-        router.push("/post");
+        router.push(`/${user?.user_name}/post`);
       },
       className: activeLink === "Post" ? "bg-lime-400" : "",
     },
@@ -48,7 +48,7 @@ const DockComponent = () => {
       label: "Profile",
       onClick: () => {
         setActiveLink("Profile");
-        router.push(user?.user_name || "/404");
+        router.push(`/${user?.user_name}/profile` || "/404");
       },
       className: activeLink === "Profile" ? "bg-lime-400" : "",
     },
