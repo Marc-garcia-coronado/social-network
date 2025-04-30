@@ -84,7 +84,7 @@ interface PostCardProps {
         {/* User Info */}
         <div 
           className="flex items-center space-x-2 cursor-pointer"           
-          onClick={() => router.push(`/${post.user.user_name}`)}>
+          onClick={() => router.push(`/${post.user.user_name}/profile`)}>
           <img
             src={post.user.profilePicture || "/teddy.webp"}
             alt="User Avatar"
@@ -95,15 +95,15 @@ interface PostCardProps {
   
           {/* Icons */}
           <div className="flex space-x-4">
-            <button className="text-white hover:text-gray-200">
-              {/* Placeholder for future icon */}
-              <Send />
-            </button>
-            <button
+          <button
               onClick={handleOpenModal}
               className="text-white hover:text-gray-200"
             >
                   <MessageCircle />
+            </button>
+            <button className="text-white hover:text-gray-200">
+              {/* Placeholder for future icon */}
+              <Send />
             </button>
           </div>
         </div>
