@@ -508,7 +508,7 @@ return (
             <li 
               key={user.id} 
               className="flex items-center p-4 space-x-4 cursor-pointer" 
-              onClick={() => router.push(`/${user.user_name}`)}
+              onClick={() => router.push(`/${user.user_name}/profile`)}
             >
               <img
                 src={user.profilePicture || "/teddy.webp"}
