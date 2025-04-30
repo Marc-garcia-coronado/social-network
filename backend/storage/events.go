@@ -15,7 +15,7 @@ func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUs
     RETURNING id, name, description, location, created_at, creator_id, topic_id
 	)
 	SELECT e.id, e.name, e.description, e.location, e.created_at,
-		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.profile_picture, u.is_active, u.role,
+		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM inserted_event e
 	JOIN users u ON u.id = e.creator_id
