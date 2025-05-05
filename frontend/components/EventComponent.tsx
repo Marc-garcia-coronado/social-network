@@ -7,6 +7,13 @@ import { Button } from "./ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useUserContext } from "@/contexts/UserContext";
+import { Check, X } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type EventComponentProps = {
   event: Event;
@@ -70,6 +77,12 @@ export default function EventComponent({
           "Ha habido un error al cambiar el estado de la suscripcion",
       });
     },
+    onSuccess: () => {
+      return toast({
+        title: "Suscrito correctamente!",
+        description: "¡Se ha suscrito correctamente al evento!",
+      });
+    },
   });
 
   const handleChangeIsApuntado = () => {
@@ -103,19 +116,24 @@ export default function EventComponent({
         <p>{event.location}</p>
         <p>{event.createdAt}</p>
       </div>
-      <Button
-        type="button"
-        className={`w-5/6 self-center mb-3
-          ${
-            isApuntado
-              ? "border-green-500 border-2 bg-transparent text-black hover:bg-transparent hover:border-green-700"
-              : ""
-          }
-        `}
-        onClick={() => handleChangeIsApuntado()}
-      >
-        {isApuntado ? "esta apuntado" : "no esta apuntado"}
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Button
+              type="button"
+              className={`self-center mb-3
+                ${!isApuntado ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
+              `}
+              onClick={() => handleChangeIsApuntado()}
+            >
+              {isApuntado ? <X /> : <Check />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {isApuntado ? <p>Desapuntarse</p> : <p>Apuntarse</p>}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </li>
   );
 }
