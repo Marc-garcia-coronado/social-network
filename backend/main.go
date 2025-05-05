@@ -1,13 +1,24 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/Marc-Garcia-Coronado/socialNetwork/routes"
+	"github.com/Marc-Garcia-Coronado/socialNetwork/storage"
+	"log"
+)
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run(":3001")
+	store, err := storage.NewPostgresStore()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer store.Db.Close()
+
+	if err := store.Init(); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Todas las tablas se han creado exitosamente!")
+
+	server := routes.NewAPIServer(":3000", store)
+	server.Run()
 }
