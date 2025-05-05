@@ -5,6 +5,7 @@ type EventReq struct {
 	Description string `json:"description"`
 	Location    string `json:"location"`
 	CreatorID   int    `json:"creator_id"`
+	Date        string `json:"date"`
 	TopicID     int    `json:"topic_id"`
 }
 
@@ -15,6 +16,7 @@ type Event struct {
 	Location    string `json:"location"`
 	CreatorID   int    `json:"creator_id"`
 	TopicID     int    `json:"topic_id"`
+	Date        string `json:"date"`
 	CreatedAt   string `json:"created_at"`
 }
 
@@ -25,6 +27,7 @@ type EventWithUser struct {
 	Location    string `json:"location"`
 	Creator     User   `json:"creator"`
 	Topic       Topic  `json:"topic"`
+	Date        string `json:"date"`
 	CreatedAt   string `json:"created_at"`
 }
 
@@ -35,6 +38,7 @@ type SubscribedEvent struct {
 	Location     string `json:"location"`
 	Creator      User   `json:"creator"`
 	Topic        Topic  `json:"topic"`
+	Date         string `json:"date"`
 	CreatedAt    string `json:"created_at"`
 	SubscribedAt string `json:"subscribed_at"`
 }
