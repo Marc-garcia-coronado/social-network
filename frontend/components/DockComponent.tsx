@@ -8,11 +8,10 @@ import { useState } from "react";
 const DockComponent = () => {
   const router = useRouter();
   const { user } = useUserContext();
-  let currentRouter = window.location.pathname.split("/")[2] || "";
+  let currentRouter = window.location.pathname.split('/')[2] || 'Home';
   currentRouter =
     currentRouter.charAt(0).toUpperCase() + currentRouter.slice(1);
   const [activeLink, setActiveLink] = useState<string>(currentRouter);
-
   const items = [
     {
       icon: <House color={activeLink === "Home" ? "black" : "white"} />,
