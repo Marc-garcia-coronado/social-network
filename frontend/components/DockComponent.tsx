@@ -34,13 +34,13 @@ const DockComponent = () => {
       className: activeLink === "Events" ? "bg-lime-400" : "",
     },
     {
-      icon: <Plus color={activeLink === "Post" ? "black" : "white"} />,
-      label: "Post",
+      icon: <Plus color={activeLink === "Create" ? "black" : "white"} />,
+      label: "Create",
       onClick: () => {
-        setActiveLink("Post");
-        router.push(`/${user?.user_name}/post`);
+        setActiveLink("Create");
+        router.push(`/${user?.user_name}/create`);
       },
-      className: activeLink === "Post" ? "bg-lime-400" : "",
+      className: activeLink === "Create" ? "bg-lime-400" : "",
     },
     {
       icon: <UserRound color={activeLink === "Profile" ? "black" : "white"} />,

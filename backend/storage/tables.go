@@ -56,6 +56,7 @@ func (s *PostgresStore) createEventsTable() error {
 	  location VARCHAR(255),
 	  creator_id INT NOT NULL,
 	  topic_id INT NOT NULL,
+		date TIMESTAMPTZ DEFAULT null,
 	  created_at TIMESTAMPTZ DEFAULT now(),
 	  
 	  FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE,

@@ -1,6 +1,5 @@
 "use client";
 
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,7 +63,11 @@ export default function Login() {
             Registrarse
           </p>
         </div>
-        {isLoginSelected ? <LoginForm /> : <RegisterForm setIsLoginSelected={setIsLoginSelected} />}
+        {isLoginSelected ? (
+          <LoginForm />
+        ) : (
+          <RegisterForm setIsLoginSelected={setIsLoginSelected} />
+        )}
       </div>
     </div>
   );
@@ -215,7 +218,7 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
         onFinalStepCompleted={() => {
           // Trigger form submission
           const form = document.getElementById(
-            "formRegister"
+            "formRegister",
           ) as HTMLFormElement;
           if (form) {
             form.requestSubmit();
