@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Heart, MessageCircle, Send } from 'lucide-react';
 import { useRouter } from "next/navigation";
+import { formatDistanceToNow } from "date-fns";
+
 
 interface PostCardProps {
     post: any;
@@ -42,7 +44,6 @@ interface PostCardProps {
     const handleCloseModal = () => {
       setIsModalOpen(false);
     };
-  
     return (
       <li
       key={post.id}
@@ -90,8 +91,16 @@ interface PostCardProps {
             alt="User Avatar"
             className="w-10 h-10 rounded-full"
           />
-          <span className="text-sm font-medium">{post.user.user_name}</span>
-        </div>
+          <div className="flex flex-col">
+          <div>
+            <span className="text-sm font-medium">{post.title}</span>
+            <span className="text-sm font-extralight">
+                  {" - " + formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+            </span>  
+            </div>
+            <span className="text-sm font-light">{post.user.user_name}</span>     
+            </div>
+          </div>
   
           {/* Icons */}
           <div className="flex space-x-4">

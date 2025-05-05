@@ -583,7 +583,7 @@ export default function Profile() {
             />
       </section>
       <section className="mb-8 mt-4 space-y-2">
-          <h2 className="text-center">{userData?.full_name || "Nombre"}</h2>
+          <h2 className="text-center">{userData?.name || "Nombre"}</h2>
           <p className="text-center"><strong>{followersCount} seguidores |  {followingCount}  siguiendo</strong></p>
           {userData?.id != user?.id && (
           <div className="flex justify-center space-x-4">

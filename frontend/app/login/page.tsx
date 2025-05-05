@@ -110,7 +110,7 @@ const LoginForm = ({ className }: FormProps) => {
     onSuccess: (data) => {
       if (data) {
         setUser(data.user);
-        router.push("/home");
+        router.push(`/${data.user.user_name}/home`);
       }
     },
     onError: (error) => {
