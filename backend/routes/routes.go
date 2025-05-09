@@ -43,7 +43,7 @@ func (s *APIServer) Run() {
 	// Public Routes
 	router.Post("/api/register", utils.MakeHTTPHandleFunc(s.handleCreateUser))
 	router.Post("/api/login", utils.MakeHTTPHandleFunc(s.handleLogin))
-
+	router.Get("/api/topics", utils.MakeHTTPHandleFunc(s.handleGetAllTopics))
 	// Protected router for not admin users
 	protectedRouter := chi.NewRouter()
 	protectedRouter.Use(middleware.JWTMiddleware)

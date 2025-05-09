@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { Event } from "@/lib/types";
 import EventComponent from "@/components/EventComponent";
+import SearchBar from "@/components/SearchBar";
 
 async function getEvents(): Promise<Event[]> {
   const cookiesStore = await cookies();
@@ -89,12 +90,15 @@ export default async function Page() {
   }
 
   return (
-    <>
-      <h1 className="text-3xl font-bold text-center mt-5 mb-10">
-        Eventos Disponibles
-      </h1>
+    <div className="container mx-auto">
+      <div>
+        <h1 className="text-3xl font-bold text-center mt-5 mb-10">
+          Eventos Disponibles
+        </h1>
+        <SearchBar />
+      </div>
       {events.length > 0 && (
-        <ul className="flex flex-col space-y-4 mt-5 mb-24">
+        <ul className="grid md:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-8 mb-32">
           {events.map((event) => (
             <EventComponent
               key={event.id}
@@ -105,6 +109,6 @@ export default async function Page() {
           ))}
         </ul>
       )}
-    </>
+    </div>
   );
 }

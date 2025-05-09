@@ -29,4 +29,5 @@ export type Event = {
   user: User;
   topic: Topic;
   createdAt: string;
+  date: string;
 };

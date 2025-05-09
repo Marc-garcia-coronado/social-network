@@ -83,12 +83,8 @@ export default function Stepper({
   };
 
   return (
-    <div
-      {...rest}
-    >
-      <div
-        className={`mx-auto ${stepCircleContainerClassName}`}
-      >
+    <div {...rest}>
+      <div className={`mx-auto ${stepCircleContainerClassName}`}>
         <div
           className={`${stepContainerClassName} flex w-full items-center py-3 px-0`}
         >
@@ -283,8 +279,8 @@ function StepIndicator({
     currentStep === step
       ? "active"
       : currentStep < step
-      ? "inactive"
-      : "complete";
+        ? "inactive"
+        : "complete";
 
   const handleClick = () => {
     if (step !== currentStep && !disableStepIndicators) {

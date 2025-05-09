@@ -105,7 +105,7 @@ func (s *APIServer) handleSearchUsers(w http.ResponseWriter, r *http.Request) er
         return err
     }
 
-    return utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+    return utils.WriteJSON(w, http.StatusOK, map[string]any{
         "users": users,
     })
 }
@@ -123,7 +123,16 @@ func (s *APIServer) handleCreateUser(w http.ResponseWriter, r *http.Request) err
 		return err
 	}
 
-	return utils.WriteJSON(w, http.StatusCreated, newUser)
+	token, err := utils.GenerateJWT(newUser.ID, newUser.Role)
+	if err != nil {
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusCreated, map[string]any{
+		"created_user": newUser,
+		"token": token,
+	})
 }
 
 func (s *APIServer) handleUpdateUser(w http.ResponseWriter, r *http.Request) error {

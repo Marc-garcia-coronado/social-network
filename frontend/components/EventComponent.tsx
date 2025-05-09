@@ -14,6 +14,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "./ui/badge";
+import { Label } from "./ui/label";
 
 type EventComponentProps = {
   event: Event;
@@ -79,8 +81,12 @@ export default function EventComponent({
     },
     onSuccess: () => {
       return toast({
-        title: "Suscrito correctamente!",
-        description: "¡Se ha suscrito correctamente al evento!",
+        title: isApuntado
+          ? "Apuntado correctamente"
+          : "Desapuntado correctamente",
+        description: isApuntado
+          ? "¡Te has apuntado correctamente al evento!"
+          : "¡Te has desapuntado correctamente al evento!",
       });
     },
   });
@@ -97,7 +103,7 @@ export default function EventComponent({
   };
 
   return (
-    <li className="flex flex-col w-5/6 mx-auto border-transparent rounded-md shadow ">
+    <li className="flex flex-col w-[350px] md:w-full min-h-[350px] overflow-hidden mx-auto border-transparent rounded-md shadow ">
       <Image
         src={event.picture ? event.picture : "/globe.svg"}
         alt={event.description}
@@ -105,16 +111,21 @@ export default function EventComponent({
         height={30}
         className="w-full max-h-40 rounded-t-md object-cover"
       />
-      <div className="px-2 py-3">
-        <h2 className="capitalize font-bold">{event.name}</h2>
-        <div className="flex gap-2">
-          <label htmlFor="desc">Descripción:</label>
+      <Badge className="w-fit mt-5 mx-5">{event.topic.name}</Badge>
+      <div className="px-5 py-1 flex flex-col ">
+        <h2 className="capitalize font-bold my-3">{event.name}</h2>
+        <div className="flex gap-2 items-center">
+          <Label htmlFor="desc">Descripción:</Label>
           <p id="desc">{event.description}</p>
         </div>
-        <p>{event.topic.name}</p>
-        <p>{event.user?.email}</p>
-        <p>{event.location}</p>
-        <p>{event.createdAt}</p>
+        <div className="flex gap-2 items-center">
+          <Label htmlFor="location">Localización:</Label>
+          <p id="location">{event.location}</p>
+        </div>
+        <div className="flex gap-2 items-center mb-5">
+          <Label htmlFor="date">Fecha del evento:</Label>
+          <p id="date">{new Date(event.date).toLocaleDateString()}</p>
+        </div>
       </div>
       <TooltipProvider>
         <Tooltip>
@@ -122,11 +133,11 @@ export default function EventComponent({
             <Button
               type="button"
               className={`self-center mb-3
-                ${!isApuntado ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
+                ${isApuntado ? "bg-lime-400 hover:bg-lime-500 text-black" : "bg-transparent border-2 text-black border-black hover:bg-black hover:text-white"}
               `}
               onClick={() => handleChangeIsApuntado()}
             >
-              {isApuntado ? <X /> : <Check />}
+              {!isApuntado ? <p>Apuntarse</p> : <p>Desapuntarse</p>}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
