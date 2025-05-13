@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Heart, MessageCircle, Send } from 'lucide-react';
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
+import { DropdownCardMenu } from "./DropdownCardMenu";
 
 
 interface PostCardProps {
@@ -18,8 +19,11 @@ interface PostCardProps {
     commentLikesCount: Record<number, number>; 
     likedComments: Record<number, boolean>; 
     addComment: (postId: number) => void; 
+    currentUser: { id: number };
+    refreshPosts: () => void;
   }
   const PostCard: React.FC<PostCardProps> = ({
+    currentUser,
     post,
     postStats,
     likedPosts,
@@ -33,6 +37,7 @@ interface PostCardProps {
     commentLikesCount,
     likedComments,
     addComment,
+    refreshPosts,
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const router = useRouter();
@@ -78,6 +83,13 @@ interface PostCardProps {
           </button>
           <span>{postStats[post.id]?.likes ?? "Loading..."}</span>
           </div>
+          {post.user.id === currentUser?.id && (
+          <DropdownCardMenu 
+          postId={post.id} 
+          userId={post.user.id}
+          refreshPosts={refreshPosts}
+          />
+          )}
       </div>
     
       {/* Footer Section */}
