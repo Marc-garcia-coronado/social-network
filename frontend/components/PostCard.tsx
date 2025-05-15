@@ -88,6 +88,8 @@ interface PostCardProps {
           postId={post.id} 
           userId={post.user.id}
           refreshPosts={refreshPosts}
+          postTitle={post.title}
+          postTopicId={post.topic.id}
           />
           )}
       </div>
