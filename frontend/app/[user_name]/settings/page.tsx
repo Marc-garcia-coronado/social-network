@@ -1,211 +1,61 @@
 "use client";
-import { useUserContext } from "@/contexts/UserContext";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import PostCard from "@/components/PostCard";
 
-export default function Profile() {
-  const { user } = useUserContext();
-  const authenticatedUserID = user?.id; 
+import { useState } from "react";
+import { useUserContext } from "@/contexts/UserContext";
+import { useRouter } from "next/navigation";
+
+export default function Settings() {
+  const { user, setUser } = useUserContext();
   const router = useRouter();
 
-  const { user_name } = useParams(); // Obtener el parámetro de la ruta
-  const [userData, setUserData] = useState<any>(null);
-  const [userPosts, setUserPosts] = useState<{ posts: any[] }>({ posts: [] });
-  
-  const [postStats, setPostStats] = useState<Record<number, { likes: number; comments: number }>>({});
-  const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
-  const [visibleComments, setVisibleComments] = useState<Record<number, boolean>>({});
-  const [comments, setComments] = useState<Record<number, any[]>>({});
-  const [newComment, setNewComment] = useState<Record<number, string>>({});
-  const [likedComments, setLikedComments] = useState<Record<number, boolean>>({});
-  const [commentLikesCount, setCommentLikesCount] = useState<Record<number, number>>({});
+  const [formData, setFormData] = useState({
+    //profilePicture: "/teddy.webp", cambiar la estructura para poner la foto en un futuro
+    full_name: user?.full_name || "",
+    email: user?.email || "",
+    user_name: user?.user_name || "",
+    password: "",
+  });
 
-  const [followersCount, setFollowersCount] = useState<number>(0);
-  const [followingCount, setFollowingCount] = useState<number>(0);
-  const [isFollowing, setIsFollowing] = useState<boolean>(false);
-  
-  
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [topics, setTopics] = useState<number[]>([]); // Topics seleccionados
+  const [allTopics, setAllTopics] = useState<any[]>([]); // Lista de todos los topics
 
-  // Fetch user data based on user_name
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user_name) return;
-
-      try {
-        const response = await fetch(`http://localhost:3000/api/users/${user_name}`, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Error fetching user data");
-        }
-
-        const userData = await response.json();
-        setUserData(userData);
-
-        // Fetch user posts
-        const postsResponse = await fetch(`http://localhost:3000/api/users/${userData.id}/posts`, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!postsResponse.ok) {
-          throw new Error("Error fetching user posts");
-        }
-
-        const postsData = await postsResponse.json();
-        setUserPosts(postsData);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [user_name]);
-
-  // Fetch stats for each post
-  const fetchPostStats = async (postID: number) => {
-    try {
-      const [likesResponse, commentsResponse] = await Promise.all([
-        fetch(`http://localhost:3000/api/likes/posts/${postID}/count`, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
-            )}`,
-          },
-        }),
-        fetch(`http://localhost:3000/api/posts/${postID}/comments/count`, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
-            )}`,
-          },
-        }),
-      ]);
-
-      if (!likesResponse.ok || !commentsResponse.ok) {
-        throw new Error("Error fetching post stats");
-      }
-
-      const likesData = await likesResponse.json();
-      const commentsData = await commentsResponse.json();
-
-      setPostStats((prevStats) => ({
-        ...prevStats,
-        [postID]: {
-          likes: likesData.post_likes_count,
-          comments: commentsData.post_comments_count,
-        },
-      }));
-    } catch (error) {
-      console.error(`Error fetching stats for post ${postID}:`, error);
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-  useEffect(() => {
-    if (userPosts?.posts?.length > 0) {
-      userPosts.posts.forEach((post) => fetchPostStats(post.id));
-    }
-  }, [userPosts]);
-
-  const toggleLike = async (postID: number) => {
+  
+  const handleProfileUpdate = async () => {
     try {
-      const isLiked = likedPosts[postID];
-      const endpoint = isLiked
-        ? `http://localhost:3000/api/posts/${postID}/dislike`
-        : `http://localhost:3000/api/posts/${postID}/like`;
-      const method = isLiked ? "DELETE" : "POST";
-      const response = await fetch(endpoint, {
-        method,
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:3000/api/users/${user?.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${document.cookie.replace(
+              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+              "$1"
+            )}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+      console.log(response)
+      if (!response.ok) throw new Error("Error updating profile");
 
-      if (!response.ok) {
-        throw new Error(isLiked ? "Error al quitar el like" : "Error al dar like");
-      }
-
-      // Actualizar el estado de likes
-      setLikedPosts((prevLikes) => ({
-        ...prevLikes,
-        [postID]: !isLiked,
-      }));
-
-      // Actualizar el contador de likes
-      setPostStats((prevStats) => ({
-        ...prevStats,
-        [postID]: {
-          ...prevStats[postID],
-          likes: prevStats[postID].likes + (isLiked ? -1 : 1),
-        },
-      }));
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      alert("Perfil actualizado correctamente");
     } catch (error) {
       console.error(error);
+      alert("Error al actualizar el perfil");
     }
   };
 
-  // Función para obtener los comentarios de un post
-  const fetchComments = async (postID: number) => {
+  const handleTopicsUpdate = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/posts/${postID}/comments`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1")}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Error fetching comments");
-      }
-      const commentsData = await response.json();
-      setComments((prevComments) => ({
-        ...prevComments,
-        [postID]: commentsData.comments,
-      }));
-      setVisibleComments((prev) => ({
-        ...prev,
-        [postID]: true,
-      }));
-      // Fetch likes count for each comment
-      commentsData.comments.forEach((comment: any) => {
-        fetchCommentLikesCount(comment.id);
-      });
-    } catch (error) {
-      console.error(`Error fetching comments for post ${postID}:`, error);
-    }
-  };
-  
-  // Función para agregar un nuevo comentario
-  const addComment = async (postID: number) => {
-    try {
-      const commentText = newComment[postID];
-      if (!commentText) return;
-  
-      const response = await fetch(`http://localhost:3000/api/posts/${postID}/comments`, {
+      const response = await fetch(`http://localhost:3000/api/topics/follow`, {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${document.cookie.replace(
@@ -213,417 +63,134 @@ export default function Profile() {
             "$1"
           )}`,
         },
-        body: JSON.stringify({ body: commentText }),
+        body: JSON.stringify({ topics }),
       });
-  
-      if (!response.ok) {
-        throw new Error("Error adding comment");
-      }
-  
-      const newCommentData = await response.json();
-  
-      await fetchComments(postID);
-  
-      // Limpia el campo de entrada del comentario
-      setNewComment((prevNewComment) => ({
-        ...prevNewComment,
-        [postID]: "",
-      }));
-  
-      // Opcional: Actualiza el contador de comentarios si es necesario
-      setPostStats((prevStats) => ({
-        ...prevStats,
-        [postID]: {
-          ...prevStats[postID],
-          comments: (prevStats[postID]?.comments || 0) + 1,
-        },
-      }));
+      if (!response.ok) throw new Error("Error updating topics");
+
+      alert("Topics actualizados correctamente");
     } catch (error) {
-      console.error(`Error adding comment to post ${postID}:`, error);
-    }
-  };
-  
-  const fetchCommentLikesCount = async (commentID: number) => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/likes/comments/${commentID}/count`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error fetching comment likes count");
-      }
-
-      const likesData = await response.json();
-
-      // Actualiza el estado para almacenar el conteo de likes de cada comentario
-      setCommentLikesCount((prevCount) => ({
-        ...prevCount,
-        [commentID]: likesData.comment_likes_count,
-      }));
-    } catch (error) {
-      console.error(`Error fetching likes count for comment ${commentID}:`, error);
-    }
-  }
-
-  useEffect(() => {
-    const fetchPostStats = async (postID: number) => {
-      try {
-        const [likesResponse, commentsResponse] = await Promise.all([
-          fetch(`http://localhost:3000/api/likes/posts/${postID}/count`, {
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${document.cookie.replace(
-                /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                "$1"
-              )}`,
-            },
-          }),
-          fetch(`http://localhost:3000/api/posts/${postID}/comments/count`, {
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${document.cookie.replace(
-                /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                "$1"
-              )}`,
-            },
-          }),
-        ]);
-  
-        if (!likesResponse.ok || !commentsResponse.ok) {
-          throw new Error("Error fetching post stats");
-        }
-  
-        const likesData = await likesResponse.json();
-        const commentsData = await commentsResponse.json();
-  
-        setPostStats((prevStats) => ({
-          ...prevStats,
-          [postID]: {
-            likes: likesData.post_likes_count,
-            comments: commentsData.post_comments_count,
-          },
-        }));
-      } catch (error) {
-        console.error(`Error fetching stats for post ${postID}:`, error);
-      }
-    };
-  
-    const fetchUserLikes = async () => {
-      try {
-        const response = await fetch(`http://localhost:3000/api/users/likes/posts`, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
-            )}`,
-          },
-        });
-  
-        if (!response.ok) {
-          throw new Error("Error fetching user likes");
-        }
-  
-        const likedPostsData = await response.json();
-  
-        const likedPostsMap = likedPostsData.reduce(
-          (acc: Record<number, boolean>, postID: number) => {
-            acc[postID] = true;
-            return acc;
-          },
-          {}
-        );
-  
-        setLikedPosts(likedPostsMap);
-      } catch (error) {
-        console.error("Error fetching user likes:", error);
-      }
-    };
-  
-    if (userPosts?.posts?.length > 0) {
-      userPosts.posts.forEach((post) => fetchPostStats(post.id));
-      fetchUserLikes();
-    }
-  }, [userPosts]);
-
-
-  const fetchFollowersCount = async (userID: number) => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/users/${userID}/followers/count`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error("Error fetching followers count");
-      }
-  
-      const data = await response.json();
-      setFollowersCount(data.followers_count);
-    } catch (error) {
-      console.error("Error fetching followers count:", error);
-    }
-  };
-  
-  const fetchFollowingCount = async (userID: number) => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/users/${userID}/follows/count`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error("Error fetching following count");
-      }
-  
-      const data = await response.json();
-      setFollowingCount(data.follows_count);
-    } catch (error) {
-      console.error("Error fetching following count:", error);
+      console.error(error);
+      alert("Error al actualizar los topics");
     }
   };
 
-  const followUser = async (userID: number) => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/users/follow/${userID}`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error("Error following user");
-      }
-  
-      setIsFollowing(true);
-      setFollowersCount((prev) => prev + 1); // Incrementar el contador de seguidores
-    } catch (error) {
-      console.error("Error following user:", error);
-    }
-  };
-  
-  const unfollowUser = async (userID: number) => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/users/unfollow/${userID}`, {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error("Error unfollowing user");
-      }
-  
-      setIsFollowing(false);
-      setFollowersCount((prev) => prev - 1); // Decrementar el contador de seguidores
-    } catch (error) {
-      console.error("Error unfollowing user:", error);
-    }
-  };
-  // Función para manejar el toggle de likes en comentarios
-  const toggleCommentLike = async (commentID: number) => {
-    try {
-      const isLiked = likedComments[commentID];
-      const endpoint = isLiked
-        ? `http://localhost:3000/api/comments/${commentID}/dislike`
-        : `http://localhost:3000/api/comments/${commentID}/like`;
-
-      const method = isLiked ? "DELETE" : "POST";
-
-      const response = await fetch(endpoint, {
-        method,
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(isLiked ? "Error al quitar el like" : "Error al dar like");
-      }
-
-      setLikedComments((prevLikedComments) => ({
-        ...prevLikedComments,
-        [commentID]: !isLiked,
-      }));
-      // Actualizar el contador de likes
-      setCommentLikesCount((prevCount) => ({
-      ...prevCount,
-      [commentID]: prevCount[commentID] + (isLiked ? -1 : 1),
-    }));
-    } catch (error) {
-      console.error(`Error toggling like for comment ${commentID}:`, error);
-    }
+  const handleLogout = () => {
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    setUser(null);
+    router.push("/login");
   };
 
-  const fetchUserCommentLikes = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/users/likes/comments`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Error fetching user comment likes");
-      }
-      const likedCommentsData = await response.json();
-      // Convertimos la lista de comment IDs en un mapa para un acceso más rápido
-      const likedCommentsMap = likedCommentsData.reduce((acc: Record<number, boolean>, commentID: number) => {
-        acc[commentID] = true;
-        return acc;
-      }, {});
-      setLikedComments(likedCommentsMap);
-    } catch (error) {
-      console.error("Error fetching user comment likes:", error);
-    }
-  };
-
-  // Llama a fetchUserCommentLikes al cargar el componente
-  useEffect(() => {
-    fetchUserCommentLikes();
-  }, []);
-  
-  useEffect(() => {
-    if (userData?.id) {
-      fetchFollowersCount(userData.id);
-      fetchFollowingCount(userData.id);
-  
-      // Verificar si el usuario ya está siendo seguido
-      const checkIfFollowing = async () => {
-        try {
-          const response = await fetch(`http://localhost:3000/api/users/${userData.id}/following`, {
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${document.cookie.replace(
-                /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                "$1"
-              )}`,
-            },
-          });
-  
-          if (!response.ok) {
-            throw new Error("Error checking follow status");
-          }
-  
-          const data = await response.json();
-          setIsFollowing(data.is_following);
-          console.log(isFollowing);
-        } catch (error) {
-          console.error("Error checking follow status:", error);
-        }
-      };
-  
-      checkIfFollowing();
-    }
-  }, [userData]);
-
-  
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-  // Cambiar el user.?id para que se tome correctamente, haciendo el pull se solucionara diria
-  // Ya que marc lo corrigio en su branch
   return (
-    <div className="min-h-screen p-8 pb-20">
-      <header className="flex flex-col justify-center">
-      <section className="flex justify-center">
-        <img
-              src={userData.profilePicture || "/teddy.webp"}
-              alt="User Avatar"
-              className="w-40 h-40 rounded-full object-cover"
-            />
-      </section>
-      <section className="mb-8 mt-4 space-y-2">
-          <h2 className="text-center">{userData?.name || "Nombre"}</h2>
-          <p className="text-center"><strong>{followersCount} seguidores |  {followingCount}  siguiendo</strong></p>
-          {userData?.id != user?.id && (
-          <div className="flex justify-center space-x-4">
-            <button onClick={() => (isFollowing ? unfollowUser(userData.id) : followUser(userData.id))} className={`mt-4 px-4 py-2 rounded-full ${isFollowing ? "bg-red-500 text-white" : "bg-lime-400 text-black"}`}>
-              {isFollowing ? "Dejar de seguir" : "Seguir"}
-            </button>
-            <button onClick={() => router.push(`/${userData.user_name}/messages` /* Aqui despues otra barra con id de mensaje y cambiar userData por user */ )} 
-              className={`mt-4 px-4 py-2 rounded-full bg-primary text-white`}>
-              Mensaje
-            </button>
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Ajustes</h1>
+
+      {/* Editar Perfil */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Editar Perfil</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block font-medium">Foto de Perfil</label>
+            {/* <input
+              type="text"
+              name="profilePicture"
+              value={formData.profilePicture}
+              onChange={handleInputChange}
+              className="w-full border rounded p-2"
+              placeholder="URL de la foto de perfil"
+            /> */}
           </div>
-          )}
+          <div>
+            <label className="block font-medium">Nombre Completo</label>
+            <input
+              type="text"
+              name="fullName"
+              value={formData.full_name}
+              onChange={handleInputChange}
+              className="w-full border rounded p-2"
+            />
+          </div>
+          <div>
+            <label className="block font-medium">Correo</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="w-full border rounded p-2"
+            />
+          </div>
+          <div>
+            <label className="block font-medium">Nombre de Usuario</label>
+            <input
+              type="text"
+              name="userName"
+              value={formData.user_name}
+              onChange={handleInputChange}
+              className="w-full border rounded p-2"
+            />
+          </div>
+          <div>
+            <label className="block font-medium">Contraseña</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              className="w-full border rounded p-2"
+            />
+          </div>
+          <button
+            onClick={handleProfileUpdate}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Guardar Cambios
+          </button>
+        </div>
       </section>
-      </header>
+
+      {/* Gestionar Topics */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold mb-4">Gestionar Topics</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block font-medium">Añadir/Quitar Topics</label>
+            <select
+              multiple
+              value={topics.map(String)}
+              onChange={(e) =>
+                setTopics(
+                  Array.from(e.target.selectedOptions, (opt) =>
+                    Number(opt.value)
+                  )
+                )
+              }
+              className="w-full border rounded p-2"
+            >
+              {allTopics.map((topic) => (
+                <option key={topic.id} value={topic.id}>
+                  {topic.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            onClick={handleTopicsUpdate}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Guardar Topics
+          </button>
+        </div>
+      </section>
+
+      {/* Cerrar Sesión */}
       <section>
-        <h2 className="text-2xl font-semibold text-center mb-3 underline underline-offset-4">Publicaciones</h2>
-        <ul className="flex flex-wrap gap-4 justify-center">
-        {userPosts?.posts?.length > 0 ? (
-            userPosts.posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                postStats={postStats}
-                likedPosts={likedPosts}
-                visibleComments={visibleComments}
-                comments={comments}
-                newComment={newComment}
-                toggleLike={toggleLike}
-                fetchComments={fetchComments}
-                toggleCommentLike={toggleCommentLike}
-                setNewComment={setNewComment}
-                commentLikesCount={commentLikesCount}
-                likedComments={likedComments}
-                addComment={addComment}
-              />
-            ))
-          ) : (
-            <li>No hay publicaciones aún.</li>
-          )}
-        </ul>
+        <h2 className="text-2xl font-semibold mb-4">Cerrar Sesión</h2>
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 text-white px-4 py-2 rounded"
+        >
+          Cerrar Sesión
+        </button>
       </section>
     </div>
   );
