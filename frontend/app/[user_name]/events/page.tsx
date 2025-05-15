@@ -1,19 +1,29 @@
 import { cookies } from "next/headers";
-import { Event } from "@/lib/types";
+import { Event, Topic } from "@/lib/types";
 import EventComponent from "@/components/EventComponent";
 import SearchBar from "@/components/SearchBar";
+import SelectComponent from "@/components/SelectComponent";
 
-async function getEvents(): Promise<Event[]> {
-  const cookiesStore = await cookies();
-  const token = cookiesStore.get("token")?.value;
-
+async function getEvents(
+  token: string | undefined,
+  search?: string,
+  topic?: string,
+): Promise<Event[]> {
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
   if (token) {
     headers.append("Authorization", "Bearer " + token);
   }
 
-  const res = await fetch("http://localhost:3000/api/events", {
+  const url = new URL("http://localhost:3000/api/events");
+  if (search) {
+    url.searchParams.set("q", search);
+  }
+  if (topic) {
+    url.searchParams.set("topic", topic);
+  }
+
+  const res = await fetch(url.toString(), {
     method: "GET",
     credentials: "include",
     headers,
@@ -42,10 +52,9 @@ async function getAuth(headers: Headers | HeadersInit): Promise<number> {
   return dataUser.user.id;
 }
 
-async function getUserSubscribedEvents(): Promise<Event[]> {
-  const cookiesStore = await cookies();
-  const token = cookiesStore.get("token")?.value;
-
+async function getUserSubscribedEvents(
+  token: string | undefined,
+): Promise<Event[]> {
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
   if (token) {
@@ -73,21 +82,43 @@ async function getUserSubscribedEvents(): Promise<Event[]> {
   return data.events;
 }
 
-export default async function Page() {
-  const events: Event[] = await getEvents();
-  const subscribedEvents: Event[] = await getUserSubscribedEvents();
-  const subscribedEventsIds: number[] = subscribedEvents
-    ? subscribedEvents?.map((event: Event) => event.id)
-    : [];
-
-  const cookiesStore = await cookies();
-  const token = cookiesStore.get("token")?.value;
-
+async function getTopics(token: string | undefined): Promise<Topic[]> {
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
   if (token) {
     headers.append("Authorization", "Bearer " + token);
   }
+
+  const res = await fetch(`http://localhost:3000/api/topics`, {
+    method: "GET",
+    credentials: "include",
+    headers,
+  });
+
+  if (!res.ok) {
+    throw new Error("no se ha podido obtener los gustos!");
+  }
+
+  const data = await res.json();
+  return data;
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: { q?: string; topic?: string };
+}) {
+  const cookiesStore = await cookies();
+  const token: string | undefined = cookiesStore.get("token")?.value;
+
+  const search = searchParams.q || "";
+  const topic = searchParams.topic || "";
+
+  const events: Event[] = await getEvents(token, search, topic);
+  const subscribedEvents: Event[] = await getUserSubscribedEvents(token);
+  const subscribedEventsIds: number[] =
+    subscribedEvents?.map((event: Event) => event.id) || [];
+  const topics: Topic[] = await getTopics(token);
 
   return (
     <div className="container mx-auto">
@@ -95,19 +126,34 @@ export default async function Page() {
         <h1 className="text-3xl font-bold text-center mt-5 mb-10">
           Eventos Disponibles
         </h1>
-        <SearchBar />
+
+        <div className="flex flex-col items-center justify-center mb-10 md:mx-20 md:flex-row md:justify-between md:gap-3">
+          <SearchBar
+            initialSearch={search}
+            className="w-full place-self-center md:w-4/6 md:place-self-start"
+          />
+          <SelectComponent
+            topics={topics}
+            className="w-3/6 md:w-[170px] place-self-start"
+          />
+        </div>
       </div>
-      {events.length > 0 && (
-        <ul className="grid md:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-8 mb-32">
-          {events.map((event) => (
+      {Array.isArray(events) && events.length > 0 ? (
+        <ul className="lg:mx-20 grid md:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-8 mb-32">
+          {events?.map((event) => (
             <EventComponent
               key={event.id}
               event={event}
               apuntado={subscribedEventsIds.includes(event.id)}
+              topics={topics}
               token={token ?? ""}
             />
           ))}
         </ul>
+      ) : (
+        <p className="text-red-500 text-center">
+          No se han encontrado eventos con '{searchParams.q}'
+        </p>
       )}
     </div>
   );

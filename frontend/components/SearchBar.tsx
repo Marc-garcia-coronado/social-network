@@ -1,18 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { Input } from "./ui/input";
 
-export default function SearchBar() {
-  const [searchTerm, setSearchTerm] = useState("");
+function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+}
+
+export default function SearchBar({
+  initialSearch = "",
+  className = "",
+}: {
+  initialSearch?: string;
+  className?: string;
+}) {
+  const [query, setQuery] = useState(initialSearch);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const updateQuery = useCallback(
+    debounce((q: string) => {
+      const params = new URLSearchParams(searchParams?.toString());
+      if (q) {
+        params.set("q", q);
+      } else {
+        params.delete("q");
+      }
+      router.push(`?${params.toString()}`);
+    }, 300),
+    [router, searchParams]
+  );
+
+  useEffect(() => {
+    updateQuery(query);
+  }, [query, updateQuery]);
 
   return (
-    <div className="search-bar">
-      <input
+    <div className={`${className} mb-6 text-center`}>
+      <Input
         type="text"
-        placeholder="Buscar evento..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full px-4 py-2 border rounded-full bg-gray-100 focus:outline-none focus:ring-1 focus:ring-black text-center text-black"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Buscar eventos..."
+        className={`${className} border px-4 py-2 rounded-md w-1/2`}
       />
     </div>
   );

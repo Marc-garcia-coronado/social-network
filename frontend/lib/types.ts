@@ -26,7 +26,7 @@ export type Event = {
   description: string;
   picture: string;
   location: string;
-  user: User;
+  creator: User;
   topic: Topic;
   createdAt: string;
   date: string;

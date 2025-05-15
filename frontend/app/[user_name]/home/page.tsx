@@ -507,7 +507,7 @@ export default function Home() {
       <div className="header flex items-center justify-between px-4 py-2 mt-20">
         {/* Logo */}
         <div className="logo">
-          <Image src="/logo.png" alt="Logo" className="h-8 cursor-pointer" />
+          <Image src="/logo.png" width={24} height={24} alt="Logo" className="h-8 cursor-pointer" />
         </div>
 
         {/* Barra de búsqueda */}

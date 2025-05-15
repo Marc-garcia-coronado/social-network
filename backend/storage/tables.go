@@ -55,6 +55,7 @@ func (s *PostgresStore) createEventsTable() error {
 	  description TEXT,
 	  location VARCHAR(255),
 	  creator_id INT NOT NULL,
+		picture VARCHAR(255),
 	  topic_id INT NOT NULL,
 		date TIMESTAMPTZ DEFAULT null,
 	  created_at TIMESTAMPTZ DEFAULT now(),
