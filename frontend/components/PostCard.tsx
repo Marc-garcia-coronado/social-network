@@ -3,6 +3,7 @@ import { Heart, MessageCircle, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { DropdownCardMenu } from "./DropdownCardMenu";
+import { CommentsDrawer } from "./CommentsDrawer";
 
 
 interface PostCardProps {
@@ -41,14 +42,11 @@ interface PostCardProps {
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const router = useRouter();
-    const handleOpenModal = async () => {
-      await fetchComments(post.id);
-      setIsModalOpen(true);
-    };
   
     const handleCloseModal = () => {
       setIsModalOpen(false);
     };
+    
     return (
       <li
       key={post.id}
@@ -122,15 +120,20 @@ interface PostCardProps {
 
         {/* Icons */}
         <div className="flex space-x-4">
-          <button
-            onClick={handleOpenModal}
-            className="text-white hover:text-gray-200"
-          >
-            <MessageCircle />
-          </button>
+        <CommentsDrawer
+          post={post}
+          comments={comments}
+          newComment={newComment}
+          setNewComment={setNewComment}
+          addComment={addComment}
+          commentLikesCount={commentLikesCount}
+          likedComments={likedComments}
+          fetchComments={fetchComments}
+          toggleCommentLike={toggleCommentLike}
+        />    
           <button className="text-white hover:text-gray-200">
-            {/* Placeholder for future icon */}
-            <Send />
+          {/* Placeholder for future icon */}
+          <Send />
           </button>
         </div>
       </div>

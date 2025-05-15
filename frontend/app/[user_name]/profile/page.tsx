@@ -525,7 +525,7 @@ export default function Profile() {
   // Función para manejar el toggle de likes en comentarios
   const toggleCommentLike = async (commentID: number) => {
     try {
-      const isLiked = likedComments[commentID];
+      const isLiked = likedComments?.[commentID];
       const endpoint = isLiked
         ? `http://localhost:3000/api/comments/${commentID}/dislike`
         : `http://localhost:3000/api/comments/${commentID}/like`;
