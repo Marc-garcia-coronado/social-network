@@ -2,49 +2,55 @@ import React, { useState } from "react";
 import { Heart, MessageCircle, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
+import { DropdownCardMenu } from "./DropdownCardMenu";
+
 
 interface PostCardProps {
-  post: any;
-  postStats: Record<number, { likes: number; comments: number }>;
-  likedPosts: Record<number, boolean>;
-  visibleComments: Record<number, boolean>;
-  comments: Record<number, any[]>;
-  newComment: Record<number, string>;
-  toggleLike: (postId: number) => void;
-  fetchComments: (postId: number) => void;
-  toggleCommentLike: (commentId: number) => void;
-  setNewComment: React.Dispatch<React.SetStateAction<Record<number, string>>>;
-  commentLikesCount: Record<number, number>;
-  likedComments: Record<number, boolean>;
-  addComment: (postId: number) => void;
-}
-const PostCard: React.FC<PostCardProps> = ({
-  post,
-  postStats,
-  likedPosts,
-  visibleComments,
-  comments,
-  newComment,
-  toggleLike,
-  fetchComments,
-  toggleCommentLike,
-  setNewComment,
-  commentLikesCount,
-  likedComments,
-  addComment,
-}) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const router = useRouter();
-  const handleOpenModal = async () => {
-    await fetchComments(post.id);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-  return (
-    <li
+    post: any;
+    postStats: Record<number, { likes: number; comments: number }>;
+    likedPosts: Record<number, boolean>;
+    visibleComments: Record<number, boolean>;
+    comments: Record<number, any[]>;
+    newComment: Record<number, string>;
+    toggleLike: (postId: number) => void;
+    fetchComments: (postId: number) => void;
+    toggleCommentLike: (commentId: number) => void;
+    setNewComment: React.Dispatch<React.SetStateAction<Record<number, string>>>;
+    commentLikesCount: Record<number, number>; 
+    likedComments: Record<number, boolean>; 
+    addComment: (postId: number) => void; 
+    currentUser: { id: number };
+    refreshPosts: () => void;
+  }
+  const PostCard: React.FC<PostCardProps> = ({
+    currentUser,
+    post,
+    postStats,
+    likedPosts,
+    visibleComments,
+    comments,
+    newComment,
+    toggleLike,
+    fetchComments,
+    toggleCommentLike,
+    setNewComment,
+    commentLikesCount,
+    likedComments,
+    addComment,
+    refreshPosts,
+  }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const router = useRouter();
+    const handleOpenModal = async () => {
+      await fetchComments(post.id);
+      setIsModalOpen(true);
+    };
+  
+    const handleCloseModal = () => {
+      setIsModalOpen(false);
+    };
+    return (
+      <li
       key={post.id}
       className="relative bg-white shadow-md rounded-lg w-[350px] sm:w-[350px] md:w-[450px] h-[350px] sm:h-[350px] md:h-[450px] overflow-hidden"
       onDoubleClick={() => toggleLike(post.id)}
@@ -76,7 +82,16 @@ const PostCard: React.FC<PostCardProps> = ({
             />
           </button>
           <span>{postStats[post.id]?.likes ?? "Loading..."}</span>
-        </div>
+          </div>
+          {post.user.id === currentUser?.id && (
+          <DropdownCardMenu 
+          postId={post.id} 
+          userId={post.user.id}
+          refreshPosts={refreshPosts}
+          postTitle={post.title}
+          postTopicId={post.topic.id}
+          />
+          )}
       </div>
 
       {/* Footer Section */}
