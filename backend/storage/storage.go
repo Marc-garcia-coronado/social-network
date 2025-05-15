@@ -47,7 +47,7 @@ type Storage interface {
 
 	// Events methods
 	CreateEvent(event *models.EventReq) (*models.EventWithUser, error)
-	GetAllEvents(limit, offset int) ([]models.EventWithUser, int, error)
+	GetAllEvents(limit, offset int, query string, topicID string) ([]models.EventWithUser, int, error)
 	GetAllEventsByTopic(topicID, limit, offset int) ([]models.EventWithUser, int, error)
 	GetUserEvents(userID, limit, offset int) ([]models.EventWithUser, int, error)
 	UpdateEvent(event map[string]any, eventID int) (*models.EventWithUser, error)

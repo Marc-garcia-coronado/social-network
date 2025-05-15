@@ -36,7 +36,7 @@ func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUs
 	return newEvent, nil
 }
 
-func (s *PostgresStore) GetAllEvents(limit, offset int) ([]models.EventWithUser, int, error) {
+func (s *PostgresStore) GetAllEvents(limit, offset int, query string, topicID string) ([]models.EventWithUser, int, error) {
 	var totalCount int
 	queryCount := "SELECT COUNT(*) FROM events;"
 	if err := s.Db.QueryRow(queryCount).Scan(&totalCount); err != nil {
@@ -50,11 +50,12 @@ func (s *PostgresStore) GetAllEvents(limit, offset int) ([]models.EventWithUser,
 	FROM events e
 	JOIN users u ON u.id = e.creator_id
 	JOIN topics t ON t.id = e.topic_id
+	WHERE e.name ILIKE $3 AND ($4 ILIKE '' OR e.topic_id::text ILIKE $4)
 	ORDER BY e.created_at DESC
 	LIMIT $1 OFFSET $2;
 	`
-
-	rows, err := s.Db.Query(stmt, limit, offset)
+	
+	rows, err := s.Db.Query(stmt, limit, offset, "%" + query + "%", "%" + topicID + "%")
 	if err != nil {
 		return nil, 0, err
 	}
@@ -207,7 +208,6 @@ func (s *PostgresStore) GetUserEvents(userID, limit, offset int) ([]models.Event
 }
 
 func (s *PostgresStore) UpdateEvent(event map[string]any, eventID int) (*models.EventWithUser, error) {
-	// Build dynamic SQL query
 	stmt := "UPDATE events SET "
 	values := []any{}
 	i := 1
@@ -218,24 +218,33 @@ func (s *PostgresStore) UpdateEvent(event map[string]any, eventID int) (*models.
 		i++
 	}
 
-	stmt = stmt[:len(stmt)-2] // Remove last comma
-	stmt += " FROM users u JOIN topics t ON events.topic_id = t.id"
-	stmt += " WHERE events.id = $" + strconv.Itoa(i)
-	stmt += " AND events.creator_id = u.id"
-	stmt += " RETURNING events.id, events.name, events.description, events.location, events.created_at, events.date,"
-	stmt += " u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role"
-	stmt += " t.id, t.name, t.description, t.created_at;"
+	stmt = stmt[:len(stmt)-2] 
+
+	stmt += ` FROM users u, topics t 
+	         WHERE events.id = $` + strconv.Itoa(i) + `
+	         AND events.creator_id = u.id 
+	         AND events.topic_id = t.id`
+
+	stmt += ` RETURNING 
+		events.id, events.name, events.description, events.location, events.created_at, events.date,
+		u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
+		t.id, t.name, t.description, t.created_at;`
+
 	values = append(values, eventID)
 
 	updatedEvent := new(models.EventWithUser)
-	// Execute stmt
+
 	err := s.Db.QueryRow(stmt, values...).Scan(
 		&updatedEvent.ID, &updatedEvent.Name, &updatedEvent.Description,
 		&updatedEvent.Location, &updatedEvent.CreatedAt, &updatedEvent.Date,
 		&updatedEvent.Creator.ID, &updatedEvent.Creator.UserName,
-		&updatedEvent.Creator.FullName, &updatedEvent.Creator.Email, &updatedEvent.Creator.ProfilePicture, &updatedEvent.Creator.IsActive, &updatedEvent.Creator.Role,
-		&updatedEvent.Topic.ID, &updatedEvent.Topic.Name, &updatedEvent.Topic.Description, &updatedEvent.Topic.CreatedAt,
+		&updatedEvent.Creator.FullName, &updatedEvent.Creator.Email,
+		&updatedEvent.Creator.ProfilePicture, &updatedEvent.Creator.IsActive,
+		&updatedEvent.Creator.Role,
+		&updatedEvent.Topic.ID, &updatedEvent.Topic.Name,
+		&updatedEvent.Topic.Description, &updatedEvent.Topic.CreatedAt,
 	)
+
 	if err != nil {
 		return nil, err
 	}
