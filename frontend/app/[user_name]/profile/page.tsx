@@ -34,7 +34,7 @@ export default function Profile() {
   const [followingCount, setFollowingCount] = useState<number>(0);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const refreshUserData = async () => {
@@ -55,6 +55,20 @@ export default function Profile() {
 
       const userData = await response.json();
       setUserData(userData);
+      const postsResponse = await fetch(
+        `http://localhost:3000/api/users/${userData.id}/posts`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!postsResponse.ok) {
+        throw new Error("Error fetching user posts");
+      }
+      const postsData = await postsResponse.json();
+      setUserPosts(postsData);
     } catch (err: any) {
       console.error("Error refreshing user data:", err.message);
     }
@@ -627,18 +641,20 @@ export default function Profile() {
   return (
     <div className="min-h-screen p-8 pb-20">
       <div className="w-100 flex justify-end">
-        <SettingsSheet refreshUserData={refreshUserData}/>
+        <SettingsSheet refreshUserData={refreshUserData} />
       </div>
       <header className="flex flex-col justify-center">
         <section className="flex justify-center">
           <img
-            src={userData.profilePicture || "/teddy.webp"}
+            src={userData?.profilePicture || "/teddy.webp"}
             alt="User Avatar"
             className="w-40 h-40 rounded-full object-cover"
           />
         </section>
         <section className="mb-8 mt-4 space-y-2">
-          <h2 className="text-center"><strong>{userData?.full_name || "Nombre"}</strong></h2>
+          <h2 className="text-center">
+            <strong>{userData?.full_name || "Nombre"}</strong>
+          </h2>
           <p className="text-center">{userData?.bio || ""}</p>
           <p className="text-center">
             <strong>
