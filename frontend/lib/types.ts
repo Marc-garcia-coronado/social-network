@@ -13,6 +13,7 @@ export type User = {
   user_since: string;
   is_active: boolean;
   role: string;
+  bio?: string;
 };
 
 export type DataHTTPResponse = {
