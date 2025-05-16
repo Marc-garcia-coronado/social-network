@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/drawer";
 import { Forward, Heart, MessageCircle } from "lucide-react";
 import Image from "next/image";
+import { Textarea } from "./ui/textarea";
+import { formatDistanceToNow } from "date-fns";
 
 interface CommentsDrawerProps {
   post: any;
@@ -25,6 +27,8 @@ interface CommentsDrawerProps {
   likedComments: Record<number, boolean>;
   fetchComments: (postId: number) => void;
   toggleCommentLike: (commentId: number) => void;
+  disableDoubleClick: () => void;
+  enableDoubleClick: () => void;
 }
 export function CommentsDrawer({
   post,
@@ -36,12 +40,18 @@ export function CommentsDrawer({
   likedComments,
   fetchComments,
   toggleCommentLike,
+  disableDoubleClick,
+  enableDoubleClick,
 }: CommentsDrawerProps) {
   const openDrawer = async () => {
+    disableDoubleClick();
     await fetchComments(post.id);
   };
+  const closeDrawer = () => {
+    enableDoubleClick();
+  };
   return (
-    <Drawer>
+    <Drawer onOpenChange={(isOpen) => !isOpen && closeDrawer()}>
       <DrawerTrigger asChild>
         <button onClick={openDrawer} className="text-white hover:text-gray-200">
           <MessageCircle />
@@ -57,13 +67,13 @@ export function CommentsDrawer({
           </DrawerHeader>
 
           {/* Lista de comentarios */}
-          <div className="space-y-4 max-h-72 overflow-y-auto">
+          <div className="space-y-1 max-h-72 overflow-y-auto">
             {(comments[post.id] || []).length > 0 ? (
               (comments[post.id] || []).map((comment, index) => (
                 <div
                   onDoubleClick={() => toggleCommentLike(comment.id)}
                   key={comment.id ?? `${post.id}-index-${index}`}
-                  className="rounded-md bg-gray-100 p-3 text-sm flex items-center justify-between"
+                  className="rounded-md p-3 text-sm flex items-center justify-between border-b border-gray-300"
                 >
                   <div className="flex items-center">
                     <Image
@@ -77,6 +87,9 @@ export function CommentsDrawer({
                   <div className="flex-1 ml-3">
                     <p className="fw-bold">{comment.user.user_name}</p>
                     <p className="text-gray-800">{comment.body}</p>
+                    <p className="text-gray-500 text-xs mt-1">
+                      {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                    </p>
                   </div>
                   <button
                     onClick={() => toggleCommentLike(comment.id)}
@@ -108,8 +121,7 @@ export function CommentsDrawer({
 
           {/* Campo para nuevo comentario */}
           <div className="mt-4 flex items-center gap-2">
-            <textarea
-              className="flex-1 rounded-md border border-gray-300 p-2 text-sm h-10"
+            <Textarea
               placeholder="Escribe un comentario..."
               value={newComment[post.id] || ""}
               onChange={(e) =>

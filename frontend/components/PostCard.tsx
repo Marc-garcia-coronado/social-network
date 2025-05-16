@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { DropdownCardMenu } from "./DropdownCardMenu";
 import { CommentsDrawer } from "./CommentsDrawer";
+import Image from "next/image";
 
 
 interface PostCardProps {
@@ -41,6 +42,7 @@ interface PostCardProps {
     refreshPosts,
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDoubleClickEnabled, setIsDoubleClickEnabled] = useState(true);
     const router = useRouter();
   
     const handleCloseModal = () => {
@@ -51,15 +53,18 @@ interface PostCardProps {
       <li
       key={post.id}
       className="relative bg-white shadow-md rounded-lg w-[350px] sm:w-[350px] md:w-[450px] h-[350px] sm:h-[350px] md:h-[450px] overflow-hidden"
-      onDoubleClick={() => toggleLike(post.id)}
-    >
+      onDoubleClick={() => {
+        if (isDoubleClickEnabled) toggleLike(post.id);
+      }}    >
       {/* Post Image */}
       {post.picture && (
         <div className="absolute inset-0">
-          <img
+          <Image
             src={/*post.picture ||*/ "/teddy.webp"}
             alt="Post Image"
             className="w-full h-full object-cover"
+            width={450}
+            height={450}
           />
         </div>
       )}
@@ -130,6 +135,8 @@ interface PostCardProps {
           likedComments={likedComments}
           fetchComments={fetchComments}
           toggleCommentLike={toggleCommentLike}
+          disableDoubleClick={() => setIsDoubleClickEnabled(false)} 
+          enableDoubleClick={() => setIsDoubleClickEnabled(true)}   
         />    
           <button className="text-white hover:text-gray-200">
           {/* Placeholder for future icon */}
