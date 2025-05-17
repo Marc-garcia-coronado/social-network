@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 	"strconv"
 
 	"github.com/Marc-Garcia-Coronado/socialNetwork/middleware"
@@ -42,6 +43,22 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 	return utils.WriteJSON(w, http.StatusOK, map[string]any{
 		"user": loggedUser,
 	})
+}
+func (s *APIServer) handleLogout(w http.ResponseWriter, r *http.Request) error {
+    http.SetCookie(w, &http.Cookie{
+        Name:     "token",
+        Value:    "",
+        Path:     "/",
+        Expires:  time.Unix(0, 0), // Expira en el pasado
+        MaxAge:   -1,
+        HttpOnly: true,
+        Secure:   false, // true si usas HTTPS en producción
+        SameSite: http.SameSiteLaxMode,
+    })
+    w.WriteHeader(http.StatusOK)
+    w.Header().Set("Content-Type", "application/json")
+    w.Write([]byte(`{"message":"Logout successful"}`))
+    return nil
 }
 
 func (s *APIServer) handleAuth(w http.ResponseWriter, r *http.Request) error {
