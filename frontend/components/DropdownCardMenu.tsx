@@ -206,7 +206,7 @@ export function DropdownCardMenu({
             </div>
 
             <DialogFooter>
-              <Button type="submit">Guardar cambios</Button>
+              <Button type="submit" className="mt-3">Guardar cambios</Button>
             </DialogFooter>
           </form>
         </DialogContent>
