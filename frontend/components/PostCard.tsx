@@ -79,8 +79,8 @@ interface PostCardProps {
             }`}
           >
             <Heart
-              className={`w-6 h-6 transition-colors duration-300 ${
-                likedPosts[post.id] ? "text-white" : "text-gray-300"
+              className={`w-6 h-6 transition-colors  duration-300 ${
+                likedPosts[post.id] ? "text-white" : "text-gray-300  hover:text-lime-400"
               }`}
             />
           </button>
@@ -138,7 +138,7 @@ interface PostCardProps {
           disableDoubleClick={() => setIsDoubleClickEnabled(false)} 
           enableDoubleClick={() => setIsDoubleClickEnabled(true)}   
         />    
-          <button className="text-white hover:text-gray-200">
+          <button className="text-white hover:text-lime-400 transition-all">
           {/* Placeholder for future icon */}
           <Send />
           </button>

@@ -204,7 +204,7 @@ export function SettingsSheet({
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Settings className="w-8 h-8 text-black cursor-pointer hover:text-lime-500 transition-all" />
+        <Settings className="w-8 h-8 text-black cursor-pointer hover:text-lime-400 transition-all" />
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
@@ -311,11 +311,15 @@ export function SettingsSheet({
             Guardar Topics
           </Button>
         </SheetFooter>
-        <SheetFooter>
-          <Button onClick={handleLogout} className="mb-3 bg-red-600 hover:bg-red-700">
+        {/* Botón de cerrar sesión abajo a la derecha */}
+        <div className="absolute right-6 bottom-6">
+          <Button
+            onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-700"
+          >
             Cerrar Sesión
           </Button>
-        </SheetFooter>
+        </div>
       </SheetContent>
     </Sheet>
   );

@@ -12,10 +12,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Forward, Heart, MessageCircle } from "lucide-react";
+import { Ellipsis, Forward, Heart, MessageCircle, Trash } from "lucide-react";
 import Image from "next/image";
 import { Textarea } from "./ui/textarea";
 import { formatDistanceToNow } from "date-fns";
+import { DeleteCommentDialog } from "@/components/DeleteCommentDialog";
+import { useUserContext } from "@/contexts/UserContext"; // Asegúrate de importar tu contexto de usuario
 
 interface CommentsDrawerProps {
   post: any;
@@ -50,10 +52,19 @@ export function CommentsDrawer({
   const closeDrawer = () => {
     enableDoubleClick();
   };
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [selectedCommentId, setSelectedCommentId] = React.useState<
+    number | null
+  >(null);
+  const { user } = useUserContext();
+
   return (
     <Drawer onOpenChange={(isOpen) => !isOpen && closeDrawer()}>
       <DrawerTrigger asChild>
-        <button onClick={openDrawer} className="text-white hover:text-gray-200">
+        <button
+          onClick={openDrawer}
+          className="text-white hover:text-lime-400 transition-all"
+        >
           <MessageCircle />
         </button>
       </DrawerTrigger>
@@ -87,9 +98,24 @@ export function CommentsDrawer({
                   <div className="flex-1 ml-3">
                     <p className="fw-bold">{comment.user.user_name}</p>
                     <p className="text-gray-800">{comment.body}</p>
-                    <p className="text-gray-500 text-xs mt-1">
-                      {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                    </p>
+                    <div className="flex items-center text-gray-500 text-xs mt-1">
+                      <span>
+                        {formatDistanceToNow(new Date(comment.created_at), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                      {user?.id === comment.user.id && (
+                        <Button
+                          className="bg-transparent text-gray-500 hover:bg-transparent hover:text-lime-400 border-none shadow-none ml-2 p-0 h-4"
+                          onClick={() => {
+                            setSelectedCommentId(comment.id);
+                            setOpenDelete(true);
+                          }}
+                        >
+                          <Trash />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <button
                     onClick={() => toggleCommentLike(comment.id)}
@@ -102,8 +128,8 @@ export function CommentsDrawer({
                     <Heart
                       className={` w-5 h-5 transition-colors duration-300 ${
                         likedComments && likedComments[comment.id]
-                          ? "text-white"
-                          : "text-gray-300"
+                          ? "text-white "
+                          : "text-gray-300 hover:text-lime-400"
                       }`}
                     />
                   </button>
@@ -118,7 +144,13 @@ export function CommentsDrawer({
               </p>
             )}
           </div>
-
+          {/* Modal para eliminar comentario */}
+          <DeleteCommentDialog
+            open={openDelete}
+            setOpen={setOpenDelete}
+            commentId={selectedCommentId ?? 0}
+            refreshComments={() => fetchComments(post.id)}
+          />
           {/* Campo para nuevo comentario */}
           <div className="mt-4 flex items-center gap-2">
             <Textarea
