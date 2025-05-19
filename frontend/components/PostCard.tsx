@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { DropdownCardMenu } from "./DropdownCardMenu";
 import { CommentsDrawer } from "./CommentsDrawer";
 import Image from "next/image";
+import { useUserContext } from "@/contexts/UserContext";
 
 
 interface PostCardProps {
@@ -41,6 +42,7 @@ interface PostCardProps {
     addComment,
     refreshPosts,
   }) => {
+    const { user } = useUserContext();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDoubleClickEnabled, setIsDoubleClickEnabled] = useState(true);
     const router = useRouter();
@@ -86,7 +88,7 @@ interface PostCardProps {
           </button>
           <span>{postStats[post.id]?.likes ?? "Loading..."}</span>
           </div>
-          {post.user.id === currentUser?.id && (
+          {post.user.id === user?.id && (
           <DropdownCardMenu 
           postId={post.id} 
           userId={post.user.id}
