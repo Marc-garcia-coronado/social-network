@@ -34,9 +34,9 @@ func (s *APIServer) Run() {
 	router := chi.NewRouter()
 	router.Use(chimw.Logger)
 	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3001"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowedOrigins:   []string{"http://localhost:3001"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,
 	}))
 
@@ -44,6 +44,10 @@ func (s *APIServer) Run() {
 	router.Post("/api/register", utils.MakeHTTPHandleFunc(s.handleCreateUser))
 	router.Post("/api/login", utils.MakeHTTPHandleFunc(s.handleLogin))
 	router.Get("/api/topics", utils.MakeHTTPHandleFunc(s.handleGetAllTopics))
+
+	// User - WebSocket route
+	router.Get("/ws", s.handleWebSocket)
+
 	// Protected router for not admin users
 	protectedRouter := chi.NewRouter()
 	protectedRouter.Use(middleware.JWTMiddleware)

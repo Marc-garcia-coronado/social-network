@@ -221,9 +221,7 @@ const registerPost = async (body: RegisterFormData) => {
     throw new Error("Ha fallado al crear un usuario");
   }
 
-  const data = response.json();
-  const topicsRes = await followTopicsFn(data.token);
-  return topicsRes.ok ? data : "";
+  return response.json();
 };
 
 const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {

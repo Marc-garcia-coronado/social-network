@@ -1,67 +1,73 @@
+"use client";
+
 import React, { useState } from "react";
 import { Heart, MessageCircle, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { DropdownCardMenu } from "./DropdownCardMenu";
-
+import Image from "next/image";
 
 interface PostCardProps {
-    post: any;
-    postStats: Record<number, { likes: number; comments: number }>;
-    likedPosts: Record<number, boolean>;
-    visibleComments: Record<number, boolean>;
-    comments: Record<number, any[]>;
-    newComment: Record<number, string>;
-    toggleLike: (postId: number) => void;
-    fetchComments: (postId: number) => void;
-    toggleCommentLike: (commentId: number) => void;
-    setNewComment: React.Dispatch<React.SetStateAction<Record<number, string>>>;
-    commentLikesCount: Record<number, number>; 
-    likedComments: Record<number, boolean>; 
-    addComment: (postId: number) => void; 
-    currentUser: { id: number };
-    refreshPosts: () => void;
-  }
-  const PostCard: React.FC<PostCardProps> = ({
-    currentUser,
-    post,
-    postStats,
-    likedPosts,
-    visibleComments,
-    comments,
-    newComment,
-    toggleLike,
-    fetchComments,
-    toggleCommentLike,
-    setNewComment,
-    commentLikesCount,
-    likedComments,
-    addComment,
-    refreshPosts,
-  }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const router = useRouter();
-    const handleOpenModal = async () => {
-      await fetchComments(post.id);
-      setIsModalOpen(true);
-    };
-  
-    const handleCloseModal = () => {
-      setIsModalOpen(false);
-    };
-    return (
-      <li
+  post: any;
+  postStats: Record<number, { likes: number; comments: number }>;
+  likedPosts: Record<number, boolean>;
+  visibleComments: Record<number, boolean>;
+  comments: Record<number, any[]>;
+  newComment: Record<number, string>;
+  toggleLike: (postId: number) => void;
+  fetchComments: (postId: number) => void;
+  toggleCommentLike: (commentId: number) => void;
+  setNewComment: React.Dispatch<React.SetStateAction<Record<number, string>>>;
+  commentLikesCount: Record<number, number>;
+  likedComments: Record<number, boolean>;
+  addComment: (postId: number) => void;
+  currentUser: { id: number };
+  refreshPosts: () => void;
+}
+const PostCard: React.FC<PostCardProps> = ({
+  currentUser,
+  post,
+  postStats,
+  likedPosts,
+  visibleComments,
+  comments,
+  newComment,
+  toggleLike,
+  fetchComments,
+  toggleCommentLike,
+  setNewComment,
+  commentLikesCount,
+  likedComments,
+  addComment,
+  refreshPosts,
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
+  const handleOpenModal = async () => {
+    await fetchComments(post.id);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  return (
+    <li
       key={post.id}
       className="relative bg-white shadow-md rounded-lg w-[350px] sm:w-[350px] md:w-[450px] h-[350px] sm:h-[350px] md:h-[450px] overflow-hidden"
       onDoubleClick={() => toggleLike(post.id)}
     >
       {/* Post Image */}
-      {post.picture && (
+      {post.picture.Valid && (
         <div className="absolute inset-0">
-          <img
-            src={/*post.picture ||*/ "/teddy.webp"}
+          <Image
+            src={post.picture.String}
             alt="Post Image"
+            width={24}
+            height={24}
             className="w-full h-full object-cover"
+            priority
           />
         </div>
       )}
@@ -82,16 +88,16 @@ interface PostCardProps {
             />
           </button>
           <span>{postStats[post.id]?.likes ?? "Loading..."}</span>
-          </div>
-          {post.user.id === currentUser?.id && (
-          <DropdownCardMenu 
-          postId={post.id} 
-          userId={post.user.id}
-          refreshPosts={refreshPosts}
-          postTitle={post.title}
-          postTopicId={post.topic.id}
+        </div>
+        {post.user.id === currentUser?.id && (
+          <DropdownCardMenu
+            postId={post.id}
+            userId={post.user.id}
+            refreshPosts={refreshPosts}
+            postTitle={post.title}
+            postTopicId={post.topic.id}
           />
-          )}
+        )}
       </div>
 
       {/* Footer Section */}
@@ -101,9 +107,11 @@ interface PostCardProps {
           className="flex items-center space-x-2 cursor-pointer"
           onClick={() => router.push(`/${post.user.user_name}/profile`)}
         >
-          <img
-            src={post.user.profilePicture || "/teddy.webp"}
+          <Image
+            src={post.user.profilePicture?.String || "/teddy.webp"}
             alt="User Avatar"
+            width={24}
+            height={24}
             className="w-10 h-10 rounded-full"
           />
           <div className="flex flex-col">
@@ -154,31 +162,37 @@ interface PostCardProps {
 
             {/* Comments List */}
             <ul className="space-y-4 max-h-96 overflow-y-auto">
-              {(comments[post.id] || []).map((comment: any, index: number) => (
-                <li
-                  key={
-                    comment.id
-                      ? `${post.id}-${comment.id}`
-                      : `${post.id}-index-${index}`
-                  }
-                  className="border-b pb-2"
-                >
-                  <p className="text-white-700">{comment.body}</p>
-                  <div className="text-sm text-white-500">
-                    Likes: {commentLikesCount[comment.id] ?? "Loading..."}
-                  </div>
-                  <button
-                    onClick={() => toggleCommentLike(comment.id)}
-                    className={`text-sm ${
-                      likedComments[comment.id]
-                        ? "text-red-500"
-                        : "text-blue-500"
-                    }`}
-                  >
-                    {likedComments[comment.id] ? "Quitar Like" : "Dar Like"}
-                  </button>
-                </li>
-              ))}
+              {Array.isArray(comments?.[post.id]) &&
+                comments[post.id]
+                  .filter((comment: any) => comment?.id != null)
+                  .map((comment: any, index: number) => {
+                    return (
+                      <li
+                        key={`${post.id}-${comment.id}`}
+                        className="border-b pb-2"
+                      >
+                        <p className="text-white-700">{comment?.body}</p>
+                        <div className="text-sm text-white-500">
+                          Likes:{" "}
+                          {commentLikesCount?.[comment.id] ?? "Loading..."}
+                        </div>
+                        {comment?.id !== undefined && (
+                          <button
+                            onClick={() => toggleCommentLike(comment.id)}
+                            className={`text-sm ${
+                              likedComments?.[comment.id]
+                                ? "text-red-500"
+                                : "text-blue-500"
+                            }`}
+                          >
+                            {likedComments?.[comment.id]
+                              ? "Quitar Like"
+                              : "Dar Like"}
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
             </ul>
 
             {/* Add Comment Section */}

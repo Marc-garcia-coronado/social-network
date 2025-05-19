@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -8,36 +7,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCallback } from "react";
 import { Topic } from "@/lib/types";
 
 export default function SelectComponent({
   topics,
+  value,
+  onChange,
   className = "",
 }: {
   topics: Topic[];
+  value: string;
+  onChange: (val: string) => void;
   className?: string;
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const handleSelect = useCallback(
-    (value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-
-      if (value === "all") {
-        params.delete("topic");
-      } else {
-        params.set("topic", value);
-      }
-
-      router.push(`?${params.toString()}`);
-    },
-    [router, searchParams],
-  );
-
   return (
-    <Select onValueChange={handleSelect}>
+    <Select value={value} onValueChange={onChange}>
       <SelectTrigger className={`${className}`}>
         <SelectValue placeholder="Filtrar por..." />
       </SelectTrigger>

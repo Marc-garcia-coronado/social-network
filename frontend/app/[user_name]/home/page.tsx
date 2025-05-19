@@ -1,15 +1,41 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useUserContext } from "@/contexts/UserContext";
-import useHome from "@/hooks/useHome";
 import useUser from "@/hooks/useUser";
-import DockComponent from "@/components/DockComponent";
-import Link from "next/link";
 import { User } from "@/lib/types";
 import PostCard from "@/components/PostCard";
 import { MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+
+type PageParam = {
+  pageParam?: number;
+};
+
+const fetchPosts = async ({
+  pageParam = 1,
+}: PageParam): Promise<{
+  posts: any;
+  pagination: { page: number; limit: number; total_count: number };
+}> => {
+  const response = await fetch(
+    `http://localhost:3000/api/feed?page=${pageParam}`,
+    {
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error fetching posts");
+  }
+
+  return response.json();
+};
 
 export default function Home() {
   const { user } = useUserContext();
@@ -17,9 +43,22 @@ export default function Home() {
 
   const {
     data: homeData,
-    error: homeError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading: homeLoading,
-  } = useHome();
+    error: homeError,
+  } = useInfiniteQuery({
+    queryKey: ["posts"],
+    queryFn: fetchPosts,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, limit, total_count } = lastPage.pagination;
+      const totalPages = Math.ceil(total_count / limit);
+      return page < totalPages ? page + 1 : undefined;
+    },
+  });
+
   const {
     data: userData,
     error: userError,
@@ -29,21 +68,17 @@ export default function Home() {
 
   const [searchTerm, setSearchTerm] = useState(""); // Estado para la barra de búsqueda
   const [filteredUsers, setFilteredUsers] = useState<any[]>([]); // Estado para los usuarios filtrados
-  const [isSearching, setIsSearching] = useState(false); // Estado para mostrar un indicador de búsqueda
   const [showNoResults, setShowNoResults] = useState(false); // Nuevo estado
 
   const [postStats, setPostStats] = useState<
     Record<number, { likes: number; comments: number }>
-  >({});
-  const [postCreators, setPostCreators] = useState<
-    Record<number, { name: string }>
   >({});
   const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
 
   const [comments, setComments] = useState<Record<number, any[]>>({});
   const [newComment, setNewComment] = useState<Record<number, string>>({});
   const [likedComments, setLikedComments] = useState<Record<number, boolean>>(
-    {},
+    {}
   );
   const [commentLikesCount, setCommentLikesCount] = useState<
     Record<number, number>
@@ -60,20 +95,12 @@ export default function Home() {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
-            )}`,
           },
         }),
         fetch(`http://localhost:3000/api/posts/${postID}/comments/count`, {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
-            )}`,
           },
         }),
       ]);
@@ -96,37 +123,6 @@ export default function Home() {
       console.error(`Error fetching stats for post ${postID}:`, error);
     }
   };
-  // Fetch creator info for a specific post
-  const fetchPostCreator = async (user: User) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/users/${user.id}`,
-        {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
-            )}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        throw new Error("Error fetching post creator");
-      }
-      const creatorData = await response.json();
-      setPostCreators((prevCreators) => ({
-        ...prevCreators,
-        [user.id]: {
-          name: creatorData.user_name,
-          //picture: creatorData.profile_picture,
-        },
-      }));
-    } catch (error) {
-      console.error(`Error fetching creator for post ${user.id}:`, error);
-    }
-  };
   // Función para manejar el toggle de likes
   const toggleLike = async (postID: number) => {
     try {
@@ -142,16 +138,12 @@ export default function Home() {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1",
-          )}`,
         },
       });
 
       if (!response.ok) {
         throw new Error(
-          isLiked ? "Error al quitar el like" : "Error al dar like",
+          isLiked ? "Error al quitar el like" : "Error al dar like"
         );
       }
 
@@ -182,12 +174,8 @@ export default function Home() {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
-            )}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -197,13 +185,15 @@ export default function Home() {
       const likedPostsData = await response.json();
 
       // Convertimos la lista de post IDs en un mapa para un acceso más rápido
-      const likedPostsMap = likedPostsData.reduce(
-        (acc: Record<number, boolean>, postID: number) => {
-          acc[postID] = true;
-          return acc;
-        },
-        {},
-      );
+      const likedPostsMap = likedPostsData
+        ? likedPostsData.reduce(
+          (acc: Record<number, boolean>, postID: number) => {
+            acc[postID] = true;
+            return acc;
+          },
+          {}
+        )
+        : [];
 
       setLikedPosts(likedPostsMap);
     } catch (error) {
@@ -220,9 +210,8 @@ export default function Home() {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1")}`,
           },
-        },
+        }
       );
       if (!response.ok) {
         throw new Error("Error fetching comments");
@@ -254,12 +243,8 @@ export default function Home() {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
-              "$1",
-            )}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -276,7 +261,7 @@ export default function Home() {
     } catch (error) {
       console.error(
         `Error fetching likes count for comment ${commentID}:`,
-        error,
+        error
       );
     }
   };
@@ -294,13 +279,9 @@ export default function Home() {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
-            )}`,
           },
           body: JSON.stringify({ body: commentText }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -333,7 +314,7 @@ export default function Home() {
   // Función para manejar el toggle de likes en comentarios
   const toggleCommentLike = async (commentID: number) => {
     try {
-      const isLiked = likedComments[commentID];
+      const isLiked = likedComments ? likedComments[commentID] : false;
       const endpoint = isLiked
         ? `http://localhost:3000/api/comments/${commentID}/dislike`
         : `http://localhost:3000/api/comments/${commentID}/like`;
@@ -345,16 +326,12 @@ export default function Home() {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1",
-          )}`,
         },
       });
 
       if (!response.ok) {
         throw new Error(
-          isLiked ? "Error al quitar el like" : "Error al dar like",
+          isLiked ? "Error al quitar el like" : "Error al dar like"
         );
       }
 
@@ -380,12 +357,8 @@ export default function Home() {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
-              "$1",
-            )}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -395,12 +368,12 @@ export default function Home() {
       const likedCommentsData: number[] = await response.json();
 
       // Convertimos la lista de comment IDs en un mapa para un acceso más rápido
-      const likedCommentsMap = likedCommentsData.reduce(
+      const likedCommentsMap = likedCommentsData?.reduce(
         (acc: Record<number, boolean>, commentID: number) => {
           acc[commentID] = true;
           return acc;
         },
-        {},
+        {}
       );
 
       setLikedComments(likedCommentsMap);
@@ -411,11 +384,12 @@ export default function Home() {
   // Fetch stats and creator info for all posts when homeData changes
   useEffect(() => {
     const fetchData = async () => {
-      if (homeData?.posts) {
+      if (homeData?.pages) {
         // Fetch stats and creator info for all posts
-        homeData.posts.forEach((post: any) => {
-          fetchPostStats(post.id);
-          fetchPostCreator(post.user);
+        homeData.pages.forEach((page) => {
+          page.posts.forEach((post: any) => {
+            fetchPostStats(post.id);
+          });
         });
 
         // Fetch user likes
@@ -430,7 +404,6 @@ export default function Home() {
   // Función para buscar usuarios en el backend
   const fetchFilteredUsers = async (term: string) => {
     try {
-      setIsSearching(true);
       setShowNoResults(false); // Ocultar mensaje mientras se busca
       const response = await fetch(
         `http://localhost:3000/api/users/search?query=${term}&limit=10`,
@@ -439,12 +412,8 @@ export default function Home() {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
-            )}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -472,8 +441,6 @@ export default function Home() {
       console.error("Error fetching users:", error);
       setFilteredUsers([]);
       setShowNoResults(true);
-    } finally {
-      setIsSearching(false);
     }
   };
 
@@ -489,7 +456,6 @@ export default function Home() {
     }
   }, [searchTerm]);
 
-  console.log(filteredUsers);
   if (homeLoading || userLoading) {
     return <div>Loading...</div>;
   }
@@ -507,7 +473,13 @@ export default function Home() {
       <div className="header flex items-center justify-between px-4 py-2 mt-20">
         {/* Logo */}
         <div className="logo">
-          <Image src="/logo.png" width={24} height={24} alt="Logo" className="h-8 cursor-pointer" />
+          <Image
+            src="/logo.png"
+            width={24}
+            height={24}
+            alt="Logo"
+            className="h-8 cursor-pointer"
+          />
         </div>
 
         {/* Barra de búsqueda */}
@@ -523,7 +495,7 @@ export default function Home() {
 
         {/* Messages Icon */}
         <div className="messages">
-          <button onClick={() => router.push("/messages")} className="relative">
+          <button onClick={() => router.push(`/${user?.user_name}/messages`)} className="relative">
             <MessageSquare size={32} />
           </button>
         </div>
@@ -553,7 +525,9 @@ export default function Home() {
 
       {/* Mensaje si no hay resultados */}
       {showNoResults && searchTerm && filteredUsers.length === 0 && (
-        <p className="mt-4 text-gray-500">No se encontraron usuarios.</p>
+        <div className="mt-4 text-center text-gray-500">
+          No se encontraron usuarios.
+        </div>
       )}
 
       <ul className="flex flex-wrap gap-2 px-4 py-2">
@@ -571,30 +545,41 @@ export default function Home() {
         )}
       </ul>
       <div className="stories">{/*Aqui irçan las historias */}</div>
-      <ul className="flex flex-wrap gap-4 justify-center">
-        {homeData?.posts ? (
-          homeData.posts.map((post: any) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              postStats={postStats}
-              likedPosts={likedPosts}
-              visibleComments={visibleComments}
-              comments={comments}
-              newComment={newComment}
-              toggleLike={toggleLike}
-              fetchComments={fetchComments}
-              toggleCommentLike={toggleCommentLike}
-              setNewComment={setNewComment}
-              commentLikesCount={commentLikesCount}
-              likedComments={likedComments}
-              addComment={addComment}
-            />
-          ))
-        ) : (
-          <p>No hay publicaciones disponibles.</p>
+      <div className="flex flex-col gap-8 mb-32">
+        <ul className="flex flex-wrap gap-4 justify-center">
+          {homeData?.pages.map((page) =>
+            page.posts.map((post: any) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                postStats={postStats}
+                likedPosts={likedPosts}
+                visibleComments={visibleComments}
+                comments={comments}
+                newComment={newComment}
+                toggleLike={toggleLike}
+                fetchComments={fetchComments}
+                toggleCommentLike={toggleCommentLike}
+                setNewComment={setNewComment}
+                commentLikesCount={commentLikesCount}
+                likedComments={likedComments}
+                addComment={addComment}
+              />
+            ))
+          )}
+        </ul>
+        {hasNextPage && (
+          <div className="text-center mt-6">
+            <Button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              variant="outline"
+            >
+              {isFetchingNextPage ? "Cargando..." : "Cargar más"}
+            </Button>
+          </div>
         )}
-      </ul>
+      </div>
     </div>
   );
 }

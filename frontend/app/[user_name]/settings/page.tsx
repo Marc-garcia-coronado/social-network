@@ -23,7 +23,7 @@ export default function Settings() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleProfileUpdate = async () => {
     try {
       const response = await fetch(
@@ -34,13 +34,13 @@ export default function Settings() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
+              "$1",
             )}`,
           },
           body: JSON.stringify(formData),
-        }
+        },
       );
-      console.log(response)
+      console.log(response);
       if (!response.ok) throw new Error("Error updating profile");
 
       const updatedUser = await response.json();
@@ -60,7 +60,7 @@ export default function Settings() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${document.cookie.replace(
             /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
+            "$1",
           )}`,
         },
         body: JSON.stringify({ topics }),
@@ -160,8 +160,8 @@ export default function Settings() {
               onChange={(e) =>
                 setTopics(
                   Array.from(e.target.selectedOptions, (opt) =>
-                    Number(opt.value)
-                  )
+                    Number(opt.value),
+                  ),
                 )
               }
               className="w-full border rounded p-2"
@@ -183,7 +183,7 @@ export default function Settings() {
       </section>
 
       {/* Cerrar Sesión */}
-      <section>
+      <section className="mb-32">
         <h2 className="text-2xl font-semibold mb-4">Cerrar Sesión</h2>
         <button
           onClick={handleLogout}

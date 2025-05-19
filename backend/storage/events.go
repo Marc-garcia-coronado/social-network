@@ -38,8 +38,8 @@ func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUs
 
 func (s *PostgresStore) GetAllEvents(limit, offset int, query string, topicID string) ([]models.EventWithUser, int, error) {
 	var totalCount int
-	queryCount := "SELECT COUNT(*) FROM events;"
-	if err := s.Db.QueryRow(queryCount).Scan(&totalCount); err != nil {
+	queryCount := "SELECT COUNT(*) FROM events e WHERE e.name ILIKE $1 AND ($2 ILIKE '' OR e.topic_id::text ILIKE $2);"
+	if err := s.Db.QueryRow(queryCount, "%"+query+"%", "%"+topicID+"%").Scan(&totalCount); err != nil {
 		return nil, 0, err
 	}
 
@@ -54,8 +54,8 @@ func (s *PostgresStore) GetAllEvents(limit, offset int, query string, topicID st
 	ORDER BY e.created_at DESC
 	LIMIT $1 OFFSET $2;
 	`
-	
-	rows, err := s.Db.Query(stmt, limit, offset, "%" + query + "%", "%" + topicID + "%")
+
+	rows, err := s.Db.Query(stmt, limit, offset, "%"+query+"%", "%"+topicID+"%")
 	if err != nil {
 		return nil, 0, err
 	}
@@ -218,7 +218,7 @@ func (s *PostgresStore) UpdateEvent(event map[string]any, eventID int) (*models.
 		i++
 	}
 
-	stmt = stmt[:len(stmt)-2] 
+	stmt = stmt[:len(stmt)-2]
 
 	stmt += ` FROM users u, topics t 
 	         WHERE events.id = $` + strconv.Itoa(i) + `

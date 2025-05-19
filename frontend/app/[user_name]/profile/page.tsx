@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import PostCard from "@/components/PostCard";
 import { Settings } from "lucide-react";
+import Image from "next/image";
 
 export default function Profile() {
   const { user } = useUserContext();
@@ -24,7 +25,7 @@ export default function Profile() {
   const [comments, setComments] = useState<Record<number, any[]>>({});
   const [newComment, setNewComment] = useState<Record<number, string>>({});
   const [likedComments, setLikedComments] = useState<Record<number, boolean>>(
-    {}
+    {},
   );
   const [commentLikesCount, setCommentLikesCount] = useState<
     Record<number, number>
@@ -50,7 +51,7 @@ export default function Profile() {
             headers: {
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -68,7 +69,7 @@ export default function Profile() {
             headers: {
               "Content-Type": "application/json",
             },
-          }
+          },
         );
 
         if (!postsResponse.ok) {
@@ -96,7 +97,7 @@ export default function Profile() {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (!postsResponse.ok) {
@@ -120,7 +121,7 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
+              "$1",
             )}`,
           },
         }),
@@ -130,7 +131,7 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
+              "$1",
             )}`,
           },
         }),
@@ -175,14 +176,14 @@ export default function Profile() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${document.cookie.replace(
             /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
+            "$1",
           )}`,
         },
       });
 
       if (!response.ok) {
         throw new Error(
-          isLiked ? "Error al quitar el like" : "Error al dar like"
+          isLiked ? "Error al quitar el like" : "Error al dar like",
         );
       }
 
@@ -216,10 +217,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
+              "$1",
             )}`,
           },
-        }
+        },
       );
       if (!response.ok) {
         throw new Error("Error fetching comments");
@@ -257,11 +258,11 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
+              "$1",
             )}`,
           },
           body: JSON.stringify({ body: commentText }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -301,10 +302,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
-              "$1"
+              "$1",
             )}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -321,7 +322,7 @@ export default function Profile() {
     } catch (error) {
       console.error(
         `Error fetching likes count for comment ${commentID}:`,
-        error
+        error,
       );
     }
   };
@@ -336,7 +337,7 @@ export default function Profile() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${document.cookie.replace(
                 /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                "$1"
+                "$1",
               )}`,
             },
           }),
@@ -346,7 +347,7 @@ export default function Profile() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${document.cookie.replace(
                 /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                "$1"
+                "$1",
               )}`,
             },
           }),
@@ -381,10 +382,10 @@ export default function Profile() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${document.cookie.replace(
                 /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                "$1"
+                "$1",
               )}`,
             },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -398,7 +399,7 @@ export default function Profile() {
             acc[postID] = true;
             return acc;
           },
-          {}
+          {},
         );
 
         setLikedPosts(likedPostsMap);
@@ -423,10 +424,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
+              "$1",
             )}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -450,10 +451,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
+              "$1",
             )}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -478,10 +479,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
+              "$1",
             )}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -506,10 +507,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
+              "$1",
             )}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -539,14 +540,14 @@ export default function Profile() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${document.cookie.replace(
             /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
+            "$1",
           )}`,
         },
       });
 
       if (!response.ok) {
         throw new Error(
-          isLiked ? "Error al quitar el like" : "Error al dar like"
+          isLiked ? "Error al quitar el like" : "Error al dar like",
         );
       }
 
@@ -574,10 +575,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
+              "$1",
             )}`,
           },
-        }
+        },
       );
       if (!response.ok) {
         throw new Error("Error fetching user comment likes");
@@ -589,7 +590,7 @@ export default function Profile() {
           acc[commentID] = true;
           return acc;
         },
-        {}
+        {},
       );
       setLikedComments(likedCommentsMap);
     } catch (error) {
@@ -618,10 +619,10 @@ export default function Profile() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${document.cookie.replace(
                   /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                  "$1"
+                  "$1",
                 )}`,
               },
-            }
+            },
           );
 
           if (!response.ok) {
@@ -638,7 +639,7 @@ export default function Profile() {
 
       checkIfFollowing();
     }
-  }, [userData]);
+  }, [userData, isFollowing]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -648,7 +649,7 @@ export default function Profile() {
     return <div>Error: {error}</div>;
   }
   return (
-    <div className="min-h-screen p-8 pb-20">
+    <div className="min-h-screen pt-8 px-8">
       <div className="w-100 flex justify-end">
         <button onClick={() => router.push(`/${userData.user_name}/settings`)}>
           <Settings className="w-8 h-8 text-black" />
@@ -656,7 +657,9 @@ export default function Profile() {
       </div>
       <header className="flex flex-col justify-center">
         <section className="flex justify-center">
-          <img
+          <Image
+            width={24}
+            height={24}
             src={userData.profilePicture || "/teddy.webp"}
             alt="User Avatar"
             className="w-40 h-40 rounded-full object-cover"
@@ -688,7 +691,7 @@ export default function Profile() {
               <button
                 onClick={() =>
                   router.push(
-                    `/${userData.user_name}/messages` /* Aqui despues otra barra con id de mensaje y cambiar userData por user */
+                    `/${userData.user_name}/messages` /* Aqui despues otra barra con id de mensaje y cambiar userData por user */,
                   )
                 }
                 className={`mt-4 px-4 py-2 rounded-full bg-primary text-white`}
@@ -703,7 +706,7 @@ export default function Profile() {
         <h2 className="text-2xl font-semibold text-center mb-3 underline underline-offset-4">
           Publicaciones
         </h2>
-        <ul className="flex flex-wrap gap-4 justify-center">
+        <ul className="flex flex-wrap gap-4 justify-center mb-32">
           {userPosts?.posts?.length > 0 ? (
             userPosts.posts.map((post) => (
               <PostCard
