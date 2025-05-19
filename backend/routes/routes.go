@@ -54,6 +54,7 @@ func (s *APIServer) Run() {
 	protectedRouter.Get("/users/{user_name}", utils.MakeHTTPHandleFunc(s.handleGetUserByUserName))
 	protectedRouter.Get("/users/search", utils.MakeHTTPHandleFunc(s.handleSearchUsers))
 	protectedRouter.Patch("/users/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateUser))
+	protectedRouter.Post("/logout", utils.MakeHTTPHandleFunc(s.handleLogout))
 
 	// User - Follows routes
 	protectedRouter.Get("/users/{id}/followers", utils.MakeHTTPHandleFunc(s.handleGetFollowers))

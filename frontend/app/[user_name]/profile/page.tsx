@@ -3,7 +3,7 @@ import { useUserContext } from "@/contexts/UserContext";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import PostCard from "@/components/PostCard";
-import { Settings } from "lucide-react";
+import { SettingsSheet } from "@/components/SettingsSheet";
 
 export default function Profile() {
   const { user } = useUserContext();
@@ -34,57 +34,48 @@ export default function Profile() {
   const [followingCount, setFollowingCount] = useState<number>(0);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch user data based on user_name
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user_name) return;
-
-      try {
-        const response = await fetch(
-          `http://localhost:3000/api/users/${user_name}`,
-          {
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Error fetching user data");
+  const refreshUserData = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/users/${user_name}`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
+      );
 
-        const userData = await response.json();
-        setUserData(userData);
-
-        // Fetch user posts
-        const postsResponse = await fetch(
-          `http://localhost:3000/api/users/${userData.id}/posts`,
-          {
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!postsResponse.ok) {
-          throw new Error("Error fetching user posts");
-        }
-
-        const postsData = await postsResponse.json();
-        setUserPosts(postsData);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error("Error fetching user data");
       }
-    };
 
-    fetchUserData();
+      const userData = await response.json();
+      setUserData(userData);
+      const postsResponse = await fetch(
+        `http://localhost:3000/api/users/${userData.id}/posts`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!postsResponse.ok) {
+        throw new Error("Error fetching user posts");
+      }
+      const postsData = await postsResponse.json();
+      setUserPosts(postsData);
+    } catch (err: any) {
+      console.error("Error refreshing user data:", err.message);
+    }
+  };
+
+  useEffect(() => {
+    refreshUserData();
   }, [user_name]);
 
   const refreshPosts = async () => {
@@ -525,7 +516,7 @@ export default function Profile() {
   // Función para manejar el toggle de likes en comentarios
   const toggleCommentLike = async (commentID: number) => {
     try {
-      const isLiked = likedComments[commentID];
+      const isLiked = likedComments?.[commentID];
       const endpoint = isLiked
         ? `http://localhost:3000/api/comments/${commentID}/dislike`
         : `http://localhost:3000/api/comments/${commentID}/like`;
@@ -650,20 +641,21 @@ export default function Profile() {
   return (
     <div className="min-h-screen p-8 pb-20">
       <div className="w-100 flex justify-end">
-        <button onClick={() => router.push(`/${userData.user_name}/settings`)}>
-          <Settings className="w-8 h-8 text-black" />
-        </button>
+        <SettingsSheet refreshUserData={refreshUserData} />
       </div>
       <header className="flex flex-col justify-center">
         <section className="flex justify-center">
           <img
-            src={userData.profilePicture || "/teddy.webp"}
+            src={userData?.profilePicture || "/teddy.webp"}
             alt="User Avatar"
             className="w-40 h-40 rounded-full object-cover"
           />
         </section>
         <section className="mb-8 mt-4 space-y-2">
-          <h2 className="text-center">{userData?.full_name || "Nombre"}</h2>
+          <h2 className="text-center">
+            <strong>{userData?.full_name || "Nombre"}</strong>
+          </h2>
+          <p className="text-center">{userData?.bio || ""}</p>
           <p className="text-center">
             <strong>
               {followersCount} seguidores | {followingCount} siguiendo
