@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Topic } from "@/lib/types";
+import { useUploadImage } from "@/hooks/useUploadImage";
 
 type QueryParamsType = {
   data: Array<Topic>;
@@ -84,34 +85,13 @@ type FormPostData = z.infer<typeof postSchema>;
 type FormEventData = z.infer<typeof eventSchema>;
 
 const createPostFn = async (body: FormPostData) => {
+  const { uploadImage } = useUploadImage();
+
   if (!body.picture) {
     throw new Error("No hay archivo para subir la imagen");
   }
 
-  console.log(
-    "upload_preset:",
-    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
-  );
-  console.log("cloud_name:", process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME);
-
-  const formData = new FormData();
-  formData.append("file", body.picture);
-  formData.append(
-    "upload_preset",
-    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
-  );
-
-  const responseUploadImage = await fetch(
-    `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!responseUploadImage.ok) throw new Error("Error al subir la imagen");
-  const dataImage = await responseUploadImage.json();
-  const imageURL = dataImage.secure_url;
+  const imageURL = await uploadImage(body.picture);
 
   const response = await fetch("http://localhost:3000/api/posts", {
     method: "POST",

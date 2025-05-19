@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import PostCard from "@/components/PostCard";
 import { SettingsSheet } from "@/components/SettingsSheet";
+import Image from "next/image";
 
 export default function Profile() {
   const { user } = useUserContext();
@@ -621,7 +622,6 @@ export default function Profile() {
 
           const data = await response.json();
           setIsFollowing(data.is_following);
-          console.log(isFollowing);
         } catch (error) {
           console.error("Error checking follow status:", error);
         }
@@ -645,9 +645,11 @@ export default function Profile() {
       </div>
       <header className="flex flex-col justify-center">
         <section className="flex justify-center">
-          <img
-            src={userData?.profilePicture || "/teddy.webp"}
-            alt="User Avatar"
+        <Image
+            src={userData?.profilePicture?.String ||"/teddy.webp"}
+            alt={userData?.user_name || "Avatar"}
+            width={1000}
+            height={1000}
             className="w-40 h-40 rounded-full object-cover"
           />
         </section>

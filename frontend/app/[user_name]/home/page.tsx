@@ -509,9 +509,11 @@ export default function Home() {
               className="flex items-center p-4 space-x-4 cursor-pointer"
               onClick={() => router.push(`/${user.user_name}/profile`)}
             >
-              <img
-                src={user.profilePicture || "/teddy.webp"}
+              <Image
+                src={user?.profilePicture?.String || "/teddy.webp"}
                 alt={`${user.full_name}'s avatar`}
+                width={1000}
+                height={1000}
                 className="w-10 h-10 rounded-full"
               />
               <div>
@@ -548,7 +550,7 @@ export default function Home() {
       <div className="flex flex-col gap-8 mb-32">
         <ul className="flex flex-wrap gap-4 justify-center">
           {homeData?.pages.map((page) =>
-            page.posts.map((post: any) => (
+            page.posts?.map((post: any) => (
               <PostCard
                 key={post.id}
                 post={post}
@@ -564,6 +566,8 @@ export default function Home() {
                 commentLikesCount={commentLikesCount}
                 likedComments={likedComments}
                 addComment={addComment}
+                currentUser={userData}
+                refreshPosts={fetchNextPage}
               />
             ))
           )}

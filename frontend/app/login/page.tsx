@@ -136,7 +136,6 @@ const LoginForm = ({ className }: FormProps) => {
       }
     },
     onError: (error) => {
-      console.log("Login error: ", error);
       alert("Email o Contraseña no validos");
     },
   });
@@ -258,7 +257,6 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
       }
     },
     onError: (error) => {
-      console.log("Register error: ", error);
       toast({
         title: "¡Registro fallido!",
         description: "❌ ¡No se ha podido registrar correctamente!",

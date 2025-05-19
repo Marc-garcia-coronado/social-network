@@ -25,7 +25,6 @@ export function useChatSocket(onMessage: (msg: Message) => void) {
     }
 
     ws.onclose = () => {
-      console.log("🔌 WebSocket cerrado")
     }
 
     return () => {

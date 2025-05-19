@@ -107,7 +107,6 @@ export default function EventFeed({
     data?.pages.flatMap((page: GetEventsPaginatedResponse) => page.events) ??
     [];
 
-  console.log(events)
 
   return (
     <main className="mb-32">
