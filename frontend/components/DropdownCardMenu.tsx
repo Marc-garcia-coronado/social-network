@@ -206,7 +206,7 @@ export function DropdownCardMenu({
             </div>
 
             <DialogFooter>
-              <Button type="submit">Guardar cambios</Button>
+              <Button type="submit" className="mt-3">Guardar cambios</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -264,7 +264,7 @@ export function DropdownCardMenu({
       {/* Dropdown */}
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
-          <Button className="bg-black/50">
+          <Button className="bg-black/50 hover:bg-lime-400 hover:text-black transition-all">
             <Ellipsis />
           </Button>
         </DropdownMenuTrigger>
@@ -273,7 +273,7 @@ export function DropdownCardMenu({
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem
-              className="cursor-pointer"
+              className="cursor-pointer focus:bg-lime-400"
               onSelect={(e) => {
                 e.preventDefault();
                 setMenuOpen(false);
@@ -285,7 +285,7 @@ export function DropdownCardMenu({
               <DropdownMenuShortcut>⇧⌘E</DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuItem
-              className="cursor-pointer"
+              className="cursor-pointer focus:bg-lime-400"
               onSelect={(e) => {
                 e.preventDefault();
                 setMenuOpen(false);
