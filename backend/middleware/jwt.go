@@ -34,6 +34,10 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			}
 		}
 
+		if tokenString == "" {
+			tokenString = r.URL.Query().Get("token")
+		}
+
 		// If no token is found, return Unauthorized
 		if tokenString == "" {
 			http.Error(w, "Missing token", http.StatusUnauthorized)

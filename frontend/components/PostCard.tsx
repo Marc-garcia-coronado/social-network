@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Heart, MessageCircle, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -59,14 +61,15 @@ interface PostCardProps {
         if (isDoubleClickEnabled) toggleLike(post.id);
       }}    >
       {/* Post Image */}
-      {post.picture && (
+      {post.picture.Valid && (
         <div className="absolute inset-0">
           <Image
-            src={/*post.picture ||*/ "/teddy.webp"}
+            src={post.picture.String}
             alt="Post Image"
-            className="w-full h-full object-cover"
             width={450}
             height={450}
+            className="w-full h-full object-cover"
+            priority
           />
         </div>
       )}
@@ -96,7 +99,7 @@ interface PostCardProps {
           postTitle={post.title}
           postTopicId={post.topic.id}
           />
-          )}
+        )}
       </div>
 
       {/* Footer Section */}
@@ -106,9 +109,11 @@ interface PostCardProps {
           className="flex items-center space-x-2 cursor-pointer"
           onClick={() => router.push(`/${post.user.user_name}/profile`)}
         >
-          <img
-            src={post.user.profilePicture || "/teddy.webp"}
+          <Image
+            src={post.user.profilePicture?.String || "/teddy.webp"}
             alt="User Avatar"
+            width={24}
+            height={24}
             className="w-10 h-10 rounded-full"
           />
           <div className="flex flex-col">
@@ -166,31 +171,37 @@ interface PostCardProps {
 
             {/* Comments List */}
             <ul className="space-y-4 max-h-96 overflow-y-auto">
-              {(comments[post.id] || []).map((comment: any, index: number) => (
-                <li
-                  key={
-                    comment.id
-                      ? `${post.id}-${comment.id}`
-                      : `${post.id}-index-${index}`
-                  }
-                  className="border-b pb-2"
-                >
-                  <p className="text-white-700">{comment.body}</p>
-                  <div className="text-sm text-white-500">
-                    Likes: {commentLikesCount[comment.id] ?? "Loading..."}
-                  </div>
-                  <button
-                    onClick={() => toggleCommentLike(comment.id)}
-                    className={`text-sm ${
-                      likedComments[comment.id]
-                        ? "text-red-500"
-                        : "text-blue-500"
-                    }`}
-                  >
-                    {likedComments[comment.id] ? "Quitar Like" : "Dar Like"}
-                  </button>
-                </li>
-              ))}
+              {Array.isArray(comments?.[post.id]) &&
+                comments[post.id]
+                  .filter((comment: any) => comment?.id != null)
+                  .map((comment: any, index: number) => {
+                    return (
+                      <li
+                        key={`${post.id}-${comment.id}`}
+                        className="border-b pb-2"
+                      >
+                        <p className="text-white-700">{comment?.body}</p>
+                        <div className="text-sm text-white-500">
+                          Likes:{" "}
+                          {commentLikesCount?.[comment.id] ?? "Loading..."}
+                        </div>
+                        {comment?.id !== undefined && (
+                          <button
+                            onClick={() => toggleCommentLike(comment.id)}
+                            className={`text-sm ${
+                              likedComments?.[comment.id]
+                                ? "text-red-500"
+                                : "text-blue-500"
+                            }`}
+                          >
+                            {likedComments?.[comment.id]
+                              ? "Quitar Like"
+                              : "Dar Like"}
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
             </ul>
 
             {/* Add Comment Section */}

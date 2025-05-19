@@ -92,7 +92,7 @@ const eventSchema = z.object({
       },
       {
         message: "Foto obligatoria",
-      }
+      },
     )
     .refine(
       (file) => {
@@ -101,7 +101,7 @@ const eventSchema = z.object({
       },
       {
         message: "El tamaño del archivo debe ser menor a 5MB",
-      }
+      },
     )
     .refine(
       (file) => {
@@ -110,7 +110,7 @@ const eventSchema = z.object({
       },
       {
         message: "Solo están permitidos los archivos JPEG y PNG",
-      }
+      },
     ),
   topicID: z.number().nullable(),
 });
@@ -145,7 +145,7 @@ const updateEventFn = async ({
         location: data.location,
         date: data.date,
       }),
-    }
+    },
   );
 
   if (!response.ok) {
@@ -253,29 +253,29 @@ export default function EventComponent({
   return (
     <li className="flex flex-col w-[350px] md:w-full min-h-[350px] overflow-hidden mx-auto border-transparent rounded-md shadow ">
       <Image
-        src={event.picture ? event.picture : "/globe.svg"}
-        alt={event.description}
+        src={event?.picture ? event.picture : "/globe.svg"}
+        alt={event?.description}
         width={30}
         height={30}
         className="w-full max-h-40 rounded-t-md object-cover"
       />
-      <Badge className="w-fit mt-5 mx-5">{event.topic.name}</Badge>
+      <Badge className="w-fit mt-5 mx-5">{event?.topic.name}</Badge>
       <div className="px-5 py-1 flex flex-col ">
-        <h2 className="capitalize font-bold my-3">{event.name}</h2>
+        <h2 className="capitalize font-bold my-3">{event?.name}</h2>
         <div className="flex gap-2 items-center">
           <Label htmlFor="desc">Descripción:</Label>
-          <p id="desc">{event.description}</p>
+          <p id="desc">{event?.description}</p>
         </div>
         <div className="flex gap-2 items-center">
           <Label htmlFor="location">Localización:</Label>
-          <p id="location">{event.location}</p>
+          <p id="location">{event?.location}</p>
         </div>
         <div className="flex gap-2 items-center mb-5">
           <Label htmlFor="date">Fecha del evento:</Label>
-          <p id="date">{new Date(event.date).toLocaleDateString()}</p>
+          <p id="date">{new Date(event?.date).toLocaleDateString()}</p>
         </div>
       </div>
-      {event.creator?.id === user?.id ? (
+      {event?.creator?.id === user?.id ? (
         <Dialog modal={false}>
           <DialogTrigger asChild>
             <Button variant="default" className="w-fit mx-auto mb-5">
@@ -376,7 +376,7 @@ export default function EventComponent({
                     onClick={() =>
                       setValue(
                         "topicID",
-                        watch("topicID") === topic.id ? null : topic.id
+                        watch("topicID") === topic.id ? null : topic.id,
                       )
                     }
                   >
