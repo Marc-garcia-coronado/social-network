@@ -470,33 +470,33 @@ export default function Home() {
 
   return (
     <div>
-      <div className="header flex items-center justify-between px-4 py-2 mt-20">
-        {/* Logo */}
-        <div className="logo bg-black flex justify-center items-center">
-          <h1 className="text-5xl font-archivo text-white tracking-tighter">
-            Fle<span className="text-lime-400">X</span>in.
-          </h1>
-        </div>
+      <div className="header grid grid-cols-3 items-center px-4 py-2 mt-20">
+  {/* Logo */}
+  <div className="logo bg-black flex justify-center items-center">
+    <h1 className="text-5xl font-archivo text-white tracking-tighter">
+      Fle<span className="text-lime-400">X</span>in.
+    </h1>
+  </div>
 
+  {/* Barra de búsqueda */}
+  <div className="search-bar flex justify-center">
+    <input
+      type="text"
+      placeholder="Buscar usuarios..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full max-w-md px-4 py-2 border rounded-full bg-gray-100 focus:outline-none focus:ring-1 focus:ring-black text-center text-black"
+    />
+  </div>
 
-        {/* Barra de búsqueda */}
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Buscar usuarios..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border rounded-full bg-gray-100 focus:outline-none focus:ring-1 focus:ring-black text-center text-black"
-          />
-        </div>
+  {/* Messages Icon */}
+  <div className="messages flex justify-end">
+    <button onClick={() => router.push(`/${user?.user_name}/messages`)} className="relative">
+      <MessageSquare size={32} />
+    </button>
+  </div>
+</div>
 
-        {/* Messages Icon */}
-        <div className="messages">
-          <button onClick={() => router.push(`/${user?.user_name}/messages`)} className="relative">
-            <MessageSquare size={32} />
-          </button>
-        </div>
-      </div>
       {/* Lista de resultados */}
       {filteredUsers.length > 0 && (
         <ul className="mt-4 bg-white border rounded-md shadow divide-y divide-gray-200">
