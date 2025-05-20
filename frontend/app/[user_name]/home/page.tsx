@@ -472,15 +472,12 @@ export default function Home() {
     <div>
       <div className="header flex items-center justify-between px-4 py-2 mt-20">
         {/* Logo */}
-        <div className="logo">
-          <Image
-            src="/logo.png"
-            width={24}
-            height={24}
-            alt="Logo"
-            className="h-8 cursor-pointer"
-          />
+        <div className="logo bg-black flex justify-center items-center">
+          <h1 className="text-5xl font-archivo text-white tracking-tighter">
+            Fle<span className="text-lime-400">X</span>in.
+          </h1>
         </div>
+
 
         {/* Barra de búsqueda */}
         <div className="search-bar">
