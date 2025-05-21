@@ -38,8 +38,9 @@ export default function Profile() {
   const [followingCount, setFollowingCount] = useState<number>(0);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
 
-  const [activeTab, setActiveTab] = useState<"posts" | "events">("posts");
+  const [activeTab, setActiveTab] = useState<"posts" | "events" | "subscribed">("posts");
   const [userEvents, setUserEvents] = useState<Event[]>([]);
+  const [subscribedEvents, setSubscribedEvents] = useState<Event[]>([]); // Nuevo estado
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +117,35 @@ export default function Profile() {
     }
   }, [userData, activeTab]);
 
+  const fetchSubscribedEventsList = async (userID: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/users/${userID}/events/subscribed`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${document.cookie.replace(
+              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+              "$1"
+            )}`,
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Error fetching subscribed events");
+      const data = await response.json();
+      setSubscribedEvents(data.events || []);
+    } catch (error) {
+      console.error("Error fetching subscribed events:", error);
+    }
+  };
+
+  // Llama a fetchSubscribedEventsList cuando el usuario cambie y la pestaña sea "subscribed"
+  useEffect(() => {
+    if (userData?.id && activeTab === "subscribed" && userData?.id === user?.id) {
+      fetchSubscribedEventsList(userData.id);
+    }
+  }, [userData, activeTab, user]);
   const refreshPosts = async () => {
     try {
       const postsResponse = await fetch(
@@ -774,6 +804,18 @@ export default function Profile() {
           >
             Eventos
           </button>
+          {userData?.id === user?.id && (
+            <button
+              className={`text-2xl font-semibold pb-1 transition-all ${
+                activeTab === "subscribed"
+                  ? "underline underline-offset-4 text-black"
+                  : "text-gray-500 hover:text-black"
+              }`}
+              onClick={() => setActiveTab("subscribed")}
+            >
+              Apuntado
+            </button>
+          )}
         </div>
 
         {/* Contenido según la pestaña */}
@@ -806,7 +848,7 @@ export default function Profile() {
               )}
             </ul>
           </>
-        ) : (
+        ) : activeTab === "events" ? (
           <>
             <ul className="flex flex-wrap gap-4 justify-center mb-32">
               {userEvents.length > 0 ? (
@@ -822,6 +864,25 @@ export default function Profile() {
                 ))
               ) : (
                 <li>No hay eventos aún.</li>
+              )}
+            </ul>
+          </>
+        ) : (
+          <>
+            <ul className="flex flex-wrap gap-4 justify-center mb-32">
+              {subscribedEvents.length > 0 ? (
+                subscribedEvents.map((event) => (
+                  <EventComponent
+                    key={event.id}
+                    event={event}
+                    topics={[]}
+                    token={""}
+                    apuntado={true}
+                    refetchEvents={() => fetchSubscribedEventsList(userData.id)}
+                  />
+                ))
+              ) : (
+                <li>No hay eventos apuntados aún.</li>
               )}
             </ul>
           </>

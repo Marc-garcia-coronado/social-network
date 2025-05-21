@@ -303,8 +303,8 @@ func (s *PostgresStore) GetUserSubscribedEvents(userID, limit, offset int) ([]mo
 	}
 
 	stmt := `
-	SELECT e.id, e.name, e.description, u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role, e.location, 
-	       t.id, t.name, t.description, t.created_at, e.created_at, e.date, ue.subscribed_at
+	SELECT e.id, e.name, e.description, e.picture, u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role, e.location, 
+		t.id, t.name, t.description, t.created_at, e.created_at, e.date, ue.subscribed_at
 	FROM user_event ue
 	JOIN events e ON e.id = ue.event_id
 	JOIN users u ON u.id = e.creator_id 
@@ -324,7 +324,7 @@ func (s *PostgresStore) GetUserSubscribedEvents(userID, limit, offset int) ([]mo
 
 	for rows.Next() {
 		newEvent := new(models.SubscribedEvent)
-		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description,
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Picture,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
 			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role, &newEvent.Location,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
