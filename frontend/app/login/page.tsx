@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { useUserContext } from "@/contexts/UserContext";
 import { toast } from "@/hooks/use-toast";
 import { Topic } from "@/lib/types";
+import { uploadImage } from "@/hooks/useUploadImage";
 
 const getTopicsFn = async () => {
   const response = await fetch(`http://localhost:3000/api/topics`, {
@@ -44,6 +45,8 @@ const schemaRegister = z
     email: z.string().email(),
     password: z.string().min(4, "Debe tener mínimo de 4 carácteres"),
     confirmPassword: z.string(),
+    bio: z.string().max(500, "La biografía no debe superar 500 caracteres").optional(),
+    profilePicture: z.any().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",
@@ -213,6 +216,9 @@ const registerPost = async (body: RegisterFormData) => {
       full_name: body.fullName,
       email: body.email,
       password: body.password,
+      bio: body.bio,
+      profile_picture: body.profilePicture,
+    
     }),
   });
 
@@ -264,10 +270,26 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
     },
   });
 
-  const onSubmit = async (data: RegisterFormData) => {
-    mutation.mutate(data);
-  };
+  const onSubmit = async (formData: RegisterFormData) => {
+    try {
+      let profilePictureUrl = "";
 
+      // Subir la imagen si existe
+      if (formData.profilePicture[0]) {
+        const file = formData.profilePicture[0];
+        profilePictureUrl = await uploadImage(file); // Subir la imagen y obtener la URL
+      }
+
+      // Enviar los datos del formulario con la URL de la imagen
+      mutation.mutate({
+        ...formData,
+        profilePicture: profilePictureUrl, // Agregar la URL de la imagen
+      });
+    } catch (error) {
+      console.error("Error al subir la imagen o registrar el usuario:", error);
+    }
+  };
+  
   return (
     <form
       id="formRegister"
@@ -332,6 +354,38 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
             {errors.email && (
               <p className="text-red-500">{errors.email.message}</p>
             )}
+          </div>
+        </Step>
+        <Step>
+          <div className="p-1">
+            <Label htmlFor="bio" className="dark:text-black">
+              Biografía
+            </Label>
+            <textarea
+              {...register("bio")}
+              className="w-full p-2 border rounded-md dark:text-black"
+              rows={4}
+              placeholder="Escribe algo sobre ti..."
+            />
+            {errors.bio && (
+              <p className="text-red-500">{errors.bio.message}</p>
+            )}
+          </div>
+        </Step>
+        <Step>
+          <div className="p-1">
+          <Label htmlFor="profilePicture" className="dark:text-black">
+          Foto de Perfil
+        </Label>
+        <Input
+          type="file"
+          id="profilePicture"
+          accept="image/png, image/jpeg"
+          {...register("profilePicture")}
+        />
+        {errors.profilePicture && (
+          <p className="text-red-500">{String(errors.profilePicture.message)}</p>
+        )}
           </div>
         </Step>
         <Step>
