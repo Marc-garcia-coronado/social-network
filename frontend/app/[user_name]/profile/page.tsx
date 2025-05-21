@@ -630,7 +630,7 @@ export default function Profile() {
       checkIfFollowing();
     }
   }, [userData, isFollowing]);
-
+  console.log(userData)
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -646,7 +646,7 @@ export default function Profile() {
       <header className="flex flex-col justify-center">
         <section className="flex justify-center">
         <Image
-            src={userData?.profilePicture?.String ||"/teddy.webp"}
+            src={userData?.profile_picture ||"/teddy.webp"}
             alt={userData?.user_name || "Avatar"}
             width={1000}
             height={1000}

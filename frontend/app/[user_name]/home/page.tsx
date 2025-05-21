@@ -507,7 +507,7 @@ export default function Home() {
               onClick={() => router.push(`/${user.user_name}/profile`)}
             >
               <Image
-                src={user?.profilePicture?.String || "/teddy.webp"}
+                src={user?.profile_picture || "/teddy.webp"}
                 alt={`${user.full_name}'s avatar`}
                 width={1000}
                 height={1000}
