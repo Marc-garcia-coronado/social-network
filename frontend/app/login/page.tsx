@@ -46,7 +46,7 @@ const schemaRegister = z
     password: z.string().min(4, "Debe tener mínimo de 4 carácteres"),
     confirmPassword: z.string(),
     bio: z.string().max(500, "La biografía no debe superar 500 caracteres").optional(),
-    profilePicture: z.any().optional(),
+    profile_picture: z.any().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",
@@ -217,7 +217,7 @@ const registerPost = async (body: RegisterFormData) => {
       email: body.email,
       password: body.password,
       bio: body.bio,
-      profile_picture: body.profilePicture,
+      profile_picture: body.profile_picture,
     
     }),
   });
@@ -275,15 +275,15 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
       let profilePictureUrl = "";
 
       // Subir la imagen si existe
-      if (formData.profilePicture[0]) {
-        const file = formData.profilePicture[0];
+      if (formData.profile_picture[0]) {
+        const file = formData.profile_picture[0];
         profilePictureUrl = await uploadImage(file); // Subir la imagen y obtener la URL
       }
 
       // Enviar los datos del formulario con la URL de la imagen
       mutation.mutate({
         ...formData,
-        profilePicture: profilePictureUrl, // Agregar la URL de la imagen
+        profile_picture: profilePictureUrl, // Agregar la URL de la imagen
       });
     } catch (error) {
       console.error("Error al subir la imagen o registrar el usuario:", error);
@@ -374,17 +374,17 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
         </Step>
         <Step>
           <div className="p-1">
-          <Label htmlFor="profilePicture" className="dark:text-black">
+          <Label htmlFor="profile_picture" className="dark:text-black">
           Foto de Perfil
         </Label>
         <Input
           type="file"
-          id="profilePicture"
+          id="profile_picture"
           accept="image/png, image/jpeg"
-          {...register("profilePicture")}
+          {...register("profile_picture")}
         />
-        {errors.profilePicture && (
-          <p className="text-red-500">{String(errors.profilePicture.message)}</p>
+        {errors.profile_picture && (
+          <p className="text-red-500">{String(errors.profile_picture.message)}</p>
         )}
           </div>
         </Step>

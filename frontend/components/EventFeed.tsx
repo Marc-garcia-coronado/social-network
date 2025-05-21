@@ -135,7 +135,7 @@ export default function EventFeed({
           No se han encontrado eventos con '{search}'
         </p>
       ) : (
-        <ul className="lg:mx-20 grid md:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-8">
+        <ul className="flex flex-wrap gap-4 justify-center mb-32">
           {events.map((event) => (
             <EventComponent
               key={event?.id ?? `event-${event?.name}`} // fallback para asegurar el key

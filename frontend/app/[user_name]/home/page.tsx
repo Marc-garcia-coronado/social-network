@@ -86,7 +86,13 @@ export default function Home() {
   const [visibleComments, setVisibleComments] = useState<
     Record<number, boolean>
   >({});
+  const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
 
+  const filteredPosts = (homeData?.pages ?? [])
+    .flatMap((page) => page.posts ?? [])
+    .filter((post: any) =>
+      selectedTopicId ? post.topic?.id === selectedTopicId : true
+    );
   // Fetch likes and comments count for a specific post
   const fetchPostStats = async (postID: number) => {
     try {
@@ -534,8 +540,32 @@ export default function Home() {
           userData.map((topic: any) => (
             <li
               key={topic.id}
-              className="px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-medium shadow"
+              className={`
+                transition-all duration-200
+                px-5 py-2 rounded-full text-sm font-semibold shadow-lg cursor-pointer border-2
+                flex items-center gap-2
+                ${selectedTopicId === topic.id
+                  ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
+                  : "bg-gradient-to-r from-white via-white to-gray-100 text-gray-700 border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"}
+              `}
+              style={{
+                boxShadow: selectedTopicId === topic.id
+                  ? "0 4px 20px 0 rgba(163, 230, 53, 0.25)"
+                  : "0 2px 8px 0 rgba(0,0,0,0.06)"
+              }}
+              onClick={() =>
+                setSelectedTopicId((prev) =>
+                  prev === topic.id ? null : topic.id
+                )
+              }
             >
+              <span className="inline-block w-2 h-2 rounded-full mr-2"
+                style={{
+                  background: selectedTopicId === topic.id
+                    ? "#84cc16"
+                    : "#d1d5db"
+                }}
+              ></span>
               {topic.name}
             </li>
           ))
@@ -543,11 +573,10 @@ export default function Home() {
           <li className="text-gray-500">No topics available</li>
         )}
       </ul>
-      <div className="stories">{/*Aqui irçan las historias */}</div>
       <div className="flex flex-col gap-8 mb-32">
         <ul className="flex flex-wrap gap-4 justify-center">
-          {homeData?.pages.map((page) =>
-            page.posts?.map((post: any) => (
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((post: any) => (
               <PostCard
                 key={post.id}
                 post={post}
@@ -567,9 +596,11 @@ export default function Home() {
                 refreshPosts={fetchNextPage}
               />
             ))
+          ) : (
+            <li>No hay publicaciones aún.</li>
           )}
         </ul>
-        {hasNextPage && (
+        {hasNextPage && !selectedTopicId && (
           <div className="text-center mt-6">
             <Button
               onClick={() => fetchNextPage()}
