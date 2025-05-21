@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Topic } from "@/lib/types";
-import { useUploadImage } from "@/hooks/useUploadImage";
+import { uploadImage } from "@/hooks/useUploadImage";
 
 type QueryParamsType = {
   data: Array<Topic>;
@@ -85,8 +85,6 @@ type FormPostData = z.infer<typeof postSchema>;
 type FormEventData = z.infer<typeof eventSchema>;
 
 const createPostFn = async (body: FormPostData) => {
-  const { uploadImage } = useUploadImage();
-
   if (!body.picture) {
     throw new Error("No hay archivo para subir la imagen");
   }
@@ -118,6 +116,13 @@ const createPostFn = async (body: FormPostData) => {
 };
 
 const createEventFn = async (body: FormEventData) => {
+  let imageURL = "";
+
+  // Subir la imagen si existe
+  if (body.picture) {
+    imageURL = await uploadImage(body.picture);
+  }
+
   const response = await fetch("http://localhost:3000/api/events", {
     method: "POST",
     credentials: "include",
@@ -132,14 +137,14 @@ const createEventFn = async (body: FormEventData) => {
       name: body.name,
       description: body.description ?? "",
       topic_id: body.topicID,
-      picture: body.picture.name,
+      picture: imageURL, // Usar la URL de la imagen subida
       location: body.location,
       date: body.date,
     }),
   });
 
   if (!response.ok) {
-    throw new Error("fallo al crear el post");
+    throw new Error("fallo al crear el evento");
   }
 
   return { status: response.status, message: "evento creado" };

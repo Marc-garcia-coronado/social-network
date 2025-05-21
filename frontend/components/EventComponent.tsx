@@ -29,12 +29,14 @@ import { Input } from "@/components/ui/input";
 import { CalendarDemo } from "./CalendarComponent";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { uploadImage } from "@/hooks/useUploadImage";
 
 type EventComponentProps = {
   event: Event;
   apuntado?: boolean;
   topics: Topic[];
   token: string;
+  refetchEvents?: () => void;
 };
 
 type UpdateSubscribedToEventType = {
@@ -92,7 +94,7 @@ const eventSchema = z.object({
       },
       {
         message: "Foto obligatoria",
-      },
+      }
     )
     .refine(
       (file) => {
@@ -101,7 +103,7 @@ const eventSchema = z.object({
       },
       {
         message: "El tamaño del archivo debe ser menor a 5MB",
-      },
+      }
     )
     .refine(
       (file) => {
@@ -110,7 +112,7 @@ const eventSchema = z.object({
       },
       {
         message: "Solo están permitidos los archivos JPEG y PNG",
-      },
+      }
     ),
   topicID: z.number().nullable(),
 });
@@ -128,6 +130,13 @@ const updateEventFn = async ({
   userID: number;
   token: string;
 }) => {
+  let imageURL = data.picture?.name ? "" : undefined;
+
+  // Subir la imagen si se selecciona una nueva
+  if (data.picture instanceof File) {
+    imageURL = await uploadImage(data.picture);
+  }
+
   const response = await fetch(
     `http://localhost:3000/api/users/${userID}/events/${eventID}`,
     {
@@ -141,17 +150,15 @@ const updateEventFn = async ({
         name: data.name,
         description: data.description ?? "",
         topic_id: data.topicID,
-        picture: data.picture?.name ?? "",
+        picture: imageURL,
         location: data.location,
         date: data.date,
       }),
-    },
+    }
   );
-
   if (!response.ok) {
     throw new Error("fallo al modificar el evento");
   }
-
   return { status: response.status, message: "evento modificado" };
 };
 
@@ -160,6 +167,7 @@ export default function EventComponent({
   apuntado = false,
   topics,
   token,
+  refetchEvents,
 }: EventComponentProps) {
   const [isApuntado, setIsApuntado] = useState<boolean>(apuntado);
   const { user } = useUserContext();
@@ -178,6 +186,7 @@ export default function EventComponent({
     mutationFn: updateEventFn,
     onSuccess: () => {
       reset();
+      refetchEvents?.();
       toast({
         description: `✅ Se ha modificado el evento exitosamente`,
       });
@@ -232,6 +241,13 @@ export default function EventComponent({
   const selectedDate = watch("date");
 
   const onSubmit = (dataForm: FormEventData) => {
+    // Crear una copia de los datos del formulario
+    const updatedData: Partial<FormEventData> = { ...dataForm };
+
+    // Si no se selecciona una nueva imagen, elimina el campo `picture` para que no se envíe
+    if (!dataForm.picture) {
+      delete updatedData.picture;
+    }
     updateMutation.mutate({
       data: dataForm,
       eventID: event.id,
@@ -254,9 +270,9 @@ export default function EventComponent({
     <li className="flex flex-col w-[350px] md:w-full min-h-[350px] overflow-hidden mx-auto border-transparent rounded-md shadow ">
       <Image
         src={event?.picture ? event.picture : "/globe.svg"}
-        alt={event?.description}
-        width={30}
-        height={30}
+        alt={event?.description || "Evento"}
+        width={1000}
+        height={1000}
         className="w-full max-h-40 rounded-t-md object-cover"
       />
       <Badge className="w-fit mt-5 mx-5">{event?.topic.name}</Badge>
@@ -360,7 +376,6 @@ export default function EventComponent({
                   type="file"
                   id="file"
                   accept="image/png, image/jpeg"
-                  defaultValue={event.picture}
                   onChange={handleFileChange}
                   className="w-4/6"
                 />
@@ -376,7 +391,7 @@ export default function EventComponent({
                     onClick={() =>
                       setValue(
                         "topicID",
-                        watch("topicID") === topic.id ? null : topic.id,
+                        watch("topicID") === topic.id ? null : topic.id
                       )
                     }
                   >

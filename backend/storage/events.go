@@ -10,11 +10,11 @@ import (
 func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUser, error) {
 	stmt := `
 	WITH inserted_event AS (
-    INSERT INTO events (name, description, creator_id, location, date, topic_id)
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING id, name, description, location, created_at, creator_id, topic_id, date
+    INSERT INTO events (name, description, creator_id, location, date, topic_id, picture)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    RETURNING id, name, description, location, created_at, creator_id, topic_id, date, picture
 	)
-	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date,
+	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date, e.picture,
 		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM inserted_event e
@@ -23,8 +23,8 @@ func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUs
 	`
 
 	newEvent := new(models.EventWithUser)
-	row := s.Db.QueryRow(stmt, event.Name, event.Description, event.CreatorID, event.Location, event.Date, event.TopicID)
-	err := row.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.Date, &newEvent.CreatedAt,
+	row := s.Db.QueryRow(stmt, event.Name, event.Description, event.CreatorID, event.Location, event.Date, event.TopicID, event.Picture)
+	err := row.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date, &newEvent.Picture,
 		&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
 		&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 		&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
@@ -44,7 +44,7 @@ func (s *PostgresStore) GetAllEvents(limit, offset int, query string, topicID st
 	}
 
 	stmt := `
-	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date,
+	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date, e.picture,
 		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM events e
@@ -64,7 +64,7 @@ func (s *PostgresStore) GetAllEvents(limit, offset int, query string, topicID st
 
 	for rows.Next() {
 		newEvent := new(models.EventWithUser)
-		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date,
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date, &newEvent.Picture,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
 			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
@@ -101,7 +101,7 @@ func (s *PostgresStore) GetAllEventsByTopic(topicID, limit, offset int) ([]model
 	}
 
 	stmt := `
-	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date,
+	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date, e.picture,
 		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM events e
@@ -121,7 +121,7 @@ func (s *PostgresStore) GetAllEventsByTopic(topicID, limit, offset int) ([]model
 
 	for rows.Next() {
 		newEvent := new(models.EventWithUser)
-		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date,
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date, &newEvent.Picture,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
 			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
@@ -168,7 +168,7 @@ func (s *PostgresStore) GetUserEvents(userID, limit, offset int) ([]models.Event
 	}
 
 	stmt := `
-	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date, 
+	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date, e.picture,
 		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM events e
@@ -188,7 +188,7 @@ func (s *PostgresStore) GetUserEvents(userID, limit, offset int) ([]models.Event
 
 	for rows.Next() {
 		newEvent := new(models.EventWithUser)
-		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date,
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date, &newEvent.Picture,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
 			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
@@ -226,7 +226,7 @@ func (s *PostgresStore) UpdateEvent(event map[string]any, eventID int) (*models.
 	         AND events.topic_id = t.id`
 
 	stmt += ` RETURNING 
-		events.id, events.name, events.description, events.location, events.created_at, events.date,
+		events.id, events.name, events.description, events.location, events.created_at, events.date, events.picture,
 		u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		t.id, t.name, t.description, t.created_at;`
 
@@ -236,7 +236,7 @@ func (s *PostgresStore) UpdateEvent(event map[string]any, eventID int) (*models.
 
 	err := s.Db.QueryRow(stmt, values...).Scan(
 		&updatedEvent.ID, &updatedEvent.Name, &updatedEvent.Description,
-		&updatedEvent.Location, &updatedEvent.CreatedAt, &updatedEvent.Date,
+		&updatedEvent.Location, &updatedEvent.CreatedAt, &updatedEvent.Date, &updatedEvent.Picture,
 		&updatedEvent.Creator.ID, &updatedEvent.Creator.UserName,
 		&updatedEvent.Creator.FullName, &updatedEvent.Creator.Email,
 		&updatedEvent.Creator.ProfilePicture, &updatedEvent.Creator.IsActive,
