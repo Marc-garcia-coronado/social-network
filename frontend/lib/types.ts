@@ -9,10 +9,13 @@ export type User = {
   id: number;
   user_name: string;
   full_name: string;
+  profile_picture: string;
   email: string;
   user_since: string;
   is_active: boolean;
   role: string;
+  bio?: string;
+  profile_picture?: string;
 };
 
 export type DataHTTPResponse = {
@@ -26,7 +29,17 @@ export type Event = {
   description: string;
   picture: string;
   location: string;
-  user: User;
+  creator: User;
   topic: Topic;
-  createdAt: string;
+  created_at: string;
+  date: string;
+};
+
+export type Message = {
+  id: number;
+  sender: User;
+  reciever: User;
+  content: string;
+  created_at: string;
+  isRead: boolean;
 };

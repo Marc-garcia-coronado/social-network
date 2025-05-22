@@ -1,1 +1,10 @@
-//Se esta pensando esta pagina
+"use client";
+
+export default function Page() {
+  
+  return (
+    <div>
+      
+    </div>
+  );
+}

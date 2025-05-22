@@ -14,16 +14,20 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Topic } from "@/lib/types";
+import { uploadImage } from "@/hooks/useUploadImage";
+
+type QueryParamsType = {
+  data: Array<Topic>;
+  isLoading: boolean;
+  isError: boolean;
+  error: Error | null;
+};
 
 const getTopicsFn = async (id: number) => {
   const response = await fetch(`http://localhost:3000/api/users/${id}/topics`, {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${document.cookie.replace(
-        /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-        "$1",
-      )}`,
     },
   });
 
@@ -77,20 +81,22 @@ type FormPostData = z.infer<typeof postSchema>;
 type FormEventData = z.infer<typeof eventSchema>;
 
 const createPostFn = async (body: FormPostData) => {
+  if (!body.picture) {
+    throw new Error("No hay archivo para subir la imagen");
+  }
+
+  const imageURL = await uploadImage(body.picture);
+
   const response = await fetch("http://localhost:3000/api/posts", {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${document.cookie.replace(
-        /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-        "$1",
-      )}`,
     },
     body: JSON.stringify({
       title: body.title,
       topic_id: body.topicID,
-      picture: body.picture.name,
+      picture: imageURL,
     }),
   });
 
@@ -102,94 +108,34 @@ const createPostFn = async (body: FormPostData) => {
 };
 
 const createEventFn = async (body: FormEventData) => {
+  let imageURL = "";
+
+  // Subir la imagen si existe
+  if (body.picture) {
+    imageURL = await uploadImage(body.picture);
+  }
+
   const response = await fetch("http://localhost:3000/api/events", {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${document.cookie.replace(
-        /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-        "$1",
-      )}`,
     },
     body: JSON.stringify({
       name: body.name,
       description: body.description ?? "",
       topic_id: body.topicID,
-      picture: body.picture.name,
+      picture: imageURL, // Usar la URL de la imagen subida
       location: body.location,
       date: body.date,
     }),
   });
 
   if (!response.ok) {
-    throw new Error("fallo al crear el post");
+    throw new Error("fallo al crear el evento");
   }
 
   return { status: response.status, message: "evento creado" };
-};
-
-export default function Page() {
-  const { user } = useUserContext();
-  const [isLoginSelected, setIsLoginSelected] = useState<boolean>(true);
-
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["topics", user?.id],
-    queryFn: () => getTopicsFn(user!.id),
-    enabled: !!user?.id,
-  });
-
-  return (
-    <div className="h-screen w-full flex items-center justify-center bg-gray-100 text-black ">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <div className="relative flex justify-between mb-5 bg-gray-200 rounded-sm overflow-hidden">
-          <motion.div
-            className="absolute top-0 bottom-0 w-1/2 bg-slate-800 rounded-sm"
-            animate={{ x: isLoginSelected ? "0%" : "100%" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          />
-
-          <p
-            className="relative flex-1 text-center py-3 cursor-pointer z-10"
-            style={{ color: isLoginSelected ? "white" : "black" }}
-            onClick={() => setIsLoginSelected(true)}
-          >
-            Publicación
-          </p>
-
-          <p
-            className="relative flex-1 text-center py-3 cursor-pointer z-10"
-            style={{ color: !isLoginSelected ? "white" : "black" }}
-            onClick={() => setIsLoginSelected(false)}
-          >
-            Evento
-          </p>
-        </div>
-        {isLoginSelected ? (
-          <FormPost
-            data={data}
-            isLoading={isLoading}
-            error={error}
-            isError={isError}
-          />
-        ) : (
-          <FormEvent
-            data={data}
-            isLoading={isLoading}
-            error={error}
-            isError={isError}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-type QueryParamsType = {
-  data: Array<Topic>;
-  isLoading: boolean;
-  isError: boolean;
-  error: Error | null;
 };
 
 function FormPost({ data, isLoading, isError, error }: QueryParamsType) {
@@ -253,7 +199,7 @@ function FormPost({ data, isLoading, isError, error }: QueryParamsType) {
           <Label htmlFor="topics">Selecciona el tema para el post:</Label>
           <ul className="list-none flex gap-4" id="topics">
             {isLoading ? (
-              <p>Loading...</p>
+              <li>Loading...</li>
             ) : (
               data?.map((topic: Topic) => (
                 <li
@@ -261,16 +207,17 @@ function FormPost({ data, isLoading, isError, error }: QueryParamsType) {
                   onClick={() =>
                     setValue(
                       "topicID",
-                      watch("topicID") === topic.id ? null : topic.id,
+                      watch("topicID") === topic.id ? null : topic.id
                     )
                   }
+                  className="cursor-pointer"
                 >
                   <Badge
-                    className={`${
+                    className={
                       watch("topicID") === topic.id
-                        ? "bg-yellow-600 hover:bg-yellow-500"
-                        : ""
-                    } cursor-pointer py-2 px-4`}
+                        ? "bg-lime-500 text-white py-2 px-4"
+                        : "py-2 px-4"
+                    }
                   >
                     {topic.name}
                   </Badge>
@@ -318,7 +265,7 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
         description: `✅ Se ha creado el evento exitosamente`,
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         variant: "destructive",
         description: `❌ Error al crear el evento: ${error.message}`,
@@ -364,9 +311,7 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
         </div>
         <div className="flex justify-between align-top gap-5">
           <div className="w-1/2 flex flex-col space-y-1">
-            <Label htmlFor="date" className="">
-              Fecha:
-            </Label>
+            <Label htmlFor="date">Fecha:</Label>
             <CalendarDemo
               value={selectedDate}
               onChangeAction={(date) => {
@@ -396,7 +341,7 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
           <Label htmlFor="topics">Selecciona el tema para el evento:</Label>
           <ul className="list-none flex gap-4" id="topics">
             {isLoading ? (
-              <p>Loading...</p>
+              <li>Loading...</li>
             ) : (
               data?.map((topic: Topic) => (
                 <li
@@ -404,16 +349,17 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
                   onClick={() =>
                     setValue(
                       "topicID",
-                      watch("topicID") === topic.id ? null : topic.id,
+                      watch("topicID") === topic.id ? null : topic.id
                     )
                   }
+                  className="cursor-pointer"
                 >
                   <Badge
-                    className={`${
+                    className={
                       watch("topicID") === topic.id
-                        ? "bg-yellow-600 hover:bg-yellow-500"
-                        : ""
-                    } cursor-pointer py-2 px-4`}
+                        ? "bg-lime-500 text-white py-2 px-4"
+                        : "py-2 px-4"
+                    }
                   >
                     {topic.name}
                   </Badge>
@@ -437,5 +383,59 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
         </Button>
       </div>
     </form>
+  );
+}
+
+export default function Page() {
+  const { user } = useUserContext();
+  const [isLoginSelected, setIsLoginSelected] = useState<boolean>(true);
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["topics", user?.id],
+    queryFn: () => getTopicsFn(user!.id),
+    enabled: !!user?.id,
+  });
+
+  return (
+    <div className="h-screen w-full flex items-center justify-center bg-gray-100 text-black ">
+      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
+        <div className="relative flex justify-between mb-5 bg-gray-200 rounded-sm overflow-hidden">
+          <motion.div
+            className="absolute top-0 bottom-0 w-1/2 bg-lime-500 hover:bg-lime-600 rounded-sm"
+            animate={{ x: isLoginSelected ? "0%" : "100%" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          />
+
+          <p
+            className="relative flex-1 text-center py-3 cursor-pointer z-10"
+            onClick={() => setIsLoginSelected(true)}
+          >
+            Publicación
+          </p>
+
+          <p
+            className="relative flex-1 text-center py-3 cursor-pointer z-10"
+            onClick={() => setIsLoginSelected(false)}
+          >
+            Evento
+          </p>
+        </div>
+        {isLoginSelected ? (
+          <FormPost
+            data={data}
+            isLoading={isLoading}
+            error={error}
+            isError={isError}
+          />
+        ) : (
+          <FormEvent
+            data={data}
+            isLoading={isLoading}
+            error={error}
+            isError={isError}
+          />
+        )}
+      </div>
+    </div>
   );
 }

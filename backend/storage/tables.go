@@ -4,6 +4,27 @@ import (
 	"log"
 )
 
+func (s *PostgresStore) createMessagesTable() error {
+	query := `
+	CREATE TABLE IF NOT EXISTS messages (
+	  	id SERIAL PRIMARY KEY,
+		sender_id INT NOT NULL,
+		receiver_id INT NOT NULL,
+		content TEXT,
+		created_at TIMESTAMP DEFAULT now(),
+		is_read BOOLEAN DEFAULT FALSE,
+
+	  	FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+		FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+	);`
+
+	if _, err := s.Db.Exec(query); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *PostgresStore) createLikesTable() error {
 	query := `
 	CREATE TABLE IF NOT EXISTS likes (
@@ -55,6 +76,7 @@ func (s *PostgresStore) createEventsTable() error {
 	  description TEXT,
 	  location VARCHAR(255),
 	  creator_id INT NOT NULL,
+		picture VARCHAR(255),
 	  topic_id INT NOT NULL,
 		date TIMESTAMPTZ DEFAULT null,
 	  created_at TIMESTAMPTZ DEFAULT now(),
@@ -241,7 +263,10 @@ func (s *PostgresStore) CreateTables() error {
 		log.Println("ERR LIKES TABLE")
 		return err
 	}
-
+	if err := s.createMessagesTable(); err != nil {
+		log.Println("ERR MESSAGES TABLE")
+		return err
+	}
 	// TODO: Falta implementar las tablas de Stories, Conversations
 	return nil
 }

@@ -34,15 +34,19 @@ func (s *APIServer) Run() {
 	router := chi.NewRouter()
 	router.Use(chimw.Logger)
 	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3001"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowedOrigins:   []string{"http://localhost:3001"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,
 	}))
 
 	// Public Routes
 	router.Post("/api/register", utils.MakeHTTPHandleFunc(s.handleCreateUser))
 	router.Post("/api/login", utils.MakeHTTPHandleFunc(s.handleLogin))
+	router.Get("/api/topics", utils.MakeHTTPHandleFunc(s.handleGetAllTopics))
+
+	// User - WebSocket route
+	router.Get("/ws", s.handleWebSocket)
 
 	// Protected router for not admin users
 	protectedRouter := chi.NewRouter()
@@ -54,6 +58,7 @@ func (s *APIServer) Run() {
 	protectedRouter.Get("/users/{user_name}", utils.MakeHTTPHandleFunc(s.handleGetUserByUserName))
 	protectedRouter.Get("/users/search", utils.MakeHTTPHandleFunc(s.handleSearchUsers))
 	protectedRouter.Patch("/users/{id}", utils.MakeHTTPHandleFunc(s.handleUpdateUser))
+	protectedRouter.Post("/logout", utils.MakeHTTPHandleFunc(s.handleLogout))
 
 	// User - Follows routes
 	protectedRouter.Get("/users/{id}/followers", utils.MakeHTTPHandleFunc(s.handleGetFollowers))
@@ -118,6 +123,10 @@ func (s *APIServer) Run() {
 	// User - Feed routes
 	protectedRouter.Get("/feed", utils.MakeHTTPHandleFunc(s.handleGetUserFeed))
 	protectedRouter.Get("/feed/topics/{topicID}", utils.MakeHTTPHandleFunc(s.handleGetUserFeedByTopic))
+
+	// User - Messages routes
+	protectedRouter.Get("/messages", utils.MakeHTTPHandleFunc(s.handleGetConversations))
+	protectedRouter.Get("/messages/{userID}", utils.MakeHTTPHandleFunc(s.handleGetConversationMessages))
 
 	// Protected router for admin
 	adminRouter := chi.NewRouter()

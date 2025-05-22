@@ -7,6 +7,7 @@ type EventReq struct {
 	CreatorID   int    `json:"creator_id"`
 	Date        string `json:"date"`
 	TopicID     int    `json:"topic_id"`
+	Picture		string `json:"picture"`
 }
 
 type Event struct {
@@ -18,6 +19,7 @@ type Event struct {
 	TopicID     int    `json:"topic_id"`
 	Date        string `json:"date"`
 	CreatedAt   string `json:"created_at"`
+	Picture		string `json:"picture"`
 }
 
 type EventWithUser struct {
@@ -29,6 +31,7 @@ type EventWithUser struct {
 	Topic       Topic  `json:"topic"`
 	Date        string `json:"date"`
 	CreatedAt   string `json:"created_at"`
+	Picture		string `json:"picture"`
 }
 
 type SubscribedEvent struct {
@@ -41,6 +44,7 @@ type SubscribedEvent struct {
 	Date         string `json:"date"`
 	CreatedAt    string `json:"created_at"`
 	SubscribedAt string `json:"subscribed_at"`
+	Picture		string `json:"picture"`
 }
 
 type EventWithCountRes[T any] struct {

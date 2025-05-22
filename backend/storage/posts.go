@@ -2,7 +2,7 @@ package storage
 
 import (
 	"errors"
-	"strconv"
+	"fmt"
 
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 )
@@ -84,40 +84,40 @@ func (s *PostgresStore) GetUserPosts(id, limit, offset int) ([]models.Post, int,
 }
 
 func (s *PostgresStore) UpdatePost(post map[string]any, postID int) (*models.Post, error) {
+	// Validar que el mapa no esté vacío
+	if len(post) == 0 {
+		return nil, fmt.Errorf("no fields to update")
+	}
 
-	// Build dynamic SQL query
-	stmt := "UPDATE posts SET "
-	values := []any{}
+	// Construir dinámicamente la consulta SQL
+	query := "UPDATE posts SET "
+	args := []interface{}{}
 	i := 1
 
 	for key, value := range post {
-		stmt += key + " = $" + strconv.Itoa(i) + ", "
-		values = append(values, value)
+		query += fmt.Sprintf("%s = $%d, ", key, i)
+		args = append(args, value)
 		i++
 	}
 
-	stmt = stmt[:len(stmt)-2] // Remove last comma
-	stmt += " FROM users u JOIN topics t ON events.topic_id = t.id"
-	stmt += " WHERE posts.id = $" + strconv.Itoa(i)
-	stmt += " AND posts.user_id = u.id"
-	stmt += " RETURNING posts.id, posts.picture, posts.title, posts.created_at,"
-	stmt += " u.id, u.user_name, u.full_name, u.email, u.profile_picture,"
-	stmt += " t.id, t.name, t.description, t.created_at;"
-	values = append(values, postID)
+	// Remover la última coma y espacio, y agregar la cláusula WHERE
+	query = query[:len(query)-2] + " WHERE id = $%d RETURNING *;"
+	args = append(args, postID)
 
-	updatedPost := new(models.Post)
-	// Execute stmt
-	err := s.Db.QueryRow(stmt, values...).Scan(
-		&updatedPost.ID, &updatedPost.Picture, &updatedPost.Title, &updatedPost.CreatedAt,
-		&updatedPost.User.ID, &updatedPost.User.UserName,
-		&updatedPost.User.FullName, &updatedPost.User.Email, &updatedPost.User.ProfilePicture,
-		&updatedPost.Topic.ID, &updatedPost.Topic.Name, &updatedPost.Topic.Description, &updatedPost.Topic.CreatedAt,
+	// Formatear el índice del parámetro de la cláusula WHERE
+	query = fmt.Sprintf(query, i)
+
+	// Ejecutar la consulta y escanear el resultado
+	var updatedPost models.Post
+	err := s.Db.QueryRow(query, args...).Scan(
+		&updatedPost.ID, &updatedPost.Picture, &updatedPost.Title,
+		&updatedPost.User.ID, &updatedPost.Topic.ID, &updatedPost.CreatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	return updatedPost, nil
+	return &updatedPost, nil
 }
 
 func (s *PostgresStore) DeletePost(id int) error {

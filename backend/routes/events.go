@@ -63,9 +63,11 @@ func (s *APIServer) handleGetAllEvents(w http.ResponseWriter, r *http.Request) e
 	// Calculate offset
 	offset := (page - 1) * limit
 
-	events, count, err := s.store.GetAllEvents(limit, offset)
+	query := r.URL.Query().Get("q")
+	topicID := r.URL.Query().Get("topic")
+
+	events, count, err := s.store.GetAllEvents(limit, offset, query, topicID)
 	if err != nil {
-		fmt.Println("error aqui")
 		return err
 	}
 

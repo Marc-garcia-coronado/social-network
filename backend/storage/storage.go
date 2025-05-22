@@ -11,7 +11,7 @@ type Storage interface {
 	Login(username, password string) (*models.User, error)
 	GetUserByID(id int) (*models.User, error)
 	GetUserByUserName(user_name string) (*models.User, error)
-    SearchUsers(query string, limit int) ([]*models.User, error)
+	SearchUsers(query string, limit int) ([]*models.User, error)
 	CreateUser(user *models.User) (*models.User, error)
 	UpdateUser(user map[string]any, userID int) (*models.User, error)
 	DeleteUser(id int) error
@@ -47,7 +47,7 @@ type Storage interface {
 
 	// Events methods
 	CreateEvent(event *models.EventReq) (*models.EventWithUser, error)
-	GetAllEvents(limit, offset int) ([]models.EventWithUser, int, error)
+	GetAllEvents(limit, offset int, query string, topicID string) ([]models.EventWithUser, int, error)
 	GetAllEventsByTopic(topicID, limit, offset int) ([]models.EventWithUser, int, error)
 	GetUserEvents(userID, limit, offset int) ([]models.EventWithUser, int, error)
 	UpdateEvent(event map[string]any, eventID int) (*models.EventWithUser, error)
@@ -84,6 +84,11 @@ type Storage interface {
 	// Feed methods
 	GetUserFeed(userID, limit, offset int) ([]models.Post, int, error)
 	GetUserFeedByTopic(userID, topicID, limit, offset int) ([]models.Post, int, error)
+
+	// Messages methods
+	SaveMessage(message *models.MessageReq) (*models.Message, error)
+	GetConversationMessages(from, to int) ([]models.Message, error)
+	GetUserConversations(userID int) ([]models.User, error)
 }
 
 type PostgresStore struct {

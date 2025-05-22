@@ -10,11 +10,11 @@ import (
 func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUser, error) {
 	stmt := `
 	WITH inserted_event AS (
-    INSERT INTO events (name, description, creator_id, location, date, topic_id)
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING id, name, description, location, created_at, creator_id, topic_id, date
+    INSERT INTO events (name, description, creator_id, location, date, topic_id, picture)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    RETURNING id, name, description, location, created_at, creator_id, topic_id, date, picture
 	)
-	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date,
+	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date, e.picture,
 		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM inserted_event e
@@ -23,8 +23,8 @@ func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUs
 	`
 
 	newEvent := new(models.EventWithUser)
-	row := s.Db.QueryRow(stmt, event.Name, event.Description, event.CreatorID, event.Location, event.Date, event.TopicID)
-	err := row.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.Date, &newEvent.CreatedAt,
+	row := s.Db.QueryRow(stmt, event.Name, event.Description, event.CreatorID, event.Location, event.Date, event.TopicID, event.Picture)
+	err := row.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date, &newEvent.Picture,
 		&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
 		&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 		&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
@@ -36,25 +36,26 @@ func (s *PostgresStore) CreateEvent(event *models.EventReq) (*models.EventWithUs
 	return newEvent, nil
 }
 
-func (s *PostgresStore) GetAllEvents(limit, offset int) ([]models.EventWithUser, int, error) {
+func (s *PostgresStore) GetAllEvents(limit, offset int, query string, topicID string) ([]models.EventWithUser, int, error) {
 	var totalCount int
-	queryCount := "SELECT COUNT(*) FROM events;"
-	if err := s.Db.QueryRow(queryCount).Scan(&totalCount); err != nil {
+	queryCount := "SELECT COUNT(*) FROM events e WHERE e.name ILIKE $1 AND ($2 ILIKE '' OR e.topic_id::text ILIKE $2);"
+	if err := s.Db.QueryRow(queryCount, "%"+query+"%", "%"+topicID+"%").Scan(&totalCount); err != nil {
 		return nil, 0, err
 	}
 
 	stmt := `
-	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date,
+	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date, e.picture,
 		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM events e
 	JOIN users u ON u.id = e.creator_id
 	JOIN topics t ON t.id = e.topic_id
+	WHERE e.name ILIKE $3 AND ($4 ILIKE '' OR e.topic_id::text ILIKE $4)
 	ORDER BY e.created_at DESC
 	LIMIT $1 OFFSET $2;
 	`
 
-	rows, err := s.Db.Query(stmt, limit, offset)
+	rows, err := s.Db.Query(stmt, limit, offset, "%"+query+"%", "%"+topicID+"%")
 	if err != nil {
 		return nil, 0, err
 	}
@@ -63,7 +64,7 @@ func (s *PostgresStore) GetAllEvents(limit, offset int) ([]models.EventWithUser,
 
 	for rows.Next() {
 		newEvent := new(models.EventWithUser)
-		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date,
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date, &newEvent.Picture,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
 			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
@@ -100,7 +101,7 @@ func (s *PostgresStore) GetAllEventsByTopic(topicID, limit, offset int) ([]model
 	}
 
 	stmt := `
-	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date,
+	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date, e.picture,
 		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM events e
@@ -120,7 +121,7 @@ func (s *PostgresStore) GetAllEventsByTopic(topicID, limit, offset int) ([]model
 
 	for rows.Next() {
 		newEvent := new(models.EventWithUser)
-		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date,
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date, &newEvent.Picture,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
 			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
@@ -167,7 +168,7 @@ func (s *PostgresStore) GetUserEvents(userID, limit, offset int) ([]models.Event
 	}
 
 	stmt := `
-	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date, 
+	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date, e.picture,
 		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
 		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
 	FROM events e
@@ -187,7 +188,7 @@ func (s *PostgresStore) GetUserEvents(userID, limit, offset int) ([]models.Event
 
 	for rows.Next() {
 		newEvent := new(models.EventWithUser)
-		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date,
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date, &newEvent.Picture,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
 			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
@@ -207,7 +208,6 @@ func (s *PostgresStore) GetUserEvents(userID, limit, offset int) ([]models.Event
 }
 
 func (s *PostgresStore) UpdateEvent(event map[string]any, eventID int) (*models.EventWithUser, error) {
-	// Build dynamic SQL query
 	stmt := "UPDATE events SET "
 	values := []any{}
 	i := 1
@@ -218,24 +218,33 @@ func (s *PostgresStore) UpdateEvent(event map[string]any, eventID int) (*models.
 		i++
 	}
 
-	stmt = stmt[:len(stmt)-2] // Remove last comma
-	stmt += " FROM users u JOIN topics t ON events.topic_id = t.id"
-	stmt += " WHERE events.id = $" + strconv.Itoa(i)
-	stmt += " AND events.creator_id = u.id"
-	stmt += " RETURNING events.id, events.name, events.description, events.location, events.created_at, events.date,"
-	stmt += " u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role"
-	stmt += " t.id, t.name, t.description, t.created_at;"
+	stmt = stmt[:len(stmt)-2]
+
+	stmt += ` FROM users u, topics t 
+	         WHERE events.id = $` + strconv.Itoa(i) + `
+	         AND events.creator_id = u.id 
+	         AND events.topic_id = t.id`
+
+	stmt += ` RETURNING 
+		events.id, events.name, events.description, events.location, events.created_at, events.date, events.picture,
+		u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
+		t.id, t.name, t.description, t.created_at;`
+
 	values = append(values, eventID)
 
 	updatedEvent := new(models.EventWithUser)
-	// Execute stmt
+
 	err := s.Db.QueryRow(stmt, values...).Scan(
 		&updatedEvent.ID, &updatedEvent.Name, &updatedEvent.Description,
-		&updatedEvent.Location, &updatedEvent.CreatedAt, &updatedEvent.Date,
+		&updatedEvent.Location, &updatedEvent.CreatedAt, &updatedEvent.Date, &updatedEvent.Picture,
 		&updatedEvent.Creator.ID, &updatedEvent.Creator.UserName,
-		&updatedEvent.Creator.FullName, &updatedEvent.Creator.Email, &updatedEvent.Creator.ProfilePicture, &updatedEvent.Creator.IsActive, &updatedEvent.Creator.Role,
-		&updatedEvent.Topic.ID, &updatedEvent.Topic.Name, &updatedEvent.Topic.Description, &updatedEvent.Topic.CreatedAt,
+		&updatedEvent.Creator.FullName, &updatedEvent.Creator.Email,
+		&updatedEvent.Creator.ProfilePicture, &updatedEvent.Creator.IsActive,
+		&updatedEvent.Creator.Role,
+		&updatedEvent.Topic.ID, &updatedEvent.Topic.Name,
+		&updatedEvent.Topic.Description, &updatedEvent.Topic.CreatedAt,
 	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -294,8 +303,8 @@ func (s *PostgresStore) GetUserSubscribedEvents(userID, limit, offset int) ([]mo
 	}
 
 	stmt := `
-	SELECT e.id, e.name, e.description, u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role, e.location, 
-	       t.id, t.name, t.description, t.created_at, e.created_at, e.date, ue.subscribed_at
+	SELECT e.id, e.name, e.description, e.picture, u.id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role, e.location, 
+		t.id, t.name, t.description, t.created_at, e.created_at, e.date, ue.subscribed_at
 	FROM user_event ue
 	JOIN events e ON e.id = ue.event_id
 	JOIN users u ON u.id = e.creator_id 
@@ -315,7 +324,7 @@ func (s *PostgresStore) GetUserSubscribedEvents(userID, limit, offset int) ([]mo
 
 	for rows.Next() {
 		newEvent := new(models.SubscribedEvent)
-		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description,
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Picture,
 			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
 			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role, &newEvent.Location,
 			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,

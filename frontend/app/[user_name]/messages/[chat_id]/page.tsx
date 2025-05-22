@@ -1,1 +1,0 @@
-//Aqui la view del chat

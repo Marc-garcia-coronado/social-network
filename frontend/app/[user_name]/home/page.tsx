@@ -1,15 +1,42 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useUserContext } from "@/contexts/UserContext";
-import useHome from "@/hooks/useHome";
 import useUser from "@/hooks/useUser";
-import DockComponent from "@/components/DockComponent";
-import Link from "next/link";
 import { User } from "@/lib/types";
 import PostCard from "@/components/PostCard";
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import SearchBar from "@/components/SearchBar";
 
+type PageParam = {
+  pageParam?: number;
+};
+
+const fetchPosts = async ({
+  pageParam = 1,
+}: PageParam): Promise<{
+  posts: any;
+  pagination: { page: number; limit: number; total_count: number };
+}> => {
+  const response = await fetch(
+    `http://localhost:3000/api/feed?page=${pageParam}`,
+    {
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Error fetching posts");
+  }
+
+  return response.json();
+};
 
 export default function Home() {
   const { user } = useUserContext();
@@ -17,9 +44,22 @@ export default function Home() {
 
   const {
     data: homeData,
-    error: homeError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading: homeLoading,
-  } = useHome();
+    error: homeError,
+  } = useInfiniteQuery({
+    queryKey: ["posts"],
+    queryFn: fetchPosts,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, limit, total_count } = lastPage.pagination;
+      const totalPages = Math.ceil(total_count / limit);
+      return page < totalPages ? page + 1 : undefined;
+    },
+  });
+
   const {
     data: userData,
     error: userError,
@@ -29,19 +69,31 @@ export default function Home() {
 
   const [searchTerm, setSearchTerm] = useState(""); // Estado para la barra de búsqueda
   const [filteredUsers, setFilteredUsers] = useState<any[]>([]); // Estado para los usuarios filtrados
-  const [isSearching, setIsSearching] = useState(false); // Estado para mostrar un indicador de búsqueda
   const [showNoResults, setShowNoResults] = useState(false); // Nuevo estado
 
-
-  const [postStats, setPostStats] = useState<Record<number, { likes: number; comments: number }>>({});
-  const [postCreators, setPostCreators] = useState<Record<number, { name: string}>>({});
+  const [postStats, setPostStats] = useState<
+    Record<number, { likes: number; comments: number }>
+  >({});
   const [likedPosts, setLikedPosts] = useState<Record<number, boolean>>({});
 
-  const [comments, setComments] = useState<Record<number, any[]>>({});  const [newComment, setNewComment] = useState<Record<number, string>>({});
-  const [likedComments, setLikedComments] = useState<Record<number, boolean>>({});
-  const [commentLikesCount, setCommentLikesCount] = useState<Record<number, number>>({});
-  const [visibleComments, setVisibleComments] = useState<Record<number, boolean>>({});
+  const [comments, setComments] = useState<Record<number, any[]>>({});
+  const [newComment, setNewComment] = useState<Record<number, string>>({});
+  const [likedComments, setLikedComments] = useState<Record<number, boolean>>(
+    {}
+  );
+  const [commentLikesCount, setCommentLikesCount] = useState<
+    Record<number, number>
+  >({});
+  const [visibleComments, setVisibleComments] = useState<
+    Record<number, boolean>
+  >({});
+  const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
 
+  const filteredPosts = (homeData?.pages ?? [])
+    .flatMap((page) => page.posts ?? [])
+    .filter((post: any) =>
+      selectedTopicId ? post.topic?.id === selectedTopicId : true
+    );
   // Fetch likes and comments count for a specific post
   const fetchPostStats = async (postID: number) => {
     try {
@@ -50,20 +102,12 @@ export default function Home() {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
-            )}`,
           },
         }),
         fetch(`http://localhost:3000/api/posts/${postID}/comments/count`, {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
-            )}`,
           },
         }),
       ]);
@@ -86,37 +130,6 @@ export default function Home() {
       console.error(`Error fetching stats for post ${postID}:`, error);
     }
   };
-  // Fetch creator info for a specific post
-  const fetchPostCreator = async (user: User) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/users/${user.id}`,
-        {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
-            )}`,
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Error fetching post creator");
-      }
-      const creatorData = await response.json();
-      setPostCreators((prevCreators) => ({
-        ...prevCreators,
-        [user.id]: {
-          name: creatorData.user_name,
-          //picture: creatorData.profile_picture,
-        },
-      }));
-    } catch (error) {
-      console.error(`Error fetching creator for post ${user.id}:`, error);
-    }
-  };
   // Función para manejar el toggle de likes
   const toggleLike = async (postID: number) => {
     try {
@@ -132,10 +145,6 @@ export default function Home() {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
         },
       });
 
@@ -166,32 +175,33 @@ export default function Home() {
 
   const fetchUserLikes = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/users/likes/posts`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
-  
+      const response = await fetch(
+        `http://localhost:3000/api/users/likes/posts`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Error fetching user likes");
       }
-  
+
       const likedPostsData = await response.json();
-  
+
       // Convertimos la lista de post IDs en un mapa para un acceso más rápido
-      const likedPostsMap = likedPostsData.reduce(
-        (acc: Record<number, boolean>, postID: number) => {
-          acc[postID] = true;
-          return acc;
-        },
-        {}
-      );
-  
+      const likedPostsMap = likedPostsData
+        ? likedPostsData.reduce(
+            (acc: Record<number, boolean>, postID: number) => {
+              acc[postID] = true;
+              return acc;
+            },
+            {}
+          )
+        : [];
+
       setLikedPosts(likedPostsMap);
     } catch (error) {
       console.error("Error fetching user likes:", error);
@@ -201,13 +211,15 @@ export default function Home() {
   // Función para obtener los comentarios de un post
   const fetchComments = async (postID: number) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/posts/${postID}/comments`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1")}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:3000/api/posts/${postID}/comments`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error("Error fetching comments");
       }
@@ -232,16 +244,15 @@ export default function Home() {
   // Fetch likes count for a specific comment
   const fetchCommentLikesCount = async (commentID: number) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/likes/comments/${commentID}/count`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:3000/api/likes/comments/${commentID}/count`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Error fetching comment likes count");
@@ -255,45 +266,47 @@ export default function Home() {
         [commentID]: likesData.comment_likes_count,
       }));
     } catch (error) {
-      console.error(`Error fetching likes count for comment ${commentID}:`, error);
+      console.error(
+        `Error fetching likes count for comment ${commentID}:`,
+        error
+      );
     }
-  }
+  };
 
   // Función para agregar un nuevo comentario
   const addComment = async (postID: number) => {
     try {
       const commentText = newComment[postID];
       if (!commentText) return;
-  
-      const response = await fetch(`http://localhost:3000/api/posts/${postID}/comments`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-        body: JSON.stringify({ body: commentText }),
-      });
-  
+
+      const response = await fetch(
+        `http://localhost:3000/api/posts/${postID}/comments`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ body: commentText }),
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Error adding comment");
       }
-  
+
       const newCommentData = await response.json();
-  
+
       await fetchComments(postID);
-  
+
       // Limpia el campo de texto del comentario
       setNewComment((prevNewComment) => ({
         ...prevNewComment,
         [postID]: "",
       }));
       // Actualiza el contador de comentarios en postStats
-       // Opcional: Actualiza el contador de comentarios si es necesario
-       setPostStats((prevStats) => ({
+      // Opcional: Actualiza el contador de comentarios si es necesario
+      setPostStats((prevStats) => ({
         ...prevStats,
         [postID]: {
           ...prevStats[postID],
@@ -308,7 +321,7 @@ export default function Home() {
   // Función para manejar el toggle de likes en comentarios
   const toggleCommentLike = async (commentID: number) => {
     try {
-      const isLiked = likedComments[commentID];
+      const isLiked = likedComments ? likedComments[commentID] : false;
       const endpoint = isLiked
         ? `http://localhost:3000/api/comments/${commentID}/dislike`
         : `http://localhost:3000/api/comments/${commentID}/like`;
@@ -320,15 +333,13 @@ export default function Home() {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
         },
       });
 
       if (!response.ok) {
-        throw new Error(isLiked ? "Error al quitar el like" : "Error al dar like");
+        throw new Error(
+          isLiked ? "Error al quitar el like" : "Error al dar like"
+        );
       }
 
       setLikedComments((prevLikedComments) => ({
@@ -337,9 +348,9 @@ export default function Home() {
       }));
       // Actualizar el contador de likes
       setCommentLikesCount((prevCount) => ({
-      ...prevCount,
-      [commentID]: prevCount[commentID] + (isLiked ? -1 : 1),
-    }));
+        ...prevCount,
+        [commentID]: prevCount[commentID] + (isLiked ? -1 : 1),
+      }));
     } catch (error) {
       console.error(`Error toggling like for comment ${commentID}:`, error);
     }
@@ -347,119 +358,111 @@ export default function Home() {
 
   const fetchUserCommentLikes = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/users/likes/comments`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      });
-  
+      const response = await fetch(
+        `http://localhost:3000/api/users/likes/comments`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Error fetching user comment likes");
       }
-  
+
       const likedCommentsData: number[] = await response.json();
-  
+
       // Convertimos la lista de comment IDs en un mapa para un acceso más rápido
-      const likedCommentsMap = likedCommentsData.reduce(
+      const likedCommentsMap = likedCommentsData?.reduce(
         (acc: Record<number, boolean>, commentID: number) => {
           acc[commentID] = true;
           return acc;
         },
         {}
       );
-  
+
       setLikedComments(likedCommentsMap);
     } catch (error) {
       console.error("Error fetching user comment likes:", error);
     }
   };
-// Fetch stats and creator info for all posts when homeData changes
-useEffect(() => {
-  const fetchData = async () => {
-    if (homeData?.posts) {
-      // Fetch stats and creator info for all posts
-      homeData.posts.forEach((post: any) => {
-        fetchPostStats(post.id);
-        fetchPostCreator(post.user);
-      });
+  // Fetch stats and creator info for all posts when homeData changes
+  useEffect(() => {
+    const fetchData = async () => {
+      if (homeData?.pages) {
+        // Fetch stats and creator info for all posts
+        homeData.pages.forEach((page) => {
+          page.posts.forEach((post: any) => {
+            fetchPostStats(post.id);
+          });
+        });
 
-      // Fetch user likes
-      await fetchUserLikes();
-      await fetchUserCommentLikes(); 
+        // Fetch user likes
+        await fetchUserLikes();
+        await fetchUserCommentLikes();
+      }
+    };
+
+    fetchData();
+  }, [homeData]);
+
+  // Función para buscar usuarios en el backend
+  const fetchFilteredUsers = async (term: string) => {
+    try {
+      setShowNoResults(false); // Ocultar mensaje mientras se busca
+      const response = await fetch(
+        `http://localhost:3000/api/users/search?query=${term}&limit=10`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error fetching users");
+      }
+
+      const data = await response.json();
+      setFilteredUsers(data.users);
+
+      // Validar que data.users exista y sea un array
+      if (!data || !Array.isArray(data.users)) {
+        setFilteredUsers([]);
+        setShowNoResults(true);
+        return;
+      }
+      // Mostrar mensaje de "No se encontraron usuarios" después de un retraso si no hay resultados
+      if (data.users.length === 0) {
+        setTimeout(() => {
+          setShowNoResults(true);
+        }, 500); // Retraso de 500ms
+      } else {
+        setShowNoResults(false);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setFilteredUsers([]);
+      setShowNoResults(true);
     }
   };
 
-  fetchData();
-}, [homeData]);
- 
-// Función para buscar usuarios en el backend
-const fetchFilteredUsers = async (term: string) => {
-  try {
-    setIsSearching(true);
-    setShowNoResults(false); // Ocultar mensaje mientras se busca
-    const response = await fetch(
-      `http://localhost:3000/api/users/search?query=${term}&limit=10`,
-      {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${document.cookie.replace(
-            /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1"
-          )}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Error fetching users");
-    }
-
-    const data = await response.json();
-    setFilteredUsers(data.users);
-
-    // Validar que data.users exista y sea un array
-    if (!data || !Array.isArray(data.users)) {
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
       setFilteredUsers([]);
-      setShowNoResults(true);
-      return;
-    }
-    // Mostrar mensaje de "No se encontraron usuarios" después de un retraso si no hay resultados
-    if (data.users.length === 0) {
-      setTimeout(() => {
-        setShowNoResults(true);
-      }, 500); // Retraso de 500ms
+      setShowNoResults(false); // Ocultar mensaje si no hay texto
     } else {
-      setShowNoResults(false);
+      const delayDebounceFn = setTimeout(() => {
+        fetchFilteredUsers(searchTerm);
+      }, 300);
+      return () => clearTimeout(delayDebounceFn);
     }
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    setFilteredUsers([]);
-    setShowNoResults(true);
-  } finally {
-    setIsSearching(false);
-  }
-};
+  }, [searchTerm]);
 
-useEffect(() => {
-  if (searchTerm.trim() === "") {
-    setFilteredUsers([]);
-    setShowNoResults(false); // Ocultar mensaje si no hay texto
-  } else {
-    const delayDebounceFn = setTimeout(() => {
-      fetchFilteredUsers(searchTerm);
-    }, 500); // Debounce de 500ms
-    return () => clearTimeout(delayDebounceFn);
-  }
-}, [searchTerm]);
-
-  console.log(filteredUsers);
   if (homeLoading || userLoading) {
     return <div>Loading...</div>;
   }
@@ -468,109 +471,149 @@ useEffect(() => {
     return <div>Error: {homeError.message}</div>;
   }
 
-if (userError) {
-  return <div>Error: {userError.message}</div>;
-}
+  if (userError) {
+    return <div>Error: {userError.message}</div>;
+  }
 
-return (
-  <div>
-    <div className="header flex items-center justify-between px-4 py-2 mt-20">
-      {/* Logo */}
-      <div className="logo">
-        <img src="/logo.png" alt="Logo" className="h-8 cursor-pointer" />
-      </div>
+  return (
+    <div>
+      <div className="header grid grid-cols-3 items-center px-4 py-2 mt-20">
+  {/* Logo */}
+  <div className="logo bg-black flex justify-center items-center">
+    <h1 className="text-5xl font-archivo text-white tracking-tighter">
+      Fle<span className="text-lime-400">X</span>in.
+    </h1>
+  </div>
 
-      {/* Barra de búsqueda */}
-      <div className="search-bar">
-        <input
-          type="text"
-          placeholder="Buscar usuarios..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border rounded-full bg-gray-100 focus:outline-none focus:ring-1 focus:ring-black text-center text-black"
-        />
-      </div>
+        <div className="relative">
+          {/* Barra de búsqueda */}
+          <SearchBar
+            value={searchTerm}
+            placeholder="Buscar usuario..."
+            onChange={(val: string) => setSearchTerm(val)}
+            className="w-96"
+          />
+          {/* Lista de resultados */}
+          {filteredUsers.length > 0 && (
+            <ul className="mt-4 bg-white border rounded-md shadow divide-y divide-gray-200 z-20 absolute top-full w-full">
+              {filteredUsers.map((user) => (
+                <li
+                  key={user.id}
+                  className="flex items-center p-4 space-x-4 cursor-pointer"
+                  onClick={() => router.push(`/${user.user_name}/profile`)}
+                >
+                  <img
+                    src={user.profilePicture || "/teddy.webp"}
+                    alt={`${user.full_name}'s avatar`}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {user.full_name}
+                    </p>
+                    <p className="text-sm text-gray-500">@{user.user_name}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
 
-      {/* Messages Icon */}
-      <div className="messages">
-        <button
-          onClick={() => router.push('/messages')}
-          className="relative"
-        >
-        <MessageSquare size={32}/>
-        </button>
-      </div>
-    </div>
-    {/* Lista de resultados */}
-    {filteredUsers.length > 0 && (
-        <ul className="mt-4 bg-white border rounded-md shadow divide-y divide-gray-200">
-          {filteredUsers.map((user) => (
-            <li 
-              key={user.id} 
-              className="flex items-center p-4 space-x-4 cursor-pointer" 
-              onClick={() => router.push(`/${user.user_name}/profile`)}
-            >
-              <img
-                src={user.profilePicture || "/teddy.webp"}
-                alt={`${user.full_name}'s avatar`}
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <p className="font-medium text-gray-900">{user.full_name}</p>
-                <p className="text-sm text-gray-500">@{user.user_name}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+          {/* Mensaje si no hay resultados */}
+          {showNoResults && searchTerm && filteredUsers.length === 0 && (
+            <div className="mt-4 text-center text-gray-500">
+              No se encontraron usuarios.
+            </div>
+          )}
+        </div>
 
-      {/* Mensaje si no hay resultados */}
-      {showNoResults && searchTerm && filteredUsers.length === 0 && (
-        <p className="mt-4 text-gray-500">No se encontraron usuarios.</p>
-      )}
-
-    <ul className="flex flex-wrap gap-2 px-4 py-2">
-      {userData ? (
-        userData.map((topic: any) => (
-          <li
-            key={topic.id}
-            className="px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-medium shadow"
+        {/* Messages Icon */}
+        <div className="messages">
+          <button
+            onClick={() => router.push(`/${user?.user_name}/messages`)}
+            className="relative"
           >
-            {topic.name}
-          </li>
-        ))
-      ) : (
-        <li className="text-gray-500">No topics available</li>
-      )}
-    </ul>
-    <div className="stories">
-    {/*Aqui irçan las historias */}
+            <MessageSquare size={32} />
+          </button>
+        </div>
+      </div>
 
-    </div>
-    <ul className="flex flex-wrap gap-4 justify-center">
-        {homeData?.posts ? (
-          homeData.posts.map((post: any) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              postStats={postStats}
-              likedPosts={likedPosts}
-              visibleComments={visibleComments}
-              comments={comments}
-              newComment={newComment}
-              toggleLike={toggleLike}
-              fetchComments={fetchComments}
-              toggleCommentLike={toggleCommentLike}
-              setNewComment={setNewComment}
-              commentLikesCount={commentLikesCount}
-              likedComments={likedComments}      
-              addComment={addComment}            
-            />
+      <ul className="flex flex-wrap gap-2 px-4 py-2">
+        {userData ? (
+          userData.map((topic: any) => (
+            <li
+              key={topic.id}
+              className={`
+                transition-all duration-200
+                px-5 py-2 rounded-full text-sm font-semibold shadow-lg cursor-pointer border-2
+                flex items-center gap-2
+                ${selectedTopicId === topic.id
+                  ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
+                  : "bg-gradient-to-r from-white via-white to-gray-100 text-gray-700 border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"}
+              `}
+              style={{
+                boxShadow: selectedTopicId === topic.id
+                  ? "0 4px 20px 0 rgba(163, 230, 53, 0.25)"
+                  : "0 2px 8px 0 rgba(0,0,0,0.06)"
+              }}
+              onClick={() =>
+                setSelectedTopicId((prev) =>
+                  prev === topic.id ? null : topic.id
+                )
+              }
+            >
+              <span className="inline-block w-2 h-2 rounded-full mr-2"
+                style={{
+                  background: selectedTopicId === topic.id
+                    ? "#84cc16"
+                    : "#d1d5db"
+                }}
+              ></span>
+              {topic.name}
+            </li>
           ))
         ) : (
-          <p>No hay publicaciones disponibles.</p>
+          <li className="text-gray-500">No topics available</li>
         )}
-      </ul>    
-  </div>
-);
+      </ul>
+      <div className="flex flex-col gap-8 mb-32">
+        <ul className="flex flex-wrap gap-4 justify-center">
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((post: any) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                postStats={postStats}
+                likedPosts={likedPosts}
+                visibleComments={visibleComments}
+                comments={comments}
+                newComment={newComment}
+                toggleLike={toggleLike}
+                fetchComments={fetchComments}
+                toggleCommentLike={toggleCommentLike}
+                setNewComment={setNewComment}
+                commentLikesCount={commentLikesCount}
+                likedComments={likedComments}
+                addComment={addComment}
+                currentUser={userData}
+                refreshPosts={fetchNextPage}
+              />
+            ))
+          ) : (
+            <li>No hay publicaciones aún.</li>
+          )}
+        </ul>
+        {hasNextPage && !selectedTopicId && (
+          <div className="text-center mt-6">
+            <Button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              variant="outline"
+            >
+              {isFetchingNextPage ? "Cargando..." : "Cargar más"}
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
