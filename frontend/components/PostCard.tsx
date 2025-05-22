@@ -147,10 +147,6 @@ const PostCard: React.FC<PostCardProps> = ({
             disableDoubleClick={() => setIsDoubleClickEnabled(false)}
             enableDoubleClick={() => setIsDoubleClickEnabled(true)}
           />
-          <button className="text-white hover:text-lime-400 transition-all">
-            {/* Placeholder for future icon */}
-            <Send />
-          </button>
         </div>
       </div>
 
