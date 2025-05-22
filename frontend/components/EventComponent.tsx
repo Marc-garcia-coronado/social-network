@@ -292,7 +292,7 @@ export default function EventComponent({
   }, [event, setValue]);
 
   return (
-    <li className="flex flex-col w-[350px] md:w-[400px] min-h-[350px] overflow-hidden border-transparent rounded-md shadow ">
+    <li className="flex flex-col w-[350px] md:w-[400px] min-h-[350px] overflow-hidden border border-[rgba(120,120,120,0.15)] dark:border-[rgba(255,255,255,0.08)] bg-white dark:bg-zinc-900 rounded-xl shadow-xl transition-colors">
       <Image
         src={event?.picture ? event.picture : "/globe.svg"}
         alt={event?.description || "Evento"}
@@ -466,7 +466,7 @@ export default function EventComponent({
                         <Badge
                           className={`${
                             watch("topicID") === topic.id
-                              ? "bg-yellow-600 hover:bg-yellow-500"
+                              ? "bg-lime-400 hover:bg-lime-300"
                               : ""
                           } cursor-pointer py-2 px-4`}
                         >

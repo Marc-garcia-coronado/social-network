@@ -479,7 +479,7 @@ export default function Home() {
     <div>
       <div className="header grid grid-cols-3 items-center px-4 py-2 mt-20">
         {/* Logo */}
-        <div className="logo bg-black flex justify-center items-center">
+        <div className="logo flex justify-center items-center">
           <h1 className="text-5xl font-archivo text-white tracking-tighter">
             Fle<span className="text-lime-400">X</span>in.
           </h1>
@@ -495,7 +495,7 @@ export default function Home() {
           />
           {/* Lista de resultados */}
           {filteredUsers.length > 0 && (
-            <ul className="mt-4 bg-white border rounded-md shadow divide-y divide-gray-200 z-20 absolute top-full w-full">
+            <ul className="mt-4 border rounded-md shadow divide-y z-20 absolute top-full w-full bg-zinc-900">
               {filteredUsers.map((user) => (
                 <li
                   key={user.id}
@@ -510,10 +510,10 @@ export default function Home() {
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-medium">
                       {user.full_name}
                     </p>
-                    <p className="text-sm text-gray-500">@{user.user_name}</p>
+                    <p className="text-sm">@{user.user_name}</p>
                   </div>
                 </li>
               ))}
@@ -522,7 +522,7 @@ export default function Home() {
 
           {/* Mensaje si no hay resultados */}
           {showNoResults && searchTerm && filteredUsers.length === 0 && (
-            <div className="mt-4 text-center text-gray-500">
+            <div className="mt-4 text-center ">
               No se encontraron usuarios.
             </div>
           )}
