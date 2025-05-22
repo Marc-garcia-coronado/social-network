@@ -17,6 +17,8 @@ import { Settings } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { uploadImage } from "@/hooks/useUploadImage";
+import Image from "next/image";
 
 export function SettingsSheet({
   refreshUserData,
@@ -30,6 +32,8 @@ export function SettingsSheet({
     user_name: user?.user_name || "",
     bio: user?.bio || "",
   });
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [userTopics, setUserTopics] = useState<any[]>([]);
   const [allTopics, setAllTopics] = useState<any[]>([]);
   const [selectedTopics, setSelectedTopics] = useState<any[]>([]);
@@ -149,8 +153,25 @@ export function SettingsSheet({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfilePicture(file);
+      const imageUrl = URL.createObjectURL(file);
+      setPreviewImage(imageUrl);
+    
+    }
+  };
+
   const handleProfileUpdate = async () => {
     try {
+      let profilePictureUrl = user?.profile_picture;
+
+      // Subir la imagen si se selecciona una nueva
+      if (profilePicture) {
+        profilePictureUrl = await uploadImage(profilePicture);
+      }
+
       const response = await fetch(
         `http://localhost:3000/api/users/${user?.id}`,
         {
@@ -163,7 +184,7 @@ export function SettingsSheet({
               "$1"
             )}`,
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({ ...formData, profile_picture: profilePictureUrl }),
         }
       );
 
@@ -215,6 +236,26 @@ export function SettingsSheet({
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-1 items-center gap-4">
+          <section className="flex justify-center">
+            <Image
+            src={previewImage || user?.profile_picture || "/teddy.webp"}
+            alt={user?.user_name || "Avatar"}
+              width={1000}
+              height={1000}
+              className="w-40 h-40 rounded-full object-cover"
+            />
+          </section>
+          <Label htmlFor="profile_picture" className="text-center">
+            Foto de Perfil
+          </Label>
+          <Input
+            id="profile_picture"
+            type="file"
+            accept="image/*"
+            onChange={handleProfilePictureChange}
+          />
+        </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="full_name" className="text-right">
               Nombre Completo

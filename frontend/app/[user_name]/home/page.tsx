@@ -86,7 +86,13 @@ export default function Home() {
   const [visibleComments, setVisibleComments] = useState<
     Record<number, boolean>
   >({});
+  const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
 
+  const filteredPosts = (homeData?.pages ?? [])
+    .flatMap((page) => page.posts ?? [])
+    .filter((post: any) =>
+      selectedTopicId ? post.topic?.id === selectedTopicId : true
+    );
   // Fetch likes and comments count for a specific post
   const fetchPostStats = async (postID: number) => {
     try {
@@ -470,36 +476,33 @@ export default function Home() {
 
   return (
     <div>
-      <div className="header flex items-center justify-between px-4 py-2 mt-20">
-        {/* Logo */}
-        <div className="logo">
-          <Image
-            src="/logo.png"
-            width={24}
-            height={24}
-            alt="Logo"
-            className="h-8 cursor-pointer"
-          />
-        </div>
+      <div className="header grid grid-cols-3 items-center px-4 py-2 mt-20">
+  {/* Logo */}
+  <div className="logo bg-black flex justify-center items-center">
+    <h1 className="text-5xl font-archivo text-white tracking-tighter">
+      Fle<span className="text-lime-400">X</span>in.
+    </h1>
+  </div>
 
-        {/* Barra de búsqueda */}
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Buscar usuarios..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border rounded-full bg-gray-100 focus:outline-none focus:ring-1 focus:ring-black text-center text-black"
-          />
-        </div>
+  {/* Barra de búsqueda */}
+  <div className="search-bar flex justify-center">
+    <input
+      type="text"
+      placeholder="Buscar usuarios..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full max-w-md px-4 py-2 border rounded-full bg-gray-100 focus:outline-none focus:ring-1 focus:ring-black text-center text-black"
+    />
+  </div>
 
-        {/* Messages Icon */}
-        <div className="messages">
-          <button onClick={() => router.push(`/${user?.user_name}/messages`)} className="relative">
-            <MessageSquare size={32} />
-          </button>
-        </div>
-      </div>
+  {/* Messages Icon */}
+  <div className="messages flex justify-end">
+    <button onClick={() => router.push(`/${user?.user_name}/messages`)} className="relative">
+      <MessageSquare size={32} />
+    </button>
+  </div>
+</div>
+
       {/* Lista de resultados */}
       {filteredUsers.length > 0 && (
         <ul className="mt-4 bg-white border rounded-md shadow divide-y divide-gray-200">
@@ -509,9 +512,11 @@ export default function Home() {
               className="flex items-center p-4 space-x-4 cursor-pointer"
               onClick={() => router.push(`/${user.user_name}/profile`)}
             >
-              <img
-                src={user.profilePicture || "/teddy.webp"}
+              <Image
+                src={user?.profile_picture || "/teddy.webp"}
                 alt={`${user.full_name}'s avatar`}
+                width={1000}
+                height={1000}
                 className="w-10 h-10 rounded-full"
               />
               <div>
@@ -535,8 +540,32 @@ export default function Home() {
           userData.map((topic: any) => (
             <li
               key={topic.id}
-              className="px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-medium shadow"
+              className={`
+                transition-all duration-200
+                px-5 py-2 rounded-full text-sm font-semibold shadow-lg cursor-pointer border-2
+                flex items-center gap-2
+                ${selectedTopicId === topic.id
+                  ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
+                  : "bg-gradient-to-r from-white via-white to-gray-100 text-gray-700 border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"}
+              `}
+              style={{
+                boxShadow: selectedTopicId === topic.id
+                  ? "0 4px 20px 0 rgba(163, 230, 53, 0.25)"
+                  : "0 2px 8px 0 rgba(0,0,0,0.06)"
+              }}
+              onClick={() =>
+                setSelectedTopicId((prev) =>
+                  prev === topic.id ? null : topic.id
+                )
+              }
             >
+              <span className="inline-block w-2 h-2 rounded-full mr-2"
+                style={{
+                  background: selectedTopicId === topic.id
+                    ? "#84cc16"
+                    : "#d1d5db"
+                }}
+              ></span>
               {topic.name}
             </li>
           ))
@@ -544,11 +573,10 @@ export default function Home() {
           <li className="text-gray-500">No topics available</li>
         )}
       </ul>
-      <div className="stories">{/*Aqui irçan las historias */}</div>
       <div className="flex flex-col gap-8 mb-32">
         <ul className="flex flex-wrap gap-4 justify-center">
-          {homeData?.pages.map((page) =>
-            page.posts.map((post: any) => (
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((post: any) => (
               <PostCard
                 key={post.id}
                 post={post}
@@ -564,11 +592,15 @@ export default function Home() {
                 commentLikesCount={commentLikesCount}
                 likedComments={likedComments}
                 addComment={addComment}
+                currentUser={userData}
+                refreshPosts={fetchNextPage}
               />
             ))
+          ) : (
+            <li>No hay publicaciones aún.</li>
           )}
         </ul>
-        {hasNextPage && (
+        {hasNextPage && !selectedTopicId && (
           <div className="text-center mt-6">
             <Button
               onClick={() => fetchNextPage()}

@@ -14,15 +14,17 @@ import (
 
 func (s *PostgresStore) CreateUser(u *models.User) (*models.User, error) {
 	stmt := `
-	INSERT INTO users (user_name, full_name, email, password_hash, role)
-	VALUES ($1, $2, $3, $4, $5)
+	INSERT INTO users (user_name, full_name, email, password_hash, role, profile_picture, bio)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)
 	RETURNING id, user_name, full_name, email, profile_picture, bio, is_active, role, user_since;
 	`
 
 	newUser := new(models.User)
 
-	if err := s.Db.QueryRow(stmt, u.UserName, u.FullName, u.Email, u.Password, u.Role).Scan(&newUser.ID, &newUser.UserName, &newUser.FullName, &newUser.Email,
-		&newUser.ProfilePicture, &newUser.Bio, &newUser.IsActive, &newUser.Role, &newUser.UserSince); err != nil {
+	if err := s.Db.QueryRow(stmt, u.UserName, u.FullName, u.Email, u.Password, u.Role, u.ProfilePicture, u.Bio).Scan(
+		&newUser.ID, &newUser.UserName, &newUser.FullName, &newUser.Email,
+		&newUser.ProfilePicture, &newUser.Bio, &newUser.IsActive, &newUser.Role,
+		&newUser.UserSince); err != nil {
 		return nil, err
 	}
 

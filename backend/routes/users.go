@@ -133,7 +133,7 @@ func (s *APIServer) handleCreateUser(w http.ResponseWriter, r *http.Request) err
 		return err
 	}
 
-	user := models.NewUser(createUserReq.UserName, createUserReq.FullName, createUserReq.Email, createUserReq.Password)
+	user := models.NewUser(createUserReq.UserName, createUserReq.FullName, createUserReq.Email, createUserReq.Password, createUserReq.Bio, createUserReq.ProfilePicture)
 
 	newUser, err := s.store.CreateUser(user)
 	if err != nil {

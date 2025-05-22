@@ -18,7 +18,6 @@ export default function Page() {
   });
 
   const handleSend = () => {
-    console.log(senderId);
     
     if (!input.trim() || !senderId) return;
     

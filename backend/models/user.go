@@ -11,6 +11,8 @@ type CreateUserReq struct {
 	FullName string `json:"full_name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	ProfilePicture string   `json:"profile_picture"`
+	Bio            string   `json:"bio"`
 }
 
 type LoginUserReq struct {
@@ -36,7 +38,7 @@ type UserWithPagination struct {
 	Pagination Pagination `json:"pagination"`
 }
 
-func NewUser(userName, fullName, email, password string) *User {
+func NewUser(userName, fullName, email, password, bio, profile_picture string) *User {
 
 	hashedPassword, err := utils.HashPassword(password)
 	if err != nil {
@@ -50,5 +52,7 @@ func NewUser(userName, fullName, email, password string) *User {
 		Email:    email,
 		Password: hashedPassword,
 		Role:     "user",
+		Bio: &bio,
+		ProfilePicture: &profile_picture,
 	}
 }

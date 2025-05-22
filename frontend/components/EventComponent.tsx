@@ -24,17 +24,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { CalendarDemo } from "./CalendarComponent";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { uploadImage } from "@/hooks/useUploadImage";
 
 type EventComponentProps = {
   event: Event;
   apuntado?: boolean;
   topics: Topic[];
   token: string;
+  refetchEvents?: () => void;
 };
 
 type UpdateSubscribedToEventType = {
@@ -92,7 +95,7 @@ const eventSchema = z.object({
       },
       {
         message: "Foto obligatoria",
-      },
+      }
     )
     .refine(
       (file) => {
@@ -101,7 +104,7 @@ const eventSchema = z.object({
       },
       {
         message: "El tamaño del archivo debe ser menor a 5MB",
-      },
+      }
     )
     .refine(
       (file) => {
@@ -110,7 +113,7 @@ const eventSchema = z.object({
       },
       {
         message: "Solo están permitidos los archivos JPEG y PNG",
-      },
+      }
     ),
   topicID: z.number().nullable(),
 });
@@ -128,6 +131,13 @@ const updateEventFn = async ({
   userID: number;
   token: string;
 }) => {
+  let imageURL = data.picture?.name ? "" : undefined;
+
+  // Subir la imagen si se selecciona una nueva
+  if (data.picture instanceof File) {
+    imageURL = await uploadImage(data.picture);
+  }
+
   const response = await fetch(
     `http://localhost:3000/api/users/${userID}/events/${eventID}`,
     {
@@ -141,17 +151,15 @@ const updateEventFn = async ({
         name: data.name,
         description: data.description ?? "",
         topic_id: data.topicID,
-        picture: data.picture?.name ?? "",
+        picture: imageURL,
         location: data.location,
         date: data.date,
       }),
-    },
+    }
   );
-
   if (!response.ok) {
     throw new Error("fallo al modificar el evento");
   }
-
   return { status: response.status, message: "evento modificado" };
 };
 
@@ -160,8 +168,10 @@ export default function EventComponent({
   apuntado = false,
   topics,
   token,
+  refetchEvents,
 }: EventComponentProps) {
   const [isApuntado, setIsApuntado] = useState<boolean>(apuntado);
+  const [openEdit, setOpenEdit] = useState(false);
   const { user } = useUserContext();
   const {
     register,
@@ -178,6 +188,8 @@ export default function EventComponent({
     mutationFn: updateEventFn,
     onSuccess: () => {
       reset();
+      refetchEvents?.();
+      setOpenEdit(false);
       toast({
         description: `✅ Se ha modificado el evento exitosamente`,
       });
@@ -232,12 +244,54 @@ export default function EventComponent({
   const selectedDate = watch("date");
 
   const onSubmit = (dataForm: FormEventData) => {
+    // Crear una copia de los datos del formulario
+    const updatedData: Partial<FormEventData> = { ...dataForm };
+
+    // Si no se selecciona una nueva imagen, elimina el campo `picture` para que no se envíe
+    if (!dataForm.picture) {
+      delete updatedData.picture;
+    }
     updateMutation.mutate({
       data: dataForm,
       eventID: event.id,
       userID: user?.id ?? 0,
       token,
     });
+  };
+  const [openDelete, setOpenDelete] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
+  // Función para borrar el evento
+  const handleDeleteEvent = async () => {
+    setLoadingDelete(true);
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/users/${user?.id}/events/${event.id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Error al borrar el evento");
+      }
+      toast({
+        description: "✅ Evento borrado correctamente.",
+      });
+      setOpenDelete(false);
+      refetchEvents?.();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        description: `❌ Error al borrar el evento: ${error.message}`,
+      });
+    } finally {
+      setLoadingDelete(false);
+    }
   };
 
   useEffect(() => {
@@ -251,12 +305,12 @@ export default function EventComponent({
   }, [event, setValue]);
 
   return (
-    <li className="flex flex-col w-[350px] md:w-full min-h-[350px] overflow-hidden mx-auto border-transparent rounded-md shadow ">
+    <li className="flex flex-col w-[350px] md:w-[400px] min-h-[350px] overflow-hidden border-transparent rounded-md shadow ">
       <Image
         src={event?.picture ? event.picture : "/globe.svg"}
-        alt={event?.description}
-        width={30}
-        height={30}
+        alt={event?.description || "Evento"}
+        width={1000}
+        height={1000}
         className="w-full max-h-40 rounded-t-md object-cover"
       />
       <Badge className="w-fit mt-5 mx-5">{event?.topic.name}</Badge>
@@ -276,131 +330,175 @@ export default function EventComponent({
         </div>
       </div>
       {event?.creator?.id === user?.id ? (
-        <Dialog modal={false}>
-          <DialogTrigger asChild>
-            <Button variant="default" className="w-fit mx-auto mb-5">
-              Editar
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Editar Evento</DialogTitle>
-              <DialogDescription>
-                Haz cambios para modificar el contenido del evento. Haz click en
-                guardar cuando hayas acabado.
-              </DialogDescription>
-            </DialogHeader>
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="flex flex-col gap-4 py-4"
-            >
-              <div className="flex items-center gap-4">
-                <Label htmlFor="name" className="w-20 text-right">
-                  Nombre
-                </Label>
-                <Input
-                  id="name"
-                  defaultValue={event.name}
-                  className="flex-1 w-full"
-                  {...register("name")}
-                />
-                {errors.name && (
-                  <p className="text-red-600">{errors.name.message}</p>
-                )}
-              </div>
-              <div className="flex items-center gap-4">
-                <Label htmlFor="description" className="w-20 text-right">
-                  Descripción
-                </Label>
-                <Input
-                  id="description"
-                  defaultValue={event.description}
-                  className="flex-1 w-full"
-                  {...register("description")}
-                />
-                {errors.description && (
-                  <p className="text-red-600">{errors.description.message}</p>
-                )}
-              </div>
-              <div className="flex items-center gap-4">
-                <Label htmlFor="location" className="w-20 text-right">
-                  Localización
-                </Label>
-                <Input
-                  id="location"
-                  defaultValue={event.location}
-                  className="flex-1"
-                  {...register("location")}
-                />
-                {errors.location && (
-                  <p className="text-red-600">{errors.location.message}</p>
-                )}
-              </div>
-              <div className="flex items-center gap-4">
-                <Label htmlFor="date" className="w-20 text-right">
-                  Fecha
-                </Label>
-                <CalendarDemo
-                  value={selectedDate}
-                  onChangeAction={(date) => {
-                    if (date) {
-                      setValue("date", date);
-                    }
-                  }}
-                />
-                {errors.date && (
-                  <p className="text-red-600">{errors.date.message}</p>
-                )}
-              </div>
-              <div className="flex items-center gap-4">
-                <Label htmlFor="file" className="w-20 text-right">
-                  Foto:
-                </Label>
-                <Input
-                  type="file"
-                  id="file"
-                  accept="image/png, image/jpeg"
-                  defaultValue={event.picture}
-                  onChange={handleFileChange}
-                  className="w-4/6"
-                />
-              </div>
-              {errors && (
-                <p className="text-red-600">{errors.topicID?.message}</p>
-              )}
-              <Label htmlFor="topics">Selecciona el tema para el evento:</Label>
-              <ul className="list-none flex gap-4" id="topics">
-                {topics?.map((topic: Topic) => (
-                  <li
-                    key={topic.id}
-                    onClick={() =>
-                      setValue(
-                        "topicID",
-                        watch("topicID") === topic.id ? null : topic.id,
-                      )
-                    }
+        <div className="flex flex-col items-center gap-2 mb-5">
+          <div className="flex gap-3">
+            {/* Botón y diálogo para borrar evento */}
+            <Dialog open={openDelete} onOpenChange={setOpenDelete}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="w-fit"
+                  onClick={() => setOpenDelete(true)}
+                >
+                  Borrar
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[400px]">
+                <DialogHeader>
+                  <DialogTitle>¿Estás seguro?</DialogTitle>
+                  <DialogDescription>
+                    Esta acción no se puede deshacer. ¿Deseas eliminar el
+                    evento?
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setOpenDelete(false)}
+                    disabled={loadingDelete}
                   >
-                    <Badge
-                      className={`${
-                        watch("topicID") === topic.id
-                          ? "bg-yellow-600 hover:bg-yellow-500"
-                          : ""
-                      } cursor-pointer py-2 px-4`}
-                    >
-                      {topic.name}
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-              {errors.topicID && (
-                <p className="text-red-600">{errors.topicID.message}</p>
-              )}
-              <DialogFooter>
-                <Button type="submit">Guardar</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+                    Cancelar
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDeleteEvent}
+                    disabled={loadingDelete}
+                  >
+                    Eliminar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog modal={false} open={openEdit} onOpenChange={setOpenEdit}>
+              <DialogTrigger asChild>
+                <Button variant="default" className="w-fit mx-auto mb-5" onClick={() => setOpenEdit(true)}>
+                  Editar
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Editar Evento</DialogTitle>
+                  <DialogDescription>
+                    Haz cambios para modificar el contenido del evento. Haz
+                    click en guardar cuando hayas acabado.
+                  </DialogDescription>
+                </DialogHeader>
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="flex flex-col gap-4 py-4"
+                >
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="name" className="w-20 text-right">
+                      Nombre
+                    </Label>
+                    <Input
+                      id="name"
+                      defaultValue={event.name}
+                      className="flex-1 w-full"
+                      {...register("name")}
+                    />
+                    {errors.name && (
+                      <p className="text-red-600">{errors.name.message}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="description" className="w-20 text-right">
+                      Descripción
+                    </Label>
+                    <Input
+                      id="description"
+                      defaultValue={event.description}
+                      className="flex-1 w-full"
+                      {...register("description")}
+                    />
+                    {errors.description && (
+                      <p className="text-red-600">
+                        {errors.description.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="location" className="w-20 text-right">
+                      Localización
+                    </Label>
+                    <Input
+                      id="location"
+                      defaultValue={event.location}
+                      className="flex-1"
+                      {...register("location")}
+                    />
+                    {errors.location && (
+                      <p className="text-red-600">{errors.location.message}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="date" className="w-20 text-right">
+                      Fecha
+                    </Label>
+                    <CalendarDemo
+                      value={selectedDate}
+                      onChangeAction={(date) => {
+                        if (date) {
+                          setValue("date", date);
+                        }
+                      }}
+                    />
+                    {errors.date && (
+                      <p className="text-red-600">{errors.date.message}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="file" className="w-20 text-right">
+                      Foto:
+                    </Label>
+                    <Input
+                      type="file"
+                      id="file"
+                      accept="image/png, image/jpeg"
+                      onChange={handleFileChange}
+                      className="w-4/6"
+                    />
+                  </div>
+                  {errors && (
+                    <p className="text-red-600">{errors.topicID?.message}</p>
+                  )}
+                  <Label htmlFor="topics">
+                    Selecciona el tema para el evento:
+                  </Label>
+                  <ul className="list-none flex gap-4" id="topics">
+                    {topics?.map((topic: Topic) => (
+                      <li
+                        key={topic.id}
+                        onClick={() =>
+                          setValue(
+                            "topicID",
+                            watch("topicID") === topic.id ? null : topic.id
+                          )
+                        }
+                      >
+                        <Badge
+                          className={`${
+                            watch("topicID") === topic.id
+                              ? "bg-yellow-600 hover:bg-yellow-500"
+                              : ""
+                          } cursor-pointer py-2 px-4`}
+                        >
+                          {topic.name}
+                        </Badge>
+                      </li>
+                    ))}
+                  </ul>
+                  {errors.topicID && (
+                    <p className="text-red-600">{errors.topicID.message}</p>
+                  )}
+                  <DialogFooter>
+                    <Button type="submit">Guardar</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
       ) : (
         <TooltipProvider>
           <Tooltip>

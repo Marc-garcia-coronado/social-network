@@ -120,7 +120,6 @@ export function DropdownCardMenu({
       }
 
       const result = await response.json();
-      console.log("Cambios guardados exitosamente:", result);
       return result;
     } catch (error) {
       console.error("Error al guardar los cambios del post:", error);
@@ -134,7 +133,6 @@ export function DropdownCardMenu({
         title,
         topic_id: watch("topic_id"),
       };
-      console.log(updatedData);
       await savePostChanges(postId, updatedData);
       setOpenEdit(false);
       refreshPosts();
@@ -142,8 +140,7 @@ export function DropdownCardMenu({
       console.error("No se pudieron guardar los cambios");
     }
   };
-  console.log(postTopicId)
-  console.log(formValues)
+
   return (
     <>
       {/* Dialogo Editar */}
@@ -247,7 +244,6 @@ export function DropdownCardMenu({
                     throw new Error("Error al eliminar el post");
                   }
 
-                  console.log("eliminado");
                   refreshPosts();
                   setOpenDelete(false);
                 } catch (error) {
