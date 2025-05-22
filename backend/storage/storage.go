@@ -86,7 +86,9 @@ type Storage interface {
 	GetUserFeedByTopic(userID, topicID, limit, offset int) ([]models.Post, int, error)
 
 	// Messages methods
-	SaveMessage(message *models.MessageReq) error
+	SaveMessage(message *models.MessageReq) (*models.Message, error)
+	GetConversationMessages(from, to int) ([]models.Message, error)
+	GetUserConversations(userID int) ([]models.User, error)
 }
 
 type PostgresStore struct {

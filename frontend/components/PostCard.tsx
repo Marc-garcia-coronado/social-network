@@ -9,57 +9,57 @@ import { CommentsDrawer } from "./CommentsDrawer";
 import Image from "next/image";
 import { useUserContext } from "@/contexts/UserContext";
 
-
 interface PostCardProps {
-    post: any;
-    postStats: Record<number, { likes: number; comments: number }>;
-    likedPosts: Record<number, boolean>;
-    visibleComments: Record<number, boolean>;
-    comments: Record<number, any[]>;
-    newComment: Record<number, string>;
-    toggleLike: (postId: number) => void;
-    fetchComments: (postId: number) => void;
-    toggleCommentLike: (commentId: number) => void;
-    setNewComment: React.Dispatch<React.SetStateAction<Record<number, string>>>;
-    commentLikesCount: Record<number, number>; 
-    likedComments: Record<number, boolean>; 
-    addComment: (postId: number) => void; 
-    currentUser: { id: number };
-    refreshPosts: () => void;
-  }
-  const PostCard: React.FC<PostCardProps> = ({
-    currentUser,
-    post,
-    postStats,
-    likedPosts,
-    visibleComments,
-    comments,
-    newComment,
-    toggleLike,
-    fetchComments,
-    toggleCommentLike,
-    setNewComment,
-    commentLikesCount,
-    likedComments,
-    addComment,
-    refreshPosts,
-  }) => {
-    const { user } = useUserContext();
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isDoubleClickEnabled, setIsDoubleClickEnabled] = useState(true);
-    const router = useRouter();
-  
-    const handleCloseModal = () => {
-      setIsModalOpen(false);
-    };
-    
-    return (
-      <li
+  post: any;
+  postStats: Record<number, { likes: number; comments: number }>;
+  likedPosts: Record<number, boolean>;
+  visibleComments: Record<number, boolean>;
+  comments: Record<number, any[]>;
+  newComment: Record<number, string>;
+  toggleLike: (postId: number) => void;
+  fetchComments: (postId: number) => void;
+  toggleCommentLike: (commentId: number) => void;
+  setNewComment: React.Dispatch<React.SetStateAction<Record<number, string>>>;
+  commentLikesCount: Record<number, number>;
+  likedComments: Record<number, boolean>;
+  addComment: (postId: number) => void;
+  currentUser: { id: number };
+  refreshPosts: () => void;
+}
+const PostCard: React.FC<PostCardProps> = ({
+  currentUser,
+  post,
+  postStats,
+  likedPosts,
+  visibleComments,
+  comments,
+  newComment,
+  toggleLike,
+  fetchComments,
+  toggleCommentLike,
+  setNewComment,
+  commentLikesCount,
+  likedComments,
+  addComment,
+  refreshPosts,
+}) => {
+  const { user } = useUserContext();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDoubleClickEnabled, setIsDoubleClickEnabled] = useState(true);
+  const router = useRouter();
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  return (
+    <li
       key={post.id}
       className="relative bg-white shadow-md rounded-lg w-[350px] sm:w-[350px] md:w-[450px] h-[350px] sm:h-[350px] md:h-[450px] overflow-hidden"
       onDoubleClick={() => {
         if (isDoubleClickEnabled) toggleLike(post.id);
-      }}    >
+      }}
+    >
       {/* Post Image */}
       {post.picture.Valid && (
         <div className="absolute inset-0">
@@ -85,19 +85,21 @@ interface PostCardProps {
           >
             <Heart
               className={`w-6 h-6 transition-colors  duration-300 ${
-                likedPosts[post.id] ? "text-white" : "text-gray-300  hover:text-lime-400"
+                likedPosts[post.id]
+                  ? "text-white"
+                  : "text-gray-300  hover:text-lime-400"
               }`}
             />
           </button>
           <span>{postStats[post.id]?.likes ?? "Loading..."}</span>
-          </div>
-          {post.user.id === user?.id && (
-          <DropdownCardMenu 
-          postId={post.id} 
-          userId={post.user.id}
-          refreshPosts={refreshPosts}
-          postTitle={post.title}
-          postTopicId={post.topic.id}
+        </div>
+        {post.user.id === user?.id && (
+          <DropdownCardMenu
+            postId={post.id}
+            userId={post.user.id}
+            refreshPosts={refreshPosts}
+            postTitle={post.title}
+            postTopicId={post.topic.id}
           />
         )}
       </div>
@@ -132,22 +134,22 @@ interface PostCardProps {
 
         {/* Icons */}
         <div className="flex space-x-4">
-        <CommentsDrawer
-          post={post}
-          comments={comments}
-          newComment={newComment}
-          setNewComment={setNewComment}
-          addComment={addComment}
-          commentLikesCount={commentLikesCount}
-          likedComments={likedComments}
-          fetchComments={fetchComments}
-          toggleCommentLike={toggleCommentLike}
-          disableDoubleClick={() => setIsDoubleClickEnabled(false)} 
-          enableDoubleClick={() => setIsDoubleClickEnabled(true)}   
-        />    
+          <CommentsDrawer
+            post={post}
+            comments={comments}
+            newComment={newComment}
+            setNewComment={setNewComment}
+            addComment={addComment}
+            commentLikesCount={commentLikesCount}
+            likedComments={likedComments}
+            fetchComments={fetchComments}
+            toggleCommentLike={toggleCommentLike}
+            disableDoubleClick={() => setIsDoubleClickEnabled(false)}
+            enableDoubleClick={() => setIsDoubleClickEnabled(true)}
+          />
           <button className="text-white hover:text-lime-400 transition-all">
-          {/* Placeholder for future icon */}
-          <Send />
+            {/* Placeholder for future icon */}
+            <Send />
           </button>
         </div>
       </div>

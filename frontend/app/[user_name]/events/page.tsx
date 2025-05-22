@@ -2,12 +2,10 @@ import { cookies } from "next/headers";
 import { Topic } from "@/lib/types";
 import EventFeed from "@/components/EventFeed";
 
-async function getTopics(token: string | undefined): Promise<Topic[]> {
+async function getTopics(): Promise<Topic[]> {
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
-  if (token) {
-    headers.append("Authorization", "Bearer " + token);
-  }
+  headers.append("Credentials", "include");
 
   const res = await fetch(`http://localhost:3000/api/topics`, {
     headers,
@@ -23,8 +21,7 @@ export default async function Page({
   searchParams: { q?: string; topic?: string };
 }) {
   const cookiesStore = cookies();
-  const token = cookiesStore.get("token")?.value || "";
-  const topics = await getTopics(token);
+  const topics = await getTopics();
 
   return (
     <div className="container mx-auto">
@@ -32,7 +29,6 @@ export default async function Page({
         Eventos Disponibles
       </h1>
       <EventFeed
-        token={token}
         topics={topics}
         initialSearch={searchParams.q || ""}
         initialTopic={searchParams.topic || ""}

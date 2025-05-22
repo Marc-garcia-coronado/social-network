@@ -7,7 +7,6 @@ import { SettingsSheet } from "@/components/SettingsSheet";
 
 export default function Profile() {
   const { user } = useUserContext();
-  const authenticatedUserID = user?.id;
   const router = useRouter();
 
   const { user_name } = useParams(); // Obtener el parámetro de la ruta
@@ -680,7 +679,7 @@ export default function Profile() {
               <button
                 onClick={() =>
                   router.push(
-                    `/${userData.user_name}/messages` /* Aqui despues otra barra con id de mensaje y cambiar userData por user */,
+                    `/${user?.user_name}/messages/${userData.id}` /* Aqui despues otra barra con id de mensaje y cambiar userData por user */,
                   )
                 }
                 className={`mt-4 px-4 py-2 rounded-full bg-primary text-white`}

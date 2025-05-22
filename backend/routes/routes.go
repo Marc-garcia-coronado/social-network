@@ -124,6 +124,10 @@ func (s *APIServer) Run() {
 	protectedRouter.Get("/feed", utils.MakeHTTPHandleFunc(s.handleGetUserFeed))
 	protectedRouter.Get("/feed/topics/{topicID}", utils.MakeHTTPHandleFunc(s.handleGetUserFeedByTopic))
 
+	// User - Messages routes
+	protectedRouter.Get("/messages", utils.MakeHTTPHandleFunc(s.handleGetConversations))
+	protectedRouter.Get("/messages/{userID}", utils.MakeHTTPHandleFunc(s.handleGetConversationMessages))
+
 	// Protected router for admin
 	adminRouter := chi.NewRouter()
 	adminRouter.Use(middleware.JWTMiddleware)

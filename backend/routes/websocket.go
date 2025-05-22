@@ -14,7 +14,9 @@ var clients = make(map[string]*websocket.Conn)
 // Upgrader para WebSocket
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		return true // ⚠️ Permitir cualquier origen (limítalo en producción)
+		origin := r.Header.Get("Origin")
+		// Permitir solo desde tu frontend (cambia al dominio que uses)
+		return origin == "http://localhost:3001" || origin == "https://tu-dominio.vercel.app"
 	},
 }
 
@@ -48,14 +50,6 @@ func (s *APIServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 		log.Printf("Mensaje de %s a %s: %s\n", userID, to, content)
 
-		// Enviar al destinatario si está conectado
-		if toConn, ok := clients[to]; ok {
-			toConn.WriteJSON(map[string]string{
-				"from":    userID,
-				"content": content,
-			})
-		}
-
 		reciever, err := strconv.Atoi(to)
 		if err != nil {
 			return
@@ -70,9 +64,19 @@ func (s *APIServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		newMessage.ReceiverID = reciever
 		newMessage.SenderID = sender
 
-		err = s.store.SaveMessage(newMessage)
+		newMsg, err := s.store.SaveMessage(newMessage)
 		if err != nil {
 			return
+		}
+
+		// Enviar al destinatario si está conectado
+		if toConn, ok := clients[to]; ok {
+			toConn.WriteJSON(newMsg)
+		}
+
+		// También enviar al emisor (si está conectado)
+		if fromConn, ok := clients[userID]; ok {
+			fromConn.WriteJSON(newMsg)
 		}
 	}
 

@@ -1,42 +1,51 @@
 "use client"
 
-import { useUserContext } from "@/contexts/UserContext"
-import { useEffect, useRef } from "react"
-
-interface Message {
-  from: string
-  content: string
-}
+import { useUserContext } from "@/contexts/UserContext";
+import { Message } from "@/lib/types";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 export function useChatSocket(onMessage: (msg: Message) => void) {
-  const socketRef = useRef<WebSocket | null>(null)
-  const {user} = useUserContext()
-  const senderId = user?.id.toString()
+  const socketRef = useRef<WebSocket | null>(null);
+  const { user } = useUserContext();
+  const senderId = user?.id.toString();
+  const [shouldReconnect, setShouldReconnect] = useState(true);
 
-  useEffect(() => {
-    if (!senderId) return
-
-    const ws = new WebSocket(`ws://localhost:3000/ws?userID=${senderId}`)
-    socketRef.current = ws
+  const connect = useCallback(() => {
+    if (!senderId) return;
+    const ws = new WebSocket(`ws://localhost:3000/ws?userID=${senderId}`);
+    socketRef.current = ws;
 
     ws.onmessage = (event) => {
-      const msg: Message = JSON.parse(event.data)
-      onMessage(msg)
-    }
+      const msg: Message = JSON.parse(event.data);
+      onMessage(msg);
+    };
 
     ws.onclose = () => {
-      console.log("🔌 WebSocket cerrado")
-    }
+      if (shouldReconnect) {
+        setTimeout(() => {
+          connect();
+        }, 3000);
+      }
+    };
 
+    ws.onerror = (e) => {
+      console.error("WebSocket error:", e);
+      ws.close();
+    };
+  }, [onMessage, senderId, shouldReconnect]);
+
+  useEffect(() => {
+    connect();
     return () => {
-      ws.close()
-    }
-  }, [senderId])
+      setShouldReconnect(false);
+      socketRef.current?.close();
+    };
+  }, [connect]);
 
   const sendMessage = (to: string, content: string) => {
-    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return
-    socketRef.current.send(JSON.stringify({ to, content }))
-  }
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return;
+    socketRef.current.send(JSON.stringify({ to, content }));
+  };
 
-  return { sendMessage, senderId }
+  return { sendMessage, senderId };
 }

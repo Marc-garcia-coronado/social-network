@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import EventComponent from "@/components/EventComponent";
 import SearchBar from "@/components/SearchBar";
 import SelectComponent from "@/components/SelectComponent";
 import { Event, Topic } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { useUserContext } from "@/contexts/UserContext";
 
 interface Props {
-  token: string;
   initialSearch: string;
   initialTopic: string;
   topics: Topic[];
@@ -18,7 +18,6 @@ interface Props {
 const LIMIT = 9;
 
 export interface GetEventsPaginatedParams {
-  token: string;
   search?: string;
   topic?: string;
   page?: number;
@@ -34,7 +33,6 @@ export interface GetEventsPaginatedResponse {
 }
 
 export async function getEventsPaginated({
-  token,
   search = "",
   topic = "",
   page = 1,
@@ -55,21 +53,17 @@ export async function getEventsPaginated({
 }
 
 export default function EventFeed({
-  token,
   initialSearch,
   initialTopic,
   topics,
 }: Props) {
   const [search, setSearch] = useState(initialSearch);
   const [topic, setTopic] = useState(initialTopic);
+  const { user } = useUserContext()
 
   const fetchSubscribedEvents = async (): Promise<number[]> => {
-    const resUser = await fetch("http://localhost:3000/api/auth", {
-      credentials: "include",
-    });
-    const dataUser = await resUser.json();
     const resSubs = await fetch(
-      `http://localhost:3000/api/users/${dataUser.user.id}/events/subscribed`,
+      `http://localhost:3000/api/users/${user?.id}/events/subscribed`,
       {
         credentials: "include",
       }
@@ -94,7 +88,7 @@ export default function EventFeed({
   } = useInfiniteQuery({
     queryKey: ["events", search, topic],
     queryFn: ({ pageParam = 1 }) =>
-      getEventsPaginated({ token, search, topic, page: pageParam }),
+      getEventsPaginated({ search, topic, page: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       const { page, limit, total_count } = lastPage.pagination;
@@ -107,15 +101,13 @@ export default function EventFeed({
     data?.pages.flatMap((page: GetEventsPaginatedResponse) => page.events) ??
     [];
 
-  console.log(events)
-
   return (
     <main className="mb-32">
       <div className="flex flex-col items-center justify-center mb-10 md:mx-20 md:flex-row md:justify-between md:gap-3">
         <SearchBar
           value={search}
+          placeholder="Buscar evento..."
           onChange={(val: string) => setSearch(val)}
-          className="w-full md:w-4/6"
         />
         <SelectComponent
           topics={topics}
@@ -143,7 +135,6 @@ export default function EventFeed({
               event={event}
               apuntado={subscribedIds.includes(event?.id)}
               topics={topics}
-              token={token}
             />
           ))}
         </ul>
@@ -162,13 +153,4 @@ export default function EventFeed({
       )}
     </main>
   );
-}
-
-// debounce helper
-function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), delay);
-  };
 }

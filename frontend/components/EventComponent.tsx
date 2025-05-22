@@ -34,21 +34,18 @@ type EventComponentProps = {
   event: Event;
   apuntado?: boolean;
   topics: Topic[];
-  token: string;
 };
 
 type UpdateSubscribedToEventType = {
   state: boolean;
   eventID: number;
   userID: number;
-  token: string;
 };
 
 const updateSubscribedToEvent = async ({
   state,
   eventID,
   userID,
-  token,
 }: UpdateSubscribedToEventType): Promise<any> => {
   const uri = !state
     ? `http://localhost:3000/api/users/${userID}/events/${eventID}/unsubscribe`
@@ -56,13 +53,10 @@ const updateSubscribedToEvent = async ({
 
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
-  if (token) {
-    headers.append("Authorization", "Bearer " + token);
-  }
+  headers.append("Credentials", "include");
 
   const res = await fetch(uri, {
     method: state ? "POST" : "DELETE",
-    credentials: "include",
     headers,
   });
 
@@ -121,12 +115,10 @@ const updateEventFn = async ({
   data,
   eventID,
   userID,
-  token,
 }: {
   data: FormEventData;
   eventID: number;
   userID: number;
-  token: string;
 }) => {
   const response = await fetch(
     `http://localhost:3000/api/users/${userID}/events/${eventID}`,
@@ -135,7 +127,6 @@ const updateEventFn = async ({
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         name: data.name,
@@ -159,7 +150,6 @@ export default function EventComponent({
   event,
   apuntado = false,
   topics,
-  token,
 }: EventComponentProps) {
   const [isApuntado, setIsApuntado] = useState<boolean>(apuntado);
   const { user } = useUserContext();
@@ -218,7 +208,6 @@ export default function EventComponent({
       state: newState,
       eventID: event.id,
       userID: user?.id ?? 0,
-      token,
     });
   };
 
@@ -236,7 +225,6 @@ export default function EventComponent({
       data: dataForm,
       eventID: event.id,
       userID: user?.id ?? 0,
-      token,
     });
   };
 
