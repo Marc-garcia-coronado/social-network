@@ -101,6 +101,7 @@ export default function EventFeed({
     data?.pages.flatMap((page: GetEventsPaginatedResponse) => page.events) ??
     [];
 
+
   return (
     <main className="mb-32">
       <div className="flex flex-col items-center justify-center mb-10 md:mx-20 md:flex-row md:justify-between md:gap-3">
@@ -128,13 +129,15 @@ export default function EventFeed({
           No se han encontrado eventos con '{search}'
         </p>
       ) : (
-        <ul className="lg:mx-20 grid md:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-8">
+        <ul className="flex flex-wrap gap-4 justify-center mb-32">
           {events.map((event) => (
             <EventComponent
               key={event?.id ?? `event-${event?.name}`} // fallback para asegurar el key
               event={event}
               apuntado={subscribedIds.includes(event?.id)}
               topics={topics}
+              token={token}
+              refetchEvents={refetch}
             />
           ))}
         </ul>

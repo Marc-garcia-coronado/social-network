@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Topic } from "@/lib/types";
+import { uploadImage } from "@/hooks/useUploadImage";
 
 type QueryParamsType = {
   data: Array<Topic>;
@@ -88,30 +89,7 @@ const createPostFn = async (body: FormPostData) => {
     throw new Error("No hay archivo para subir la imagen");
   }
 
-  console.log(
-    "upload_preset:",
-    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
-  );
-  console.log("cloud_name:", process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME);
-
-  const formData = new FormData();
-  formData.append("file", body.picture);
-  formData.append(
-    "upload_preset",
-    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
-  );
-
-  const responseUploadImage = await fetch(
-    `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!responseUploadImage.ok) throw new Error("Error al subir la imagen");
-  const dataImage = await responseUploadImage.json();
-  const imageURL = dataImage.secure_url;
+  const imageURL = await uploadImage(body.picture);
 
   const response = await fetch("http://localhost:3000/api/posts", {
     method: "POST",
@@ -138,6 +116,13 @@ const createPostFn = async (body: FormPostData) => {
 };
 
 const createEventFn = async (body: FormEventData) => {
+  let imageURL = "";
+
+  // Subir la imagen si existe
+  if (body.picture) {
+    imageURL = await uploadImage(body.picture);
+  }
+
   const response = await fetch("http://localhost:3000/api/events", {
     method: "POST",
     credentials: "include",
@@ -152,14 +137,14 @@ const createEventFn = async (body: FormEventData) => {
       name: body.name,
       description: body.description ?? "",
       topic_id: body.topicID,
-      picture: body.picture.name,
+      picture: imageURL, // Usar la URL de la imagen subida
       location: body.location,
       date: body.date,
     }),
   });
 
   if (!response.ok) {
-    throw new Error("fallo al crear el post");
+    throw new Error("fallo al crear el evento");
   }
 
   return { status: response.status, message: "evento creado" };

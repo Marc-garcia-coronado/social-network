@@ -66,8 +66,8 @@ const PostCard: React.FC<PostCardProps> = ({
           <Image
             src={post.picture.String}
             alt="Post Image"
-            width={450}
-            height={450}
+            width={1000}
+            height={1000}
             className="w-full h-full object-cover"
             priority
           />
@@ -112,7 +112,7 @@ const PostCard: React.FC<PostCardProps> = ({
           onClick={() => router.push(`/${post.user.user_name}/profile`)}
         >
           <Image
-            src={post.user.profilePicture?.String || "/teddy.webp"}
+            src={post.user.profile_picture || "/teddy.webp"}
             alt="User Avatar"
             width={24}
             height={24}

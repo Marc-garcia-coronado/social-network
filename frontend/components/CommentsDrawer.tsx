@@ -88,7 +88,7 @@ export function CommentsDrawer({
                 >
                   <div className="flex items-center">
                     <Image
-                      src={comment.user.profilePicture || "/teddy.webp"}
+                      src={comment.user.profile_picture || "/teddy.webp"}
                       alt="User Avatar"
                       className="w-10 h-10 rounded-full"
                       width={40}

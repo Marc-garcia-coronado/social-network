@@ -15,6 +15,7 @@ export type User = {
   is_active: boolean;
   role: string;
   bio?: string;
+  profile_picture?: string;
 };
 
 export type DataHTTPResponse = {

@@ -4,6 +4,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import PostCard from "@/components/PostCard";
 import { SettingsSheet } from "@/components/SettingsSheet";
+import Image from "next/image";
+import { Event } from "@/lib/types";
+import EventComponent from "@/components/EventComponent";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Profile() {
   const { user } = useUserContext();
@@ -23,7 +27,7 @@ export default function Profile() {
   const [comments, setComments] = useState<Record<number, any[]>>({});
   const [newComment, setNewComment] = useState<Record<number, string>>({});
   const [likedComments, setLikedComments] = useState<Record<number, boolean>>(
-    {},
+    {}
   );
   const [commentLikesCount, setCommentLikesCount] = useState<
     Record<number, number>
@@ -32,6 +36,10 @@ export default function Profile() {
   const [followersCount, setFollowersCount] = useState<number>(0);
   const [followingCount, setFollowingCount] = useState<number>(0);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
+
+  const [activeTab, setActiveTab] = useState<"posts" | "events" | "subscribed">("posts");
+  const [userEvents, setUserEvents] = useState<Event[]>([]);
+  const [subscribedEvents, setSubscribedEvents] = useState<Event[]>([]); // Nuevo estado
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +85,66 @@ export default function Profile() {
     refreshUserData();
   }, [user_name]);
 
+  // Fetch de eventos del usuario
+  const fetchUserEvents = async (userID: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/users/${userID}/events`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${document.cookie.replace(
+              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+              "$1"
+            )}`,
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Error fetching user events");
+      const data = await response.json();
+      setUserEvents(data.events || []);
+    } catch (error) {
+      console.error("Error fetching user events:", error);
+    }
+  };
+
+  // Llama a fetchUserEvents cuando el usuario cambie y la pestaña sea "events"
+  useEffect(() => {
+    if (userData?.id && activeTab === "events") {
+      fetchUserEvents(userData.id);
+    }
+  }, [userData, activeTab]);
+
+  const fetchSubscribedEventsList = async (userID: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/users/${userID}/events/subscribed`,
+        {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${document.cookie.replace(
+              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+              "$1"
+            )}`,
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Error fetching subscribed events");
+      const data = await response.json();
+      setSubscribedEvents(data.events || []);
+    } catch (error) {
+      console.error("Error fetching subscribed events:", error);
+    }
+  };
+
+  // Llama a fetchSubscribedEventsList cuando el usuario cambie y la pestaña sea "subscribed"
+  useEffect(() => {
+    if (userData?.id && activeTab === "subscribed" && userData?.id === user?.id) {
+      fetchSubscribedEventsList(userData.id);
+    }
+  }, [userData, activeTab, user]);
   const refreshPosts = async () => {
     try {
       const postsResponse = await fetch(
@@ -86,7 +154,7 @@ export default function Profile() {
           headers: {
             "Content-Type": "application/json",
           },
-        },
+        }
       );
 
       if (!postsResponse.ok) {
@@ -110,7 +178,7 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
+              "$1"
             )}`,
           },
         }),
@@ -120,7 +188,7 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
+              "$1"
             )}`,
           },
         }),
@@ -165,14 +233,14 @@ export default function Profile() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${document.cookie.replace(
             /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1",
+            "$1"
           )}`,
         },
       });
 
       if (!response.ok) {
         throw new Error(
-          isLiked ? "Error al quitar el like" : "Error al dar like",
+          isLiked ? "Error al quitar el like" : "Error al dar like"
         );
       }
 
@@ -206,10 +274,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
+              "$1"
             )}`,
           },
-        },
+        }
       );
       if (!response.ok) {
         throw new Error("Error fetching comments");
@@ -247,11 +315,11 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
+              "$1"
             )}`,
           },
           body: JSON.stringify({ body: commentText }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -291,10 +359,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
-              "$1",
+              "$1"
             )}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -311,7 +379,7 @@ export default function Profile() {
     } catch (error) {
       console.error(
         `Error fetching likes count for comment ${commentID}:`,
-        error,
+        error
       );
     }
   };
@@ -326,7 +394,7 @@ export default function Profile() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${document.cookie.replace(
                 /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                "$1",
+                "$1"
               )}`,
             },
           }),
@@ -336,7 +404,7 @@ export default function Profile() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${document.cookie.replace(
                 /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                "$1",
+                "$1"
               )}`,
             },
           }),
@@ -371,10 +439,10 @@ export default function Profile() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${document.cookie.replace(
                 /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                "$1",
+                "$1"
               )}`,
             },
-          },
+          }
         );
 
         if (!response.ok) {
@@ -388,7 +456,7 @@ export default function Profile() {
             acc[postID] = true;
             return acc;
           },
-          {},
+          {}
         );
 
         setLikedPosts(likedPostsMap);
@@ -413,10 +481,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
+              "$1"
             )}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -440,10 +508,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
+              "$1"
             )}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -468,10 +536,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
+              "$1"
             )}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -496,10 +564,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
+              "$1"
             )}`,
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -529,14 +597,14 @@ export default function Profile() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${document.cookie.replace(
             /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-            "$1",
+            "$1"
           )}`,
         },
       });
 
       if (!response.ok) {
         throw new Error(
-          isLiked ? "Error al quitar el like" : "Error al dar like",
+          isLiked ? "Error al quitar el like" : "Error al dar like"
         );
       }
 
@@ -564,10 +632,10 @@ export default function Profile() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${document.cookie.replace(
               /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1",
+              "$1"
             )}`,
           },
-        },
+        }
       );
       if (!response.ok) {
         throw new Error("Error fetching user comment likes");
@@ -579,13 +647,32 @@ export default function Profile() {
           acc[commentID] = true;
           return acc;
         },
-        {},
+        {}
       );
       setLikedComments(likedCommentsMap);
     } catch (error) {
       console.error("Error fetching user comment likes:", error);
     }
   };
+  
+  const fetchSubscribedEvents = async (): Promise<number[]> => {
+    const res = await fetch(
+      `http://localhost:3000/api/users/${user?.id}/events/subscribed`,
+      { credentials: "include" }
+    );
+    const data = await res.json();
+    return data.events.map((event: any) => event.id);
+  };
+
+  const { data: subscribedIds = [] } = useQuery({
+    queryKey: ["subscribed-events", user?.id],
+    queryFn: fetchSubscribedEvents,
+    enabled: !!user?.id,
+  });
+
+  useEffect(() => {
+    fetchSubscribedEvents();
+  }, [user]);
 
   // Llama a fetchUserCommentLikes al cargar el componente
   useEffect(() => {
@@ -608,10 +695,10 @@ export default function Profile() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${document.cookie.replace(
                   /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                  "$1",
+                  "$1"
                 )}`,
               },
-            },
+            }
           );
 
           if (!response.ok) {
@@ -620,7 +707,6 @@ export default function Profile() {
 
           const data = await response.json();
           setIsFollowing(data.is_following);
-          console.log(isFollowing);
         } catch (error) {
           console.error("Error checking follow status:", error);
         }
@@ -629,7 +715,7 @@ export default function Profile() {
       checkIfFollowing();
     }
   }, [userData, isFollowing]);
-
+  console.log(userData);
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -640,13 +726,17 @@ export default function Profile() {
   return (
     <div className="min-h-screen pt-8 px-8">
       <div className="w-100 flex justify-end">
-        <SettingsSheet refreshUserData={refreshUserData} />
+        {userData?.id === user?.id && (
+          <SettingsSheet refreshUserData={refreshUserData} />
+        )}
       </div>
       <header className="flex flex-col justify-center">
         <section className="flex justify-center">
-          <img
-            src={userData?.profilePicture || "/teddy.webp"}
-            alt="User Avatar"
+          <Image
+            src={userData?.profile_picture || "/teddy.webp"}
+            alt={userData?.user_name || "Avatar"}
+            width={1000}
+            height={1000}
             className="w-40 h-40 rounded-full object-cover"
           />
         </section>
@@ -691,35 +781,111 @@ export default function Profile() {
         </section>
       </header>
       <section>
-        <h2 className="text-2xl font-semibold text-center mb-3 underline underline-offset-4">
-          Publicaciones
-        </h2>
-        <ul className="flex flex-wrap gap-4 justify-center mb-32">
-          {userPosts?.posts?.length > 0 ? (
-            userPosts.posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                postStats={postStats}
-                likedPosts={likedPosts}
-                visibleComments={visibleComments}
-                comments={comments}
-                newComment={newComment}
-                toggleLike={toggleLike}
-                fetchComments={fetchComments}
-                toggleCommentLike={toggleCommentLike}
-                setNewComment={setNewComment}
-                commentLikesCount={commentLikesCount}
-                likedComments={likedComments}
-                addComment={addComment}
-                currentUser={userData}
-                refreshPosts={refreshPosts}
-              />
-            ))
-          ) : (
-            <li>No hay publicaciones aún.</li>
+        {/* Tabs */}
+        <div className="flex justify-center gap-8 mb-6">
+          <button
+            className={`text-2xl font-semibold pb-1 transition-all ${
+              activeTab === "posts"
+                ? "underline underline-offset-4 text-black"
+                : "text-gray-500 hover:text-black"
+            }`}
+            onClick={() => setActiveTab("posts")}
+          >
+            Publicaciones
+          </button>
+          <button
+            className={`text-2xl font-semibold pb-1 transition-all ${
+              activeTab === "events"
+                ? "underline underline-offset-4 text-black"
+                : "text-gray-500 hover:text-black"
+            }`}
+            onClick={() => setActiveTab("events")}
+          >
+            Eventos
+          </button>
+          {userData?.id === user?.id && (
+            <button
+              className={`text-2xl font-semibold pb-1 transition-all ${
+                activeTab === "subscribed"
+                  ? "underline underline-offset-4 text-black"
+                  : "text-gray-500 hover:text-black"
+              }`}
+              onClick={() => setActiveTab("subscribed")}
+            >
+              Apuntado
+            </button>
           )}
-        </ul>
+        </div>
+
+        {/* Contenido según la pestaña */}
+        {activeTab === "posts" ? (
+          <>
+            <ul className="flex flex-wrap gap-4 justify-center mb-32">
+              {userPosts?.posts?.length > 0 ? (
+                userPosts.posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    postStats={postStats}
+                    likedPosts={likedPosts}
+                    visibleComments={visibleComments}
+                    comments={comments}
+                    newComment={newComment}
+                    toggleLike={toggleLike}
+                    fetchComments={fetchComments}
+                    toggleCommentLike={toggleCommentLike}
+                    setNewComment={setNewComment}
+                    commentLikesCount={commentLikesCount}
+                    likedComments={likedComments}
+                    addComment={addComment}
+                    currentUser={userData}
+                    refreshPosts={refreshPosts}
+                  />
+                ))
+              ) : (
+                <li>No hay publicaciones aún.</li>
+              )}
+            </ul>
+          </>
+        ) : activeTab === "events" ? (
+          <>
+            <ul className="flex flex-wrap gap-4 justify-center mb-32">
+              {userEvents.length > 0 ? (
+                userEvents.map((event) => (
+                  <EventComponent
+                    key={event.id}
+                    event={event}
+                    topics={[]}
+                    token={""}
+                    apuntado={subscribedIds.includes(event?.id)}
+                    refetchEvents={() => fetchUserEvents(userData.id)}
+                  />
+                ))
+              ) : (
+                <li>No hay eventos aún.</li>
+              )}
+            </ul>
+          </>
+        ) : (
+          <>
+            <ul className="flex flex-wrap gap-4 justify-center mb-32">
+              {subscribedEvents.length > 0 ? (
+                subscribedEvents.map((event) => (
+                  <EventComponent
+                    key={event.id}
+                    event={event}
+                    topics={[]}
+                    token={""}
+                    apuntado={true}
+                    refetchEvents={() => fetchSubscribedEventsList(userData.id)}
+                  />
+                ))
+              ) : (
+                <li>No hay eventos apuntados aún.</li>
+              )}
+            </ul>
+          </>
+        )}
       </section>
     </div>
   );
