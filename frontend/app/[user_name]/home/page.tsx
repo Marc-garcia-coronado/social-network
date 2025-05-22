@@ -502,9 +502,11 @@ export default function Home() {
                   className="flex items-center p-4 space-x-4 cursor-pointer"
                   onClick={() => router.push(`/${user.user_name}/profile`)}
                 >
-                  <img
-                    src={user.profilePicture || "/teddy.webp"}
+                  <Image
+                    src={user.profile_picture || "/teddy.webp"}
                     alt={`${user.full_name}'s avatar`}
+                    width={1000}
+                    height={1000}
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
