@@ -11,7 +11,6 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function Profile() {
   const { user } = useUserContext();
-  const authenticatedUserID = user?.id;
   const router = useRouter();
 
   const { user_name } = useParams(); // Obtener el parámetro de la ruta
@@ -770,7 +769,7 @@ export default function Profile() {
               <button
                 onClick={() =>
                   router.push(
-                    `/${userData.user_name}/messages` /* Aqui despues otra barra con id de mensaje y cambiar userData por user */
+                    `/${user?.user_name}/messages/${userData.id}` /* Aqui despues otra barra con id de mensaje y cambiar userData por user */,
                   )
                 }
                 className={`mt-4 px-4 py-2 rounded-full bg-primary text-white`}
@@ -857,7 +856,6 @@ export default function Profile() {
                     key={event.id}
                     event={event}
                     topics={[]}
-                    token={""}
                     apuntado={subscribedIds.includes(event?.id)}
                     refetchEvents={() => fetchUserEvents(userData.id)}
                   />
@@ -876,7 +874,6 @@ export default function Profile() {
                     key={event.id}
                     event={event}
                     topics={[]}
-                    token={""}
                     apuntado={true}
                     refetchEvents={() => fetchSubscribedEventsList(userData.id)}
                   />

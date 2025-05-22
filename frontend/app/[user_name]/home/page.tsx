@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import SearchBar from "@/components/SearchBar";
 
 type PageParam = {
   pageParam?: number;
@@ -193,12 +194,12 @@ export default function Home() {
       // Convertimos la lista de post IDs en un mapa para un acceso más rápido
       const likedPostsMap = likedPostsData
         ? likedPostsData.reduce(
-          (acc: Record<number, boolean>, postID: number) => {
-            acc[postID] = true;
-            return acc;
-          },
-          {}
-        )
+            (acc: Record<number, boolean>, postID: number) => {
+              acc[postID] = true;
+              return acc;
+            },
+            {}
+          )
         : [];
 
       setLikedPosts(likedPostsMap);
@@ -457,7 +458,7 @@ export default function Home() {
     } else {
       const delayDebounceFn = setTimeout(() => {
         fetchFilteredUsers(searchTerm);
-      }, 500); // Debounce de 500ms
+      }, 300);
       return () => clearTimeout(delayDebounceFn);
     }
   }, [searchTerm]);
@@ -484,56 +485,57 @@ export default function Home() {
     </h1>
   </div>
 
-  {/* Barra de búsqueda */}
-  <div className="search-bar flex justify-center">
-    <input
-      type="text"
-      placeholder="Buscar usuarios..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      className="w-full max-w-md px-4 py-2 border rounded-full bg-gray-100 focus:outline-none focus:ring-1 focus:ring-black text-center text-black"
-    />
-  </div>
+        <div className="relative">
+          {/* Barra de búsqueda */}
+          <SearchBar
+            value={searchTerm}
+            placeholder="Buscar usuario..."
+            onChange={(val: string) => setSearchTerm(val)}
+            className="w-96"
+          />
+          {/* Lista de resultados */}
+          {filteredUsers.length > 0 && (
+            <ul className="mt-4 bg-white border rounded-md shadow divide-y divide-gray-200 z-20 absolute top-full w-full">
+              {filteredUsers.map((user) => (
+                <li
+                  key={user.id}
+                  className="flex items-center p-4 space-x-4 cursor-pointer"
+                  onClick={() => router.push(`/${user.user_name}/profile`)}
+                >
+                  <img
+                    src={user.profilePicture || "/teddy.webp"}
+                    alt={`${user.full_name}'s avatar`}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {user.full_name}
+                    </p>
+                    <p className="text-sm text-gray-500">@{user.user_name}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
 
-  {/* Messages Icon */}
-  <div className="messages flex justify-end">
-    <button onClick={() => router.push(`/${user?.user_name}/messages`)} className="relative">
-      <MessageSquare size={32} />
-    </button>
-  </div>
-</div>
-
-      {/* Lista de resultados */}
-      {filteredUsers.length > 0 && (
-        <ul className="mt-4 bg-white border rounded-md shadow divide-y divide-gray-200">
-          {filteredUsers.map((user) => (
-            <li
-              key={user.id}
-              className="flex items-center p-4 space-x-4 cursor-pointer"
-              onClick={() => router.push(`/${user.user_name}/profile`)}
-            >
-              <Image
-                src={user?.profile_picture || "/teddy.webp"}
-                alt={`${user.full_name}'s avatar`}
-                width={1000}
-                height={1000}
-                className="w-10 h-10 rounded-full"
-              />
-              <div>
-                <p className="font-medium text-gray-900">{user.full_name}</p>
-                <p className="text-sm text-gray-500">@{user.user_name}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* Mensaje si no hay resultados */}
-      {showNoResults && searchTerm && filteredUsers.length === 0 && (
-        <div className="mt-4 text-center text-gray-500">
-          No se encontraron usuarios.
+          {/* Mensaje si no hay resultados */}
+          {showNoResults && searchTerm && filteredUsers.length === 0 && (
+            <div className="mt-4 text-center text-gray-500">
+              No se encontraron usuarios.
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Messages Icon */}
+        <div className="messages">
+          <button
+            onClick={() => router.push(`/${user?.user_name}/messages`)}
+            className="relative"
+          >
+            <MessageSquare size={32} />
+          </button>
+        </div>
+      </div>
 
       <ul className="flex flex-wrap gap-2 px-4 py-2">
         {userData ? (
