@@ -28,10 +28,6 @@ const getTopicsFn = async (id: number) => {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${document.cookie.replace(
-        /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-        "$1"
-      )}`,
     },
   });
 
@@ -96,10 +92,6 @@ const createPostFn = async (body: FormPostData) => {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${document.cookie.replace(
-        /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-        "$1"
-      )}`,
     },
     body: JSON.stringify({
       title: body.title,
@@ -128,10 +120,6 @@ const createEventFn = async (body: FormEventData) => {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${document.cookie.replace(
-        /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-        "$1"
-      )}`,
     },
     body: JSON.stringify({
       name: body.name,

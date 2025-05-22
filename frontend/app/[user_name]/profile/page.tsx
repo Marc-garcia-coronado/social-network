@@ -856,7 +856,6 @@ export default function Profile() {
                     key={event.id}
                     event={event}
                     topics={[]}
-                    token={""}
                     apuntado={subscribedIds.includes(event?.id)}
                     refetchEvents={() => fetchUserEvents(userData.id)}
                   />
@@ -875,7 +874,6 @@ export default function Profile() {
                     key={event.id}
                     event={event}
                     topics={[]}
-                    token={""}
                     apuntado={true}
                     refetchEvents={() => fetchSubscribedEventsList(userData.id)}
                   />

@@ -20,7 +20,6 @@ export default async function Page({
 }: {
   searchParams: { q?: string; topic?: string };
 }) {
-  const cookiesStore = cookies();
   const topics = await getTopics();
 
   return (

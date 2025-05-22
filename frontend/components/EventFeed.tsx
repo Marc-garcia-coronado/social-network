@@ -136,7 +136,6 @@ export default function EventFeed({
               event={event}
               apuntado={subscribedIds.includes(event?.id)}
               topics={topics}
-              token={token}
               refetchEvents={refetch}
             />
           ))}

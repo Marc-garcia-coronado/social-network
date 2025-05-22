@@ -36,7 +36,6 @@ type EventComponentProps = {
   event: Event;
   apuntado?: boolean;
   topics: Topic[];
-  token: string;
   refetchEvents?: () => void;
 };
 
@@ -159,7 +158,6 @@ export default function EventComponent({
   event,
   apuntado = false,
   topics,
-  token,
   refetchEvents,
 }: EventComponentProps) {
   const [isApuntado, setIsApuntado] = useState<boolean>(apuntado);
@@ -262,7 +260,6 @@ export default function EventComponent({
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         }
       );
