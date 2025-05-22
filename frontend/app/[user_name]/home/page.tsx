@@ -4,7 +4,7 @@ import { useUserContext } from "@/contexts/UserContext";
 import useUser from "@/hooks/useUser";
 import { User } from "@/lib/types";
 import PostCard from "@/components/PostCard";
-import { MessageSquare } from "lucide-react";
+import { MessageCircle, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -478,12 +478,12 @@ export default function Home() {
   return (
     <div>
       <div className="header grid grid-cols-3 items-center px-4 py-2 mt-20">
-  {/* Logo */}
-  <div className="logo bg-black flex justify-center items-center">
-    <h1 className="text-5xl font-archivo text-white tracking-tighter">
-      Fle<span className="text-lime-400">X</span>in.
-    </h1>
-  </div>
+        {/* Logo */}
+        <div className="logo bg-black flex justify-center items-center">
+          <h1 className="text-5xl font-archivo text-white tracking-tighter">
+            Fle<span className="text-lime-400">X</span>in.
+          </h1>
+        </div>
 
         <div className="relative">
           {/* Barra de búsqueda */}
@@ -532,9 +532,9 @@ export default function Home() {
         <div className="messages">
           <button
             onClick={() => router.push(`/${user?.user_name}/messages`)}
-            className="relative"
+            className="relative text-white hover:text-lime-400 transition-all"
           >
-            <MessageSquare size={32} />
+            <MessageCircle size={32} />
           </button>
         </div>
       </div>
@@ -548,14 +548,17 @@ export default function Home() {
                 transition-all duration-200
                 px-5 py-2 rounded-full text-sm font-semibold shadow-lg cursor-pointer border-2
                 flex items-center gap-2
-                ${selectedTopicId === topic.id
-                  ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
-                  : "bg-gradient-to-r from-white via-white to-gray-100 text-gray-700 border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"}
+                ${
+                  selectedTopicId === topic.id
+                    ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
+                    : "bg-gradient-to-r from-white via-white to-gray-100 text-gray-700 border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"
+                }
               `}
               style={{
-                boxShadow: selectedTopicId === topic.id
-                  ? "0 4px 20px 0 rgba(163, 230, 53, 0.25)"
-                  : "0 2px 8px 0 rgba(0,0,0,0.06)"
+                boxShadow:
+                  selectedTopicId === topic.id
+                    ? "0 4px 20px 0 rgba(163, 230, 53, 0.25)"
+                    : "0 2px 8px 0 rgba(0,0,0,0.06)",
               }}
               onClick={() =>
                 setSelectedTopicId((prev) =>
@@ -563,11 +566,11 @@ export default function Home() {
                 )
               }
             >
-              <span className="inline-block w-2 h-2 rounded-full mr-2"
+              <span
+                className="inline-block w-2 h-2 rounded-full mr-2"
                 style={{
-                  background: selectedTopicId === topic.id
-                    ? "#84cc16"
-                    : "#d1d5db"
+                  background:
+                    selectedTopicId === topic.id ? "#84cc16" : "#d1d5db",
                 }}
               ></span>
               {topic.name}

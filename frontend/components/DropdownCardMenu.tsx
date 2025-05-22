@@ -260,7 +260,7 @@ export function DropdownCardMenu({
       {/* Dropdown */}
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
-          <Button className="bg-black/50 hover:bg-lime-400 hover:text-black transition-all">
+          <Button className="bg-black/50 hover:bg-lime-400 hover:text-black transition-all text-white">
             <Ellipsis />
           </Button>
         </DropdownMenuTrigger>
@@ -269,7 +269,7 @@ export function DropdownCardMenu({
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem
-              className="cursor-pointer focus:bg-lime-400"
+              className="cursor-pointer focus:bg-lime-400 focus:text-black"
               onSelect={(e) => {
                 e.preventDefault();
                 setMenuOpen(false);
@@ -281,7 +281,7 @@ export function DropdownCardMenu({
               <DropdownMenuShortcut>⇧⌘E</DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuItem
-              className="cursor-pointer focus:bg-lime-400"
+              className="cursor-pointer focus:bg-lime-400 focus:text-black"
               onSelect={(e) => {
                 e.preventDefault();
                 setMenuOpen(false);

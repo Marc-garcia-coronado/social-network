@@ -12,7 +12,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Ellipsis, Forward, Heart, MessageCircle, Trash } from "lucide-react";
+import {
+  Ellipsis,
+  Forward,
+  Heart,
+  MessageCircle,
+  MessageSquare,
+  Trash,
+} from "lucide-react";
 import Image from "next/image";
 import { Textarea } from "./ui/textarea";
 import { formatDistanceToNow } from "date-fns";
@@ -65,7 +72,7 @@ export function CommentsDrawer({
           onClick={openDrawer}
           className="text-white hover:text-lime-400 transition-all"
         >
-          <MessageCircle />
+          <MessageSquare />
         </button>
       </DrawerTrigger>
       <DrawerContent>
@@ -97,8 +104,8 @@ export function CommentsDrawer({
                   </div>
                   <div className="flex-1 ml-3">
                     <p className="fw-bold">{comment.user.user_name}</p>
-                    <p className="text-gray-800">{comment.body}</p>
-                    <div className="flex items-center text-gray-500 text-xs mt-1">
+                    <p>{comment.body}</p>
+                    <div className="flex items-center text-muted-foreground text-xs mt-1">
                       <span>
                         {formatDistanceToNow(new Date(comment.created_at), {
                           addSuffix: true,
@@ -106,7 +113,7 @@ export function CommentsDrawer({
                       </span>
                       {user?.id === comment.user.id && (
                         <Button
-                          className="bg-transparent text-gray-500 hover:bg-transparent hover:text-lime-400 border-none shadow-none ml-2 p-0 h-4"
+                          className="bg-transparent text-muted-foreground hover:bg-transparent hover:text-lime-400 border-none shadow-none ml-2 p-0 h-4"
                           onClick={() => {
                             setSelectedCommentId(comment.id);
                             setOpenDelete(true);
@@ -164,7 +171,7 @@ export function CommentsDrawer({
               }
             />
             <Button
-              className="flex-shrink-0 h-10 bg-black hover:bg-lime-400 hover:text-black"
+              className="flex-shrink-0 h-10 hover:bg-lime-400 hover:text-black"
               onClick={() => addComment(post.id)}
               disabled={(newComment[post.id] || "").trim() === ""}
             >
