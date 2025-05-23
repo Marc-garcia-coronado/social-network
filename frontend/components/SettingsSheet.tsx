@@ -128,7 +128,7 @@ export function SettingsSheet({
       // Dejar de seguir topics eliminados
       if (toUnfollow.length > 0) {
         for (const topic of toUnfollow) {
-          await fetch(`http://localhost:3000/api/topics/${topic.id}/unfollow`, {
+          await fetch(`http://localhost:3000/api/topics/unfollow`, {
             method: "DELETE",
             credentials: "include",
             headers: {
@@ -138,6 +138,7 @@ export function SettingsSheet({
                 "$1"
               )}`,
             },
+            //Cambiar para que se envie el topic
             body: JSON.stringify({ topics: toUnfollow.map((t) => t.id) }),
           });
         }
