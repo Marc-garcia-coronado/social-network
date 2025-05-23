@@ -68,7 +68,7 @@ const PostCard: React.FC<PostCardProps> = ({
             alt="Post Image"
             width={1000}
             height={1000}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover pointer-events-none "
             priority
           />
         </div>

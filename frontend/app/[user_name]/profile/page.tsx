@@ -40,9 +40,38 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState<"posts" | "events" | "subscribed">("posts");
   const [userEvents, setUserEvents] = useState<Event[]>([]);
   const [subscribedEvents, setSubscribedEvents] = useState<Event[]>([]); // Nuevo estado
+  const [userTopics, setuserTopics] = useState([]);
+
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+
+  useEffect(() => {
+    // Fetch all topics and user topics
+    const fetchTopics = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/users/${user?.id}/topics`,
+          {
+            credentials: "include",
+            headers: {
+              Authorization: `Bearer ${document.cookie.replace(
+                /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+                "$1"
+              )}`,
+            },
+          }
+        );
+        const topics = await response.json();
+        setuserTopics(topics);
+      } catch (error) {
+        console.error("Error fetching topics:", error);
+      }
+    };
+
+    fetchTopics();
+  }, []);
 
   const refreshUserData = async () => {
     try {
@@ -856,7 +885,7 @@ export default function Profile() {
                   <EventComponent
                     key={event.id}
                     event={event}
-                    topics={[]}
+                    topics={userTopics}
                     apuntado={subscribedIds.includes(event?.id)}
                     refetchEvents={() => fetchUserEvents(userData.id)}
                   />

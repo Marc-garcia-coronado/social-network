@@ -37,7 +37,7 @@ export default function SelectComponent({
       <SelectContent>
       {Array.isArray(topics) && topics.length > 0 ? (
         topics.map((topic, index) => (
-          <SelectItem key={`${topic.id}-${index}`} value={topic.id.toString()}>
+          <SelectItem key={`${topic.id}-${index}`} className="hover:bg-accent hover:cursor-pointer" value={topic.id.toString()}>
             {topic.name}
           </SelectItem>
         ))

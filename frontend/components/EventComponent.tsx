@@ -298,7 +298,7 @@ export default function EventComponent({
         alt={event?.description || "Evento"}
         width={1000}
         height={1000}
-        className="w-full max-h-40 rounded-t-md object-cover"
+        className="w-full max-h-40 rounded-t-md object-cover pointer-events-none"
       />
       <Badge className="w-fit mt-5 mx-5">{event?.topic.name}</Badge>
       <div className="px-5 py-1 flex flex-col ">
@@ -452,7 +452,7 @@ export default function EventComponent({
                   <Label htmlFor="topics">
                     Selecciona el tema para el evento:
                   </Label>
-                  <ul className="list-none flex gap-4" id="topics">
+                  <ul className="list-none flex gap-4 flex-wrap" id="topics">
                     {topics?.map((topic: Topic) => (
                       <li
                         key={topic.id}

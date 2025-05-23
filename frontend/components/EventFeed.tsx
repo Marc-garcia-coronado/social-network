@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import EventComponent from "@/components/EventComponent";
 import SearchBar from "@/components/SearchBar";
@@ -59,7 +59,35 @@ export default function EventFeed({
 }: Props) {
   const [search, setSearch] = useState(initialSearch);
   const [topic, setTopic] = useState(initialTopic);
+  const [userTopics, setuserTopics] = useState([]);
+
   const { user } = useUserContext()
+
+  useEffect(() => {
+    // Fetch all topics and user topics
+    const fetchTopics = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/users/${user?.id}/topics`,
+          {
+            credentials: "include",
+            headers: {
+              Authorization: `Bearer ${document.cookie.replace(
+                /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+                "$1"
+              )}`,
+            },
+          }
+        );
+        const topics = await response.json();
+        setuserTopics(topics);
+      } catch (error) {
+        console.error("Error fetching topics:", error);
+      }
+    };
+
+    fetchTopics();
+  }, []);
 
   const fetchSubscribedEvents = async (): Promise<number[]> => {
     const resSubs = await fetch(
@@ -111,7 +139,7 @@ export default function EventFeed({
           onChange={(val: string) => setSearch(val)}
         />
         <SelectComponent
-          topics={topics}
+          topics={userTopics}
           value={topic}
           onChange={(val: string) => setTopic(val)}
           className="w-3/6 md:w-[170px]"
@@ -135,7 +163,7 @@ export default function EventFeed({
               key={event?.id ?? `event-${event?.name}`} // fallback para asegurar el key
               event={event}
               apuntado={subscribedIds.includes(event?.id)}
-              topics={topics}
+              topics={userTopics}
               refetchEvents={refetch}
             />
           ))}
