@@ -94,6 +94,13 @@ export function SettingsSheet({
 
   const handleSave = async () => {
     try {
+      if (selectedTopics.length === 0) {
+        toast.toast({
+          variant: "destructive",
+          description: "Debes mantener al menos un topic en tus gustos.",
+        });
+        return;
+      }
       const currentSelectedTopics = [...selectedTopics];
       // IDs originales y seleccionados
       const originalIds = userTopics.map((t) => t.id);
@@ -107,8 +114,6 @@ export function SettingsSheet({
       // Topics a dejar de seguir
       const toUnfollow = userTopics.filter((t) => !selectedIds.includes(t.id));
 
-      console.log("1 - " + toFollow);
-      console.log("3 - " + toUnfollow);
       // Seguir nuevos topics
       if (toFollow.length > 0) {
         await fetch("http://localhost:3000/api/topics/follow", {
@@ -138,8 +143,7 @@ export function SettingsSheet({
                 "$1"
               )}`,
             },
-            //Cambiar para que se envie el topic
-            body: JSON.stringify({ topics: toUnfollow.map((t) => t.id) }),
+            body: JSON.stringify({ topics: [topic.id] }),
           });
         }
       }
@@ -207,13 +211,15 @@ export function SettingsSheet({
       const updatedSelected = prevSelected.filter(
         (topic) => topic.id !== topicToRemove.id
       );
-  
-      // Actualiza los otros estados basándote en el nuevo estado de selectedTopics
-      setAvailableTopics((prev) => [...prev, topicToRemove]);
+
+      setAvailableTopics((prev) => [
+        ...prev.filter((t) => t.id !== topicToRemove.id),
+        topicToRemove,
+      ]);
       setSelectedFromSelect((prev) =>
         prev.filter((id) => id !== topicToRemove.id.toString())
       );
-  
+
       return updatedSelected;
     });
   };
@@ -379,7 +385,7 @@ export function SettingsSheet({
         </div>
           <div>
             <h3 className="text-lg font-semibold text-center">Tus Gustos</h3>
-            <ul className="list-none border p-4 flex gap-2 items-center">
+            <ul className="list-none border p-4 flex flex-wrap gap-2 items-center">
               {selectedTopics.map((topic) => (
                 <li
                   key={topic.id}
