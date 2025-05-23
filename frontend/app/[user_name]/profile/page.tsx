@@ -744,6 +744,7 @@ export default function Profile() {
           <h2 className="text-center">
             <strong>{userData?.full_name || "Nombre"}</strong>
           </h2>
+          <p className="text-center text-gray-300">{"@" + userData?.user_name || ""}</p>
           <p className="text-center">{userData?.bio || ""}</p>
           <p className="text-center">
             <strong>
@@ -786,8 +787,8 @@ export default function Profile() {
           <button
             className={`text-2xl font-semibold pb-1 transition-all ${
               activeTab === "posts"
-                ? "underline underline-offset-4 text-black"
-                : "text-gray-500 hover:text-black"
+              ? "underline underline-offset-4 text-white"
+              : "text-gray-400 hover:text-white"
             }`}
             onClick={() => setActiveTab("posts")}
           >
@@ -796,8 +797,8 @@ export default function Profile() {
           <button
             className={`text-2xl font-semibold pb-1 transition-all ${
               activeTab === "events"
-                ? "underline underline-offset-4 text-black"
-                : "text-gray-500 hover:text-black"
+                ? "underline underline-offset-4 text-white"
+                : "text-gray-400 hover:text-white"
             }`}
             onClick={() => setActiveTab("events")}
           >
@@ -807,8 +808,8 @@ export default function Profile() {
             <button
               className={`text-2xl font-semibold pb-1 transition-all ${
                 activeTab === "subscribed"
-                  ? "underline underline-offset-4 text-black"
-                  : "text-gray-500 hover:text-black"
+                  ? "underline underline-offset-4 text-white"
+                  : "text-gray-400 hover:text-white"
               }`}
               onClick={() => setActiveTab("subscribed")}
             >

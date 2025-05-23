@@ -189,7 +189,7 @@ export function DropdownCardMenu({
                         <Badge
                           className={`${
                             watch("topic_id") === topic.id
-                              ? "bg-yellow-600 hover:bg-yellow-500"
+                              ? "bg-lime-400 hover:bg-lime-300"
                               : ""
                           } cursor-pointer py-2 px-4`}
                         >
