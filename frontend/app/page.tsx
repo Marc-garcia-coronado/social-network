@@ -15,7 +15,7 @@ export default function Home() {
   const router = useRouter()
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/events/closest", {
+    fetch("http://social-network-production.up.railway.app/api/events/closest", {
       headers: {
         "Content-Type": "application/json",
       },

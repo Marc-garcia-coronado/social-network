@@ -17,7 +17,7 @@ import { Topic } from "@/lib/types";
 import { uploadImage } from "@/hooks/useUploadImage";
 
 const getTopicsFn = async () => {
-  const response = await fetch(`http://localhost:3000/api/topics`, {
+  const response = await fetch(`http://social-network-production.up.railway.app/api/topics`, {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
@@ -114,7 +114,7 @@ const LoginForm = ({ className }: FormProps) => {
   });
 
   const loginFn = async (body: FormData) => {
-    const response = await fetch("http://localhost:3000/api/login", {
+    const response = await fetch("http://social-network-production.up.railway.app/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -189,7 +189,7 @@ const followTopicsFn = async ({
   token: string;
   ids: number[];
 }) => {
-  const response = await fetch("http://localhost:3000/api/topics/follow", {
+  const response = await fetch("http://social-network-production.up.railway.app/api/topics/follow", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -208,7 +208,7 @@ const followTopicsFn = async ({
 };
 
 const registerPost = async (body: RegisterFormData) => {
-  const response = await fetch("http://localhost:3000/api/register", {
+  const response = await fetch("http://social-network-production.up.railway.app/api/register", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -8,7 +8,7 @@ export default function usePosts() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:3000/api/users/1/posts", {
+      const response = await fetch("http://social-network-production.up.railway.app/api/users/1/posts", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
