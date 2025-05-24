@@ -17,12 +17,15 @@ import { Topic } from "@/lib/types";
 import { uploadImage } from "@/hooks/useUploadImage";
 
 const getTopicsFn = async () => {
-  const response = await fetch(`https://social-network-production.up.railway.app/api/topics`, {
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  const response = await fetch(
+    `https://social-network-production.up.railway.app/api/topics`,
+    {
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   const data = await response.json();
 
@@ -114,14 +117,17 @@ const LoginForm = ({ className }: FormProps) => {
   });
 
   const loginFn = async (body: FormData) => {
-    const response = await fetch("https://social-network-production.up.railway.app/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(body),
-    });
+    const response = await fetch(
+      "https://social-network-production.up.railway.app/api/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(body),
+      }
+    );
 
     const data = await response.json();
 
@@ -137,7 +143,7 @@ const LoginForm = ({ className }: FormProps) => {
     onSuccess: (data) => {
       if (data) {
         setUser(data.user);
-        router.push(`/ ${data.user.user_name}/home`);
+        router.push(`/${data.user.user_name}/home`);
       }
     },
     onError: () => {
@@ -189,16 +195,19 @@ const followTopicsFn = async ({
   token: string;
   ids: number[];
 }) => {
-  const response = await fetch("https://social-network-production.up.railway.app/api/topics/follow", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      topics: ids,
-    }),
-  });
+  const response = await fetch(
+    "https://social-network-production.up.railway.app/api/topics/follow",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        topics: ids,
+      }),
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Ha fallado al seguir los temas seleccionados");
@@ -208,20 +217,23 @@ const followTopicsFn = async ({
 };
 
 const registerPost = async (body: RegisterFormData) => {
-  const response = await fetch("https://social-network-production.up.railway.app/api/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      user_name: body.userName,
-      full_name: body.fullName,
-      email: body.email,
-      password: body.password,
-      bio: body.bio,
-      profile_picture: body.profile_picture,
-    }),
-  });
+  const response = await fetch(
+    "https://social-network-production.up.railway.app/api/register",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_name: body.userName,
+        full_name: body.fullName,
+        email: body.email,
+        password: body.password,
+        bio: body.bio,
+        profile_picture: body.profile_picture,
+      }),
+    }
+  );
 
   if (!response.ok) {
     throw new Error("Ha fallado al crear un usuario");
