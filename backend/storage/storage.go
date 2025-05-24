@@ -48,6 +48,7 @@ type Storage interface {
 	// Events methods
 	CreateEvent(event *models.EventReq) (*models.EventWithUser, error)
 	GetAllEvents(limit, offset int, query string, topicID string) ([]models.EventWithUser, int, error)
+	GetClosestEvents() ([]models.EventWithUser, error)
 	GetAllEventsByTopic(topicID, limit, offset int) ([]models.EventWithUser, int, error)
 	GetUserEvents(userID, limit, offset int) ([]models.EventWithUser, int, error)
 	UpdateEvent(event map[string]any, eventID int) (*models.EventWithUser, error)
@@ -89,6 +90,8 @@ type Storage interface {
 	SaveMessage(message *models.MessageReq) (*models.Message, error)
 	GetConversationMessages(from, to int) ([]models.Message, error)
 	GetUserConversations(userID int) ([]models.User, error)
+	ReadConversationMessages(from, to int) error
+	GetNotReadedConversationMessages(from, to int) (int, error)
 }
 
 type PostgresStore struct {

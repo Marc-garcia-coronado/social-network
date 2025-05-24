@@ -62,6 +62,8 @@ export default function Page() {
       setMessages(Array.isArray(data.messages) ? data.messages.reverse() : []);
     };
     fetchMessages();
+
+    
   }, [userId]);
 
   const talkingTo: User | null = useMemo(() => {
@@ -76,7 +78,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="flex items-center gap-4 bg-white sticky top-0 z-10 px-4 py-6 border-b">
+      <header className="flex items-center gap-4 sticky top-0 z-10 px-4 py-6 border-b">
         <Image
           src={talkingTo?.profile_picture ?? "/teddy.webp"}
           alt={`imagen de perfil de ${talkingTo?.user_name}`}
@@ -101,7 +103,7 @@ export default function Page() {
               }`}
             >
               <p className="text-sm">{msg.content}</p>
-              <p className="text-xs text-gray-300">
+              <p className="text-xs text-gray-300 dark:text-gray-500">
                 {new Date(msg.created_at).getHours()}:
                 {new Date(msg.created_at).getMinutes() > 10
                   ? new Date(msg.created_at).getMinutes()
@@ -112,7 +114,7 @@ export default function Page() {
         <div ref={messagesEndRef} />
       </div>
 
-      <footer className="sticky bottom-0 bg-white pb-24 flex mt-4 gap-2 px-4">
+      <footer className="sticky bottom-0 pb-24 flex mt-4 gap-2 px-4">
         <Input
           ref={inputRef}
           type="text"
