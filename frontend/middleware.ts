@@ -17,6 +17,6 @@ export const config = {
     // "/:user_name/events",
     // "/:user_name/create",
     // "/:user_name/profile",
-    /:user_name/profile,
+    "/:user_name/profile",
   ],
 };
