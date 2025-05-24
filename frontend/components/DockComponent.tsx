@@ -20,40 +20,40 @@ const DockComponent = () => {
 
   const items = [
     {
-      icon: <House color={activeLink === "Home" ? "black" : "white"} />,
+      icon: <House color={activeLink === "Home" ? "black" : "black"} />,
       label: "Home",
       onClick: () => {
         setActiveLink("Home");
         router.push(`/${user?.user_name}/home`);
       },
-      className: activeLink === "Home" ? "bg-lime-400" : "",
+      className: activeLink === "Home" ? "bg-lime-400" : "bg-white",
     },
     {
-      icon: <CalendarPlus2 color={activeLink === "Events" ? "black" : "white"} />,
+      icon: <CalendarPlus2 color={activeLink === "Events" ? "black" : "black"} />,
       label: "Events",
       onClick: () => {
         setActiveLink("Events");
         router.push(`/${user?.user_name}/events`);
       },
-      className: activeLink === "Events" ? "bg-lime-400" : "",
+      className: activeLink === "Events" ? "bg-lime-400" : "bg-white",
     },
     {
-      icon: <Plus color={activeLink === "Create" ? "black" : "white"} />,
+      icon: <Plus color={activeLink === "Create" ? "black" : "black"} />,
       label: "Create",
       onClick: () => {
         setActiveLink("Create");
         router.push(`/${user?.user_name}/create`);
       },
-      className: activeLink === "Create" ? "bg-lime-400" : "",
+      className: activeLink === "Create" ? "bg-lime-400" : "bg-white",
     },
     {
-      icon: <UserRound color={activeLink === "Profile" ? "black" : "white"} />,
+      icon: <UserRound color={activeLink === "Profile" ? "black" : "black"} />,
       label: "Profile",
       onClick: () => {
         setActiveLink("Profile");
         router.push(`/${user?.user_name}/profile` || "/404");
       },
-      className: activeLink === "Profile" ? "bg-lime-400" : "",
+      className: activeLink === "Profile" ? "bg-lime-400" : "bg-white",
     },
   ];
 

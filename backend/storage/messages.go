@@ -129,3 +129,29 @@ func (s *PostgresStore) GetUserConversations(userID int) ([]models.User, error) 
 
 	return arrayUsers, nil
 }
+
+func (s *PostgresStore) ReadConversationMessages(from, to int) error {
+	stmt := `
+		UPDATE messages 
+		SET is_read = true 
+		WHERE sender_id = $2 AND receiver_id = $1 AND is_read = false;
+	`
+
+	_, err := s.Db.Exec(stmt, from, to)
+	return err
+}
+
+func (s *PostgresStore) GetNotReadedConversationMessages(from, to int) (int, error) {
+	stmt := `
+	SELECT COUNT(*)
+	FROM messages
+	WHERE (sender_id = $2 AND receiver_id = $1) AND is_read = false;
+	`
+	var number int
+	err := s.Db.QueryRow(stmt, from, to).Scan(&number)
+	if err != nil {
+		return 0, err
+	}
+
+	return number, nil
+}

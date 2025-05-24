@@ -3,6 +3,7 @@ import { useUserContext } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import SelectMultipleComponent from "@/components/SelectMultipleComponent";
 import {
   Sheet,
   SheetClose,
@@ -19,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { uploadImage } from "@/hooks/useUploadImage";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 
 export function SettingsSheet({
   refreshUserData,
@@ -36,7 +38,9 @@ export function SettingsSheet({
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [userTopics, setUserTopics] = useState<any[]>([]);
   const [allTopics, setAllTopics] = useState<any[]>([]);
-  const [selectedTopics, setSelectedTopics] = useState<any[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<any[]>([]); // Tus gustos
+  const [availableTopics, setAvailableTopics] = useState<any[]>([]); // Otros temas disponibles
+  const [selectedFromSelect, setSelectedFromSelect] = useState<string[]>([]); // IDs seleccionados en el select
   const router = useRouter();
 
   useEffect(() => {
@@ -71,6 +75,12 @@ export function SettingsSheet({
         const allTopicsData = await allTopicsResponse.json();
         const userTopicsData = await userTopicsResponse.json();
 
+        setAvailableTopics(
+          allTopicsData.filter(
+            (topic: any) =>
+              !userTopicsData.some((userTopic: any) => userTopic.id === topic.id)
+          )
+        );
         setAllTopics(allTopicsData);
         setUserTopics(userTopicsData);
         setSelectedTopics(userTopicsData);
@@ -82,22 +92,25 @@ export function SettingsSheet({
     fetchTopics();
   }, []);
 
-  const handleToggleTopic = (topic: any) => {
-    if (selectedTopics.some((t) => t.id === topic.id)) {
-      setSelectedTopics(selectedTopics.filter((t) => t.id !== topic.id));
-    } else {
-      setSelectedTopics([...selectedTopics, topic]);
-    }
-  };
-
   const handleSave = async () => {
     try {
+      if (selectedTopics.length === 0) {
+        toast.toast({
+          variant: "destructive",
+          description: "Debes mantener al menos un topic en tus gustos.",
+        });
+        return;
+      }
+      const currentSelectedTopics = [...selectedTopics];
       // IDs originales y seleccionados
       const originalIds = userTopics.map((t) => t.id);
-      const selectedIds = selectedTopics.map((t) => t.id);
+      const selectedIds = currentSelectedTopics.map((t) => t.id);
+      
 
       // Topics nuevos a seguir
-      const toFollow = selectedTopics.filter((t) => !originalIds.includes(t.id));
+      const toFollow = currentSelectedTopics.filter(
+        (t) => !originalIds.includes(t.id)
+      );
       // Topics a dejar de seguir
       const toUnfollow = userTopics.filter((t) => !selectedIds.includes(t.id));
 
@@ -119,24 +132,26 @@ export function SettingsSheet({
 
       // Dejar de seguir topics eliminados
       if (toUnfollow.length > 0) {
-        await fetch("http://localhost:3000/api/topics/unfollow", {
-          method: "DELETE",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
-            )}`,
-          },
-          body: JSON.stringify({ topics: toUnfollow.map((t) => t.id) }),
-        });
+        for (const topic of toUnfollow) {
+          await fetch(`http://localhost:3000/api/topics/unfollow`, {
+            method: "DELETE",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${document.cookie.replace(
+                /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+                "$1"
+              )}`,
+            },
+            body: JSON.stringify({ topics: [topic.id] }),
+          });
+        }
       }
 
       toast.toast({
         description: "✅ Topics actualizados correctamente.",
       });
-      setUserTopics(selectedTopics);
+      setUserTopics(currentSelectedTopics);
     } catch (error) {
       console.error("Error saving topics:", error);
       toast.toast({
@@ -145,6 +160,34 @@ export function SettingsSheet({
       });
     }
   };
+
+  const handleSelectChange = (selectedIds: string[]) => {
+    const selectedIdsAsNumbers = selectedIds.map((id) => parseInt(id, 10));
+  
+    const newSelectedTopics = availableTopics.filter((topic) =>
+      selectedIdsAsNumbers.includes(topic.id)
+    );
+    const remainingAvailableTopics = availableTopics.filter(
+      (topic) => !selectedIdsAsNumbers.includes(topic.id)
+    );
+  
+    setSelectedTopics((prev) => {
+      const existingIds = prev.map((t) => t.id);
+      const merged = [
+        ...prev,
+        ...newSelectedTopics.filter((t) => !existingIds.includes(t.id)),
+      ];
+  
+      setAvailableTopics(
+        allTopics.filter((topic) => !merged.some((sel) => sel.id === topic.id))
+      );
+  
+      return merged;
+    });
+  
+    setSelectedFromSelect(selectedIds);
+  };
+  
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -162,6 +205,26 @@ export function SettingsSheet({
     
     }
   };
+
+  const handleRemoveTopic = (topicToRemove: any) => {
+    setSelectedTopics((prevSelected) => {
+      const updatedSelected = prevSelected.filter(
+        (topic) => topic.id !== topicToRemove.id
+      );
+
+      setAvailableTopics((prev) => [
+        ...prev.filter((t) => t.id !== topicToRemove.id),
+        topicToRemove,
+      ]);
+      setSelectedFromSelect((prev) =>
+        prev.filter((id) => id !== topicToRemove.id.toString())
+      );
+
+      return updatedSelected;
+    });
+  };
+  
+  
 
   const handleProfileUpdate = async () => {
     try {
@@ -225,9 +288,9 @@ export function SettingsSheet({
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Settings className="w-8 h-8 text-black cursor-pointer hover:text-lime-400 transition-all" />
+        <Settings className="w-8 h-8 cursor-pointer hover:text-lime-400 transition-all" />
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="bg-zinc-900 overflow-y-scroll">
         <SheetHeader>
           <SheetTitle>Configuración del Perfil</SheetTitle>
           <SheetDescription>
@@ -243,7 +306,7 @@ export function SettingsSheet({
             alt={user?.user_name || "Avatar"}
               width={1000}
               height={1000}
-              className="w-40 h-40 rounded-full object-cover"
+              className="w-24 h-24 rounded-full object-cover"
             />
           </section>
           <Label htmlFor="profile_picture" className="text-center">
@@ -253,31 +316,32 @@ export function SettingsSheet({
             id="profile_picture"
             type="file"
             accept="image/*"
+            className="bg-background hover:bg-accent"
             onChange={handleProfilePictureChange}
           />
         </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="full_name" className="text-right">
-              Nombre Completo
+              Nombre
             </Label>
             <Input
               id="full_name"
               name="full_name"
               value={formData.full_name}
               onChange={handleInputChange}
-              className="col-span-3"
+              className="col-span-3 bg-background hover:bg-accent"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="user_name" className="text-right">
-              Nombre de Usuario
+              Usuario
             </Label>
             <Input
               id="user_name"
               name="user_name"
               value={formData.user_name}
               onChange={handleInputChange}
-              className="col-span-3"
+              className="col-span-3 bg-background hover:bg-accent"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -289,14 +353,14 @@ export function SettingsSheet({
               name="bio"
               value={formData.bio}
               onChange={handleInputChange}
-              className="col-span-3"
+              className="col-span-3 bg-background hover:bg-accent"
               placeholder="Escribe algo sobre ti..."
             />
           </div>
         </div>
         <SheetFooter>
           <SheetClose asChild>
-            <Button onClick={handleProfileUpdate} className="mb-3">
+            <Button onClick={handleProfileUpdate} className="mb-5 w-full">
               Guardar Cambios
             </Button>
           </SheetClose>
@@ -308,59 +372,58 @@ export function SettingsSheet({
             guardar cuando termines.
           </SheetDescription>
         </SheetHeader>
-        <div className="grid grid-cols-2 gap-8 mt-3">
-          {/* User Topics */
-          /*
-              Me he quedado aqui, queda poner los topics para poner y quitar y despues 
-              el cerrar sesion
-            */}
+        <div className="flex flex-col gap-3 mt-3">
+          {/* User Topics */}
+            {/* Other Topics */}
+        <div>
+          <SelectMultipleComponent
+            topics={availableTopics}
+            value={selectedFromSelect}
+            onChange={handleSelectChange}
+            className="w-full hover:bg-accent"
+          />
+        </div>
           <div>
-            <h3 className="text-lg font-semibold text-center">Tus Topics</h3>
-            <ul className="list-none border p-4 rounded">
+            <h3 className="text-lg font-semibold text-center">Tus Gustos</h3>
+            <ul className="list-none border p-4 flex flex-wrap gap-2 items-center">
               {selectedTopics.map((topic) => (
                 <li
                   key={topic.id}
-                  className="cursor-pointer py-2 px-4 bg-lime-400 hover:bg-lime-500 rounded mb-2"
-                  onClick={() => handleToggleTopic(topic)}
-                >
-                  {topic.name}
+                  className="cursor-pointer"
+                  onClick={() => handleRemoveTopic(topic)}
+            >
+                  <Badge
+                    className={`text-black bg-lime-400 hover:bg-lime-300 py-2 px-4 mb-3" cursor-pointer`}
+                    >                    
+                    {topic.name}
+                  </Badge>
                 </li>
               ))}
             </ul>
           </div>
-
-          {/* Other Topics */}
-          <div>
-            <h3 className="text-lg font-semibold text-center">Otros Topics</h3>
-            <ul className="list-none border p-4 rounded">
-              {allTopics
-                .filter((topic) => !selectedTopics.some((t) => t.id === topic.id))
-                .map((topic) => (
-                  <li
-                    key={topic.id}
-                    className="cursor-pointer py-2 px-4 bg-gray-300 hover:bg-gray-400 rounded mb-2"
-                    onClick={() => handleToggleTopic(topic)}
-                  >
-                    {topic.name}
-                  </li>
-                ))}
-            </ul>
-          </div>
         </div>
         <SheetFooter>
-          <Button onClick={handleSave} className="mb-3">
+          <Button onClick={handleSave} className="mb-5 w-full">
             Guardar Topics
           </Button>
         </SheetFooter>
-        {/* Botón de cerrar sesión abajo a la derecha */}
-        <div className="absolute right-6 bottom-6">
-          <Button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700"
-          >
-            Cerrar Sesión
-          </Button>
-        </div>
+        <SheetHeader>
+          <SheetTitle>Cerrar Sessión</SheetTitle>
+          <SheetDescription>
+          <SheetDescription className="mb-3">
+            Cierra tu sesión aquí.
+          </SheetDescription>
+            {/* Botón de cerrar sesión abajo a la derecha */}
+            <div className="flex justify-end">
+              <Button
+                onClick={handleLogout}
+                className="bg-red-600 hover:bg-red-700 text-white w-full"
+              >
+                Cerrar Sesión
+              </Button>
+            </div>
+          </SheetDescription>
+        </SheetHeader>
       </SheetContent>
     </Sheet>
   );

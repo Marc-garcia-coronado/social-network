@@ -14,7 +14,7 @@ export default function SearchBar({
   className?: string;
 }) {
   return (
-    <div className={`${className} mb-6 text-center`}>
+    <div className={`${className} text-center`}>
       <Input
         type="text"
         value={value}

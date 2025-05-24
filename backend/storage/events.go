@@ -83,6 +83,47 @@ func (s *PostgresStore) GetAllEvents(limit, offset int, query string, topicID st
 	return arrayEvents, totalCount, nil
 }
 
+func (s *PostgresStore) GetClosestEvents() ([]models.EventWithUser, error) {
+
+	stmt := `
+	SELECT e.id, e.name, e.description, e.location, e.created_at, e.date, e.picture,
+		   u.id AS creator_id, u.user_name, u.full_name, u.email, u.profile_picture, u.is_active, u.role,
+		   t.id AS topic_id, t.name AS topic_name, t.description AS topic_description, t.created_at AS topic_created_at
+	FROM events e
+	JOIN users u ON u.id = e.creator_id
+	JOIN topics t ON t.id = e.topic_id
+	WHERE e.date >= NOW()
+	ORDER BY e.date ASC
+	LIMIT 3 OFFSET 0;
+	`
+
+	rows, err := s.Db.Query(stmt)
+	if err != nil {
+		return nil, err
+	}
+	var arrayEvents []models.EventWithUser
+
+	for rows.Next() {
+		newEvent := new(models.EventWithUser)
+		err := rows.Scan(&newEvent.ID, &newEvent.Name, &newEvent.Description, &newEvent.Location, &newEvent.CreatedAt, &newEvent.Date, &newEvent.Picture,
+			&newEvent.Creator.ID, &newEvent.Creator.UserName, &newEvent.Creator.FullName,
+			&newEvent.Creator.Email, &newEvent.Creator.ProfilePicture, &newEvent.Creator.IsActive, &newEvent.Creator.Role,
+			&newEvent.Topic.ID, &newEvent.Topic.Name, &newEvent.Topic.Description, &newEvent.Topic.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		arrayEvents = append(arrayEvents, *newEvent)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return arrayEvents, nil
+}
+
 func (s *PostgresStore) GetAllEventsCount() (*int, error) {
 	var totalCount *int
 	queryCount := "SELECT COUNT(*) FROM events;"

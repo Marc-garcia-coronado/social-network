@@ -175,10 +175,16 @@ function FormPost({ data, isLoading, isError, error }: QueryParamsType) {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <h2 className="text-4xl font-bold text-center mb-6">Crear Publicación</h2>
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="space-y-1">
           <Label htmlFor="title">Titulo:</Label>
-          <Input type="text" id="title" {...register("title")} />
+          <Input
+            type="text"
+            id="title"
+            className="bg-background hover:bg-accent"
+            placeholder="Título de la publicación"
+            {...register("title")}
+          />
           {errors.title && (
             <p className="text-red-600">{errors.title.message}</p>
           )}
@@ -189,6 +195,7 @@ function FormPost({ data, isLoading, isError, error }: QueryParamsType) {
             type="file"
             id="file"
             accept="image/png, image/jpeg"
+            className="bg-background hover:bg-accent"
             onChange={handleFileChange}
           />
           {errors.picture && (
@@ -215,8 +222,8 @@ function FormPost({ data, isLoading, isError, error }: QueryParamsType) {
                   <Badge
                     className={
                       watch("topicID") === topic.id
-                        ? "bg-lime-500 text-white py-2 px-4"
-                        : "py-2 px-4"
+                        ? "bg-lime-400 hover:bg-lime-300 py-2 px-4 mb-3"
+                        : "py-2 px-4 mb-3"
                     }
                   >
                     {topic.name}
@@ -292,19 +299,37 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
       <div className="space-y-2">
         <div className="space-y-1">
           <Label htmlFor="name">Nombre:</Label>
-          <Input type="text" id="name" {...register("name")} />
+          <Input
+            type="text"
+            id="name"
+            className="bg-background hover:bg-accent"
+            placeholder="Nombre para el evento"
+            {...register("name")}
+          />
           {errors.name && <p className="text-red-600">{errors.name.message}</p>}
         </div>
         <div className="space-y-1">
           <Label htmlFor="description">Descripción:</Label>
-          <Input type="text" id="description" {...register("description")} />
+          <Input
+            type="text"
+            id="description"
+            className="bg-background hover:bg-accent"
+            placeholder="Descripión breve"
+            {...register("description")}
+          />
           {errors.description && (
             <p className="text-red-600">{errors.description.message}</p>
           )}
         </div>
         <div className="space-y-1">
           <Label htmlFor="location">Localización:</Label>
-          <Input type="text" id="location" {...register("location")} />
+          <Input
+            type="text"
+            id="location"
+            className="bg-background hover:bg-accent"
+            placeholder="Localización del evento"
+            {...register("location")}
+          />
           {errors.location && (
             <p className="text-red-600">{errors.location.message}</p>
           )}
@@ -330,6 +355,7 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
               type="file"
               id="file"
               accept="image/png, image/jpeg"
+              className="bg-background hover:bg-accent"
               onChange={handleFileChange}
             />
             {errors.picture && (
@@ -357,8 +383,8 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
                   <Badge
                     className={
                       watch("topicID") === topic.id
-                        ? "bg-lime-500 text-white py-2 px-4"
-                        : "py-2 px-4"
+                        ? "bg-lime-400 hover:bg-lime-300 py-2 px-4 mb-3"
+                        : "py-2 px-4 mb-3"
                     }
                   >
                     {topic.name}
@@ -397,24 +423,49 @@ export default function Page() {
   });
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-gray-100 text-black ">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <div className="relative flex justify-between mb-5 bg-gray-200 rounded-sm overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center bg-background">
+      <div
+        className="
+          grid grid-cols-3
+          items-center
+          gap-4
+          px-4 py-4 mt-10
+          w-full max-w-5xl mx-auto
+        "
+      >
+        {/* Columna izquierda vacía */}
+        <div />
+        {/* Logo centrado en la columna del medio */}
+        <div className="flex justify-center items-center select-none">
+          <h1 className="text-4xl md:text-5xl font-archivo text-white tracking-tighter text-center mb-9 md:mb-32 ">
+            Fle<span className="text-lime-400">X</span>in.
+          </h1>
+        </div>
+        {/* Columna derecha vacía */}
+        <div />
+      </div>
+
+      <div className="w-full max-w-md p-8 rounded-lg shadow-lg bg-zinc-900 mb-32">
+        <div className="relative flex justify-between mb-5 rounded-sm overflow-hidden">
           <motion.div
-            className="absolute top-0 bottom-0 w-1/2 bg-lime-500 hover:bg-lime-600 rounded-sm"
+            className="absolute top-0 bottom-0 w-1/2 bg-lime-400 hover:bg-lime-600 rounded-sm"
             animate={{ x: isLoginSelected ? "0%" : "100%" }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
           />
 
           <p
-            className="relative flex-1 text-center py-3 cursor-pointer z-10"
+            className={`relative flex-1 text-center py-3 cursor-pointer z-10 ${
+              isLoginSelected ? "text-black" : "text-white hover:bg-accent"
+            }`}
             onClick={() => setIsLoginSelected(true)}
           >
             Publicación
           </p>
 
           <p
-            className="relative flex-1 text-center py-3 cursor-pointer z-10"
+            className={`relative flex-1 text-center py-3 cursor-pointer z-10 ${
+              !isLoginSelected ? "text-black" : "text-white hover:bg-accent"
+            }`}
             onClick={() => setIsLoginSelected(false)}
           >
             Evento
