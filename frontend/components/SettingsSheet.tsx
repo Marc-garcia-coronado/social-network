@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useUserContext } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,7 +90,7 @@ export function SettingsSheet({
     };
 
     fetchTopics();
-  }, []);
+  }, [user?.id]);
 
   const handleSave = async () => {
     try {
@@ -166,9 +166,6 @@ export function SettingsSheet({
   
     const newSelectedTopics = availableTopics.filter((topic) =>
       selectedIdsAsNumbers.includes(topic.id)
-    );
-    const remainingAvailableTopics = availableTopics.filter(
-      (topic) => !selectedIdsAsNumbers.includes(topic.id)
     );
   
     setSelectedTopics((prev) => {
