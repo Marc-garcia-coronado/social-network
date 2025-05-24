@@ -22,7 +22,7 @@ export default function Home() {
     })
       .then((res) => res.json())
       .then((res) => setEvents(res.events))
-      .catch((_) => setError(true));
+      .catch(() => setError(true));
   }, []);
 
   return (

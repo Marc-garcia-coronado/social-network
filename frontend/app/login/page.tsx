@@ -45,7 +45,10 @@ const schemaRegister = z
     email: z.string().email(),
     password: z.string().min(4, "Debe tener mínimo de 4 carácteres"),
     confirmPassword: z.string(),
-    bio: z.string().max(500, "La biografía no debe superar 500 caracteres").optional(),
+    bio: z
+      .string()
+      .max(500, "La biografía no debe superar 500 caracteres")
+      .optional(),
     profile_picture: z.any().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -105,7 +108,6 @@ const LoginForm = ({ className }: FormProps) => {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schemaLogin),
@@ -138,7 +140,7 @@ const LoginForm = ({ className }: FormProps) => {
         router.push(`/ ${data.user.user_name}/home`);
       }
     },
-    onError: (error) => {
+    onError: () => {
       alert("Email o Contraseña no validos");
     },
   });
@@ -218,7 +220,6 @@ const registerPost = async (body: RegisterFormData) => {
       password: body.password,
       bio: body.bio,
       profile_picture: body.profile_picture,
-    
     }),
   });
 
@@ -262,7 +263,7 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
         setIsLoginSelected(true);
       }
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "¡Registro fallido!",
         description: "❌ ¡No se ha podido registrar correctamente!",
@@ -289,7 +290,7 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
       console.error("Error al subir la imagen o registrar el usuario:", error);
     }
   };
-  
+
   return (
     <form
       id="formRegister"
@@ -301,7 +302,7 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
         onFinalStepCompleted={() => {
           // Trigger form submission
           const form = document.getElementById(
-            "formRegister",
+            "formRegister"
           ) as HTMLFormElement;
           if (form) {
             form.requestSubmit();
@@ -367,9 +368,7 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
               rows={4}
               placeholder="Escribe algo sobre ti..."
             />
-            {errors.bio && (
-              <p className="text-red-500">{errors.bio.message}</p>
-            )}
+            {errors.bio && <p className="text-red-500">{errors.bio.message}</p>}
           </div>
         </Step>
         <Step>
@@ -384,7 +383,9 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
               {...register("profile_picture")}
             />
             {errors.profile_picture && (
-              <p className="text-red-500">{String(errors.profile_picture.message)}</p>
+              <p className="text-red-500">
+                {String(errors.profile_picture.message)}
+              </p>
             )}
           </div>
         </Step>
@@ -407,7 +408,11 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
                 {data.map((topic: Topic) => (
                   <li key={topic.id}>
                     <Button
-                      className={`cursor-pointer capitalize outline-transparent shadow-none border border-black bg-transparent text-black hover:text-white hover:border-white hover:bg-black ${topicsIDsSelected.includes(topic.id) ? "bg-black text-white border-white hover:bg-gray-800" : ""} `}
+                      className={`cursor-pointer capitalize outline-transparent shadow-none border border-black bg-transparent text-black hover:text-white hover:border-white hover:bg-black ${
+                        topicsIDsSelected.includes(topic.id)
+                          ? "bg-black text-white border-white hover:bg-gray-800"
+                          : ""
+                      } `}
                       onClick={() =>
                         setTopicsIDsSelected((prev) => {
                           if (prev.includes(topic.id)) {

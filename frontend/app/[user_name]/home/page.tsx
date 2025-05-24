@@ -2,9 +2,8 @@
 import { useEffect, useState } from "react";
 import { useUserContext } from "@/contexts/UserContext";
 import useUser from "@/hooks/useUser";
-import { User } from "@/lib/types";
 import PostCard from "@/components/PostCard";
-import { MessageCircle, MessageSquare } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -294,8 +293,6 @@ export default function Home() {
       if (!response.ok) {
         throw new Error("Error adding comment");
       }
-
-      const newCommentData = await response.json();
 
       await fetchComments(postID);
 
