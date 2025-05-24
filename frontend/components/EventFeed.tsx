@@ -55,14 +55,12 @@ export async function getEventsPaginated({
 export default function EventFeed({
   initialSearch,
   initialTopic,
-  topics,
 }: Props) {
   const [search, setSearch] = useState(initialSearch);
   const [topic, setTopic] = useState(initialTopic);
   const [userTopics, setuserTopics] = useState([]);
 
   const { user } = useUserContext();
-
   useEffect(() => {
     // Fetch all topics and user topics
     const fetchTopics = async () => {
@@ -87,7 +85,7 @@ export default function EventFeed({
     };
 
     fetchTopics();
-  }, []);
+  }, [user?.id]);
 
   const fetchSubscribedEvents = async (): Promise<number[]> => {
     const resSubs = await fetch(
@@ -179,7 +177,7 @@ export default function EventFeed({
         </p>
       ) : events.length === 0 || events[0] === null ? (
         <p className="text-red-500 text-center mt-8">
-          No se han encontrado eventos con '{search}'
+          No se han encontrado eventos con &apos;{search}&apos;
         </p>
       ) : (
         <ul className="flex flex-wrap gap-4 justify-center mb-32">

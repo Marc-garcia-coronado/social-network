@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Heart, MessageCircle, Send } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { DropdownCardMenu } from "./DropdownCardMenu";
@@ -28,11 +28,9 @@ interface PostCardProps {
   commentsCount: number;
 }
 const PostCard: React.FC<PostCardProps> = ({
-  currentUser,
   post,
   postStats,
   likedPosts,
-  visibleComments,
   comments,
   newComment,
   toggleLike,
@@ -46,13 +44,9 @@ const PostCard: React.FC<PostCardProps> = ({
   commentsCount,
 }) => {
   const { user } = useUserContext();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDoubleClickEnabled, setIsDoubleClickEnabled] = useState(true);
   const router = useRouter();
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
 
   return (
     <li
