@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Event } from "@/lib/types";
 import EventComponent from "@/components/EventComponent";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 
 export default function Profile() {
   const { user } = useUserContext();
@@ -800,30 +801,31 @@ export default function Profile() {
           </p>
           {userData?.id != user?.id && (
             <div className="flex justify-center space-x-4">
-              <button
+              <Button
                 onClick={() =>
                   isFollowing
                     ? unfollowUser(userData.id)
                     : followUser(userData.id)
                 }
-                className={`mt-4 px-4 py-2 rounded-full ${
+                variant={isFollowing ? "destructive" : "default"}
+                className={
                   isFollowing
-                    ? "bg-red-500 text-white"
-                    : "bg-lime-400 text-black"
-                }`}
+                    ? "mt-4 min-w-[140px] rounded-full"
+                    : "mt-4 min-w-[140px] rounded-full bg-lime-400 text-black hover:bg-lime-300"
+                }
               >
                 {isFollowing ? "Dejar de seguir" : "Seguir"}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() =>
                   router.push(
-                    `/${user?.user_name}/messages/${userData.id}` /* user */
+                    `/${user?.user_name}/messages/${userData.id}`
                   )
                 }
-                className={`mt-4 px-4 py-2 rounded-full bg-primary text-white`}
+                className="mt-4 min-w-[140px] rounded-full"
               >
                 Mensaje
-              </button>
+              </Button>
             </div>
           )}
         </section>
