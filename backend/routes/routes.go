@@ -10,8 +10,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-
-	"github.com/joho/godotenv"
 )
 
 type APIServer struct {
@@ -27,10 +25,6 @@ func NewAPIServer(listenAddress string, store *storage.PostgresStore) *APIServer
 }
 
 func (s *APIServer) Run() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	router := chi.NewRouter()
 	router.Use(chimw.Logger)
 	router.Use(cors.Handler(cors.Options{
