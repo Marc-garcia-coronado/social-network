@@ -53,7 +53,7 @@ export default function Profile() {
     const fetchTopics = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/users/${user?.id}/topics`,
+          `http://social-network-production.up.railway.app/api/users/${user?.id}/topics`,
           {
             credentials: "include",
             headers: {
@@ -77,7 +77,7 @@ export default function Profile() {
   const refreshUserData = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/users/${user_name}`,
+        `http://social-network-production.up.railway.app/api/users/${user_name}`,
         {
           credentials: "include",
           headers: {
@@ -93,7 +93,7 @@ export default function Profile() {
       const userData = await response.json();
       setUserData(userData);
       const postsResponse = await fetch(
-        `http://localhost:3000/api/users/${userData.id}/posts`,
+        `http://social-network-production.up.railway.app/api/users/${userData.id}/posts`,
         {
           credentials: "include",
           headers: {
@@ -119,7 +119,7 @@ export default function Profile() {
   const fetchUserEvents = async (userID: number) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/users/${userID}/events`,
+        `http://social-network-production.up.railway.app/api/users/${userID}/events`,
         {
           credentials: "include",
           headers: {
@@ -149,7 +149,7 @@ export default function Profile() {
   const fetchSubscribedEventsList = async (userID: number) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/users/${userID}/events/subscribed`,
+        `http://social-network-production.up.railway.app/api/users/${userID}/events/subscribed`,
         {
           credentials: "include",
           headers: {
@@ -182,7 +182,7 @@ export default function Profile() {
   const refreshPosts = async () => {
     try {
       const postsResponse = await fetch(
-        `http://localhost:3000/api/users/${userData.id}/posts`,
+        `http://social-network-production.up.railway.app/api/users/${userData.id}/posts`,
         {
           credentials: "include",
           headers: {
@@ -206,7 +206,7 @@ export default function Profile() {
   const fetchPostStats = async (postID: number) => {
     try {
       const [likesResponse, commentsResponse] = await Promise.all([
-        fetch(`http://localhost:3000/api/likes/posts/${postID}/count`, {
+        fetch(`http://social-network-production.up.railway.app/api/likes/posts/${postID}/count`, {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -216,7 +216,7 @@ export default function Profile() {
             )}`,
           },
         }),
-        fetch(`http://localhost:3000/api/posts/${postID}/comments/count`, {
+        fetch(`http://social-network-production.up.railway.app/api/posts/${postID}/comments/count`, {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -257,8 +257,8 @@ export default function Profile() {
     try {
       const isLiked = likedPosts[postID];
       const endpoint = isLiked
-        ? `http://localhost:3000/api/posts/${postID}/dislike`
-        : `http://localhost:3000/api/posts/${postID}/like`;
+        ? `http://social-network-production.up.railway.app/api/posts/${postID}/dislike`
+        : `http://social-network-production.up.railway.app/api/posts/${postID}/like`;
       const method = isLiked ? "DELETE" : "POST";
       const response = await fetch(endpoint, {
         method,
@@ -301,7 +301,7 @@ export default function Profile() {
   const fetchComments = async (postID: number) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/posts/${postID}/comments`,
+        `http://social-network-production.up.railway.app/api/posts/${postID}/comments`,
         {
           credentials: "include",
           headers: {
@@ -341,7 +341,7 @@ export default function Profile() {
       if (!commentText) return;
 
       const response = await fetch(
-        `http://localhost:3000/api/posts/${postID}/comments`,
+        `http://social-network-production.up.railway.app/api/posts/${postID}/comments`,
         {
           method: "POST",
           credentials: "include",
@@ -384,7 +384,7 @@ export default function Profile() {
   const fetchCommentLikesCount = async (commentID: number) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/likes/comments/${commentID}/count`,
+        `http://social-network-production.up.railway.app/api/likes/comments/${commentID}/count`,
         {
           credentials: "include",
           headers: {
@@ -420,7 +420,7 @@ export default function Profile() {
     const fetchPostStats = async (postID: number) => {
       try {
         const [likesResponse, commentsResponse] = await Promise.all([
-          fetch(`http://localhost:3000/api/likes/posts/${postID}/count`, {
+          fetch(`http://social-network-production.up.railway.app/api/likes/posts/${postID}/count`, {
             credentials: "include",
             headers: {
               "Content-Type": "application/json",
@@ -430,7 +430,7 @@ export default function Profile() {
               )}`,
             },
           }),
-          fetch(`http://localhost:3000/api/posts/${postID}/comments/count`, {
+          fetch(`http://social-network-production.up.railway.app/api/posts/${postID}/comments/count`, {
             credentials: "include",
             headers: {
               "Content-Type": "application/json",
@@ -464,7 +464,7 @@ export default function Profile() {
     const fetchUserLikes = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/users/likes/posts`,
+          `http://social-network-production.up.railway.app/api/users/likes/posts`,
           {
             credentials: "include",
             headers: {
@@ -506,7 +506,7 @@ export default function Profile() {
   const fetchFollowersCount = async (userID: number) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/users/${userID}/followers/count`,
+        `http://social-network-production.up.railway.app/api/users/${userID}/followers/count`,
         {
           credentials: "include",
           headers: {
@@ -533,7 +533,7 @@ export default function Profile() {
   const fetchFollowingCount = async (userID: number) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/users/${userID}/follows/count`,
+        `http://social-network-production.up.railway.app/api/users/${userID}/follows/count`,
         {
           credentials: "include",
           headers: {
@@ -560,7 +560,7 @@ export default function Profile() {
   const followUser = async (userID: number) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/users/follow/${userID}`,
+        `http://social-network-production.up.railway.app/api/users/follow/${userID}`,
         {
           method: "POST",
           credentials: "include",
@@ -588,7 +588,7 @@ export default function Profile() {
   const unfollowUser = async (userID: number) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/users/unfollow/${userID}`,
+        `http://social-network-production.up.railway.app/api/users/unfollow/${userID}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -617,8 +617,8 @@ export default function Profile() {
     try {
       const isLiked = likedComments?.[commentID];
       const endpoint = isLiked
-        ? `http://localhost:3000/api/comments/${commentID}/dislike`
-        : `http://localhost:3000/api/comments/${commentID}/like`;
+        ? `http://social-network-production.up.railway.app/api/comments/${commentID}/dislike`
+        : `http://social-network-production.up.railway.app/api/comments/${commentID}/like`;
 
       const method = isLiked ? "DELETE" : "POST";
 
@@ -657,7 +657,7 @@ export default function Profile() {
   const fetchUserCommentLikes = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/users/likes/comments`,
+        `http://social-network-production.up.railway.app/api/users/likes/comments`,
         {
           credentials: "include",
           headers: {
@@ -689,7 +689,7 @@ export default function Profile() {
 
   const fetchSubscribedEvents = async (): Promise<number[]> => {
     const res = await fetch(
-      `http://localhost:3000/api/users/${user?.id}/events/subscribed`,
+      `http://social-network-production.up.railway.app/api/users/${user?.id}/events/subscribed`,
       { credentials: "include" }
     );
     const data = await res.json();
@@ -720,7 +720,7 @@ export default function Profile() {
       const checkIfFollowing = async () => {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/users/${userData.id}/following`,
+            `http://social-network-production.up.railway.app/api/users/${userData.id}/following`,
             {
               credentials: "include",
               headers: {

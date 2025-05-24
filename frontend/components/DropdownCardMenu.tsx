@@ -28,7 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Topic } from "@/lib/types";
 
 const getTopicsFn = async (id: number) => {
-  const response = await fetch(`http://localhost:3000/api/users/${id}/topics`, {
+  const response = await fetch(`http://social-network-production.up.railway.app/api/users/${id}/topics`, {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
@@ -98,7 +98,7 @@ export function DropdownCardMenu({
   ) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/users/${userId}/posts/${postId}`,
+        `http://social-network-production.up.railway.app/api/users/${userId}/posts/${postId}`,
         {
           method: "PATCH",
           credentials: "include",
@@ -225,7 +225,7 @@ export function DropdownCardMenu({
               onClick={async () => {
                 try {
                   const response = await fetch(
-                    `http://localhost:3000/api/users/${userId}/posts/${postId}`,
+                    `http://social-network-production.up.railway.app/api/users/${userId}/posts/${postId}`,
                     {
                       method: "DELETE",
                       credentials: "include",

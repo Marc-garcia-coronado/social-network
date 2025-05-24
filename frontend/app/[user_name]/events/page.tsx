@@ -6,7 +6,7 @@ async function getTopics(): Promise<Topic[]> {
   headers.append("Content-Type", "application/json");
   headers.append("Credentials", "include");
 
-  const res = await fetch(`http://localhost:3000/api/topics`, {
+  const res = await fetch(`http://social-network-production.up.railway.app/api/topics`, {
     headers,
   });
 
