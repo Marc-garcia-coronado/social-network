@@ -35,17 +35,17 @@ export default function SelectComponent({
         <SelectValue placeholder="Selecciona temas..." />
       </SelectTrigger>
       <SelectContent>
-      {Array.isArray(topics) && topics.length > 0 ? (
-        topics.map((topic, index) => (
-          <SelectItem key={`${topic.id}-${index}`} className="hover:bg-accent hover:cursor-pointer" value={topic.id.toString()}>
-            {topic.name}
+        {Array.isArray(topics) && topics.length > 0 ? (
+          topics.map((topic, index) => (
+            <SelectItem key={`${topic.id}-${index}`} className="hover:bg-accent hover:cursor-pointer" value={topic.id.toString()}>
+              {topic.name}
+            </SelectItem>
+          ))
+        ) : (
+          <SelectItem value="disabled" disabled>
+            No hay topics
           </SelectItem>
-        ))
-      ) : (
-        <SelectItem value="disabled" disabled>
-          No hay topics
-        </SelectItem>
-      )}
+        )}
       </SelectContent>
     </Select>
   );

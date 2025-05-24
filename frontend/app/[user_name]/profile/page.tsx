@@ -890,6 +890,7 @@ export default function Profile() {
                     addComment={addComment}
                     currentUser={userData}
                     refreshPosts={refreshPosts}
+                    commentsCount={postStats[post.id]?.comments ?? 0}
                   />
                 ))
               ) : (
