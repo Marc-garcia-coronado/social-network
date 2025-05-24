@@ -1,101 +1,97 @@
-import Image from "next/image";
+"use client";
+
+import { motion } from "motion/react";
+import { BentoGridSecondComponent } from "@/components/BentoGridSecondComponent";
+import EventComponentLanding from "@/components/EventComponentLanding";
+import { HeroSectionOne } from "@/components/HeroSection";
+import { InfiniteMovingCardsComponent } from "@/components/InfiniteMovingCardsComponent";
+import { Event } from "@/lib/types";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [events, setEvents] = useState<Event[]>([]);
+  const [error, setError] = useState<boolean>(false);
+  const router = useRouter()
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  useEffect(() => {
+    fetch("http://localhost:3000/api/events/closest", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((res) => setEvents(res.events))
+      .catch((_) => setError(true));
+  }, []);
+
+  return (
+    <>
+      <HeroSectionOne />
+      <section className="flex flex-col gap-10 my-20">
+        <h2 className="text-5xl font-extrabold text-center w-4/6 mx-auto">
+          Todo en un solo lugar para los amantes del deporte
+        </h2>
+        <BentoGridSecondComponent />
+      </section>
+      <section className="flex flex-col gap-10 my-20">
+        <h2 className="text-5xl font-extrabold text-center w-4/6 mx-auto">Vista Previa de la feed... TODO</h2>
+        {/* TODO: Hacer seccion de vista previa de la feed */}
+      </section>
+      <section className="flex flex-col gap-10 my-20">
+        <h2 className="text-5xl font-extrabold text-center w-4/6 mx-auto">
+          No solo se habla de deporte. ¡Se vive!
+        </h2>
+        <p className="text-center text-lg font-normal text-neutral-600 dark:text-neutral-300">
+          Próximos eventos...
+        </p>
+        {events.length === 0 && !error && <p>Cargando...</p>}
+        {error && (
+          <p className="text-red-500 text-center">
+            ¡Ha ocurrido un error al obtener los próximos eventos!
+          </p>
+        )}
+        {Array.isArray(events) && events.length > 0 && (
+          <ul className="flex flex-wrap gap-4 justify-center">
+            {events.map((event) => (
+              <li key={event.id}>
+                <EventComponentLanding event={event} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+      <section className="flex flex-col gap-10 my-20">
+        <h2 className="text-5xl font-extrabold text-center w-4/6 mx-auto">
+          Lo que dice nuestra comunidad
+        </h2>
+        <InfiniteMovingCardsComponent />
+      </section>
+      <section className="flex flex-col gap-10 my-20">
+        <h2 className="text-5xl font-extrabold text-center w-4/6 mx-auto">
+          ¿Estás listo para llevar tu pasión al siguiente nivel?
+        </h2>
+        <motion.div
+          initial={{
+            opacity: 0,
+          }}
+          animate={{
+            opacity: 1,
+          }}
+          transition={{
+            duration: 0.3,
+            delay: 1,
+          }}
+          className="relative z-10 mt-8 flex flex-wrap items-center justify-center gap-4"
+        >
+          <button
+            className="w-60 transform rounded-lg bg-black px-6 py-2 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+            onClick={() => router.push("/login")}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            Crea tu cuenta gratis
+          </button>
+        </motion.div>
+      </section>
+    </>
   );
 }

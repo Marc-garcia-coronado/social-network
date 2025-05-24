@@ -22,21 +22,51 @@ const fetchConversations = async (): Promise<User[]> => {
       throw new Error("Error fetching conversations");
     }
 
-    const data = await response.json(); // <-- Aquí va el await
+    const data = await response.json();
 
     return data.conversations;
   } catch (error) {
     console.error("Error fetching conversations:", error);
-    return []; // O puedes lanzar de nuevo el error dependiendo de cómo manejes esto
+    return [];
   }
 };
 
 export default function MessagesLayout({ children }: { children: ReactNode }) {
   const [search, setSearch] = useState<string>("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [showNoResults, setShowNoResults] = useState(false);
+  const [showNoResults, setShowNoResults] = useState<boolean>(false);
+  const [numberNotReadedMsg, setNumberNotReadedMsg] = useState<
+    Record<number, number>
+  >({});
   const router = useRouter();
   const { user } = useUserContext();
+
+  const fetchGetNotReadedConversationMessage = async (
+    id: number
+  ): Promise<number> => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/messages/${id}/read`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error fetching not readed conversation messages");
+      }
+
+      const data = await response.json();
+      return data.number;
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      return 0;
+    }
+  };
 
   // Función para buscar usuarios en el backend
   const fetchFilteredUsers = async (term: string) => {
@@ -103,9 +133,26 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
     }
   }, [search]);
 
+  useEffect(() => {
+    const fetchUnreadCounts = async () => {
+      if (!conversations || !Array.isArray(conversations)) return;
+
+      const counts: Record<number, number> = {};
+
+      for (const convo of conversations) {
+        const number = await fetchGetNotReadedConversationMessage(convo.id);
+        counts[convo.id] = number;
+      }
+
+      setNumberNotReadedMsg(counts);
+    };
+
+    fetchUnreadCounts();
+  }, [conversations]);
+
   return (
     <div className="flex h-screen">
-      <aside className="w-[400px] border-r flex flex-col">
+      <aside className="min-w-96 border-r flex flex-col">
         <h1 className="ps-4 mb-4 text-3xl mt-4">Chats</h1>
         <div className="relative">
           <SearchBar
@@ -122,7 +169,7 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
                   key={searchedUser.id}
                   className="flex items-center p-4 space-x-4 cursor-pointer"
                   onClick={() => {
-                    setSearch("")
+                    setSearch("");
                     router.push(
                       `/${user?.user_name}/messages/${searchedUser.id}`
                     );
@@ -158,29 +205,58 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
           <p className="text-gray-400">Cargando tus conversaciones...</p>
         )}
         {isError && <p className="text-red-500">Ha ocurrido un error</p>}
-        <ul className="mt-4 border-y divide-y divide-gray-200 overflow-y-auto">
+        <ul className="mt-4 border-y divide-y divide-gray-200 overflow-y-auto ">
           {Array.isArray(conversations) &&
             conversations.length > 0 &&
             conversations.map((conversation: User) => (
               <div
                 key={conversation.id}
-                className="flex gap-4 items-center cursor-pointer p-4"
-                onClick={() =>
-                  router.push(`/${user?.user_name}/messages/${conversation.id}`)
-                }
+                className="flex justify-between items-center cursor-pointer p-4 w-full"
+                onClick={() => {
+                  router.push(
+                    `/${user?.user_name}/messages/${conversation.id}`
+                  );
+                  fetch(
+                    `http://localhost:3000/api/messages/${conversation.id}/read`,
+                    {
+                      method: "PATCH",
+                      credentials: "include",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                    }
+                  ).then((res) => {
+                    if (res.ok) {
+                      setNumberNotReadedMsg((prev) => ({
+                        ...prev,
+                        [conversation.id]: 0,
+                      }));
+                    }
+                  });
+                }}
               >
-                <Image
-                  src={
-                    conversation.profile_picture
-                      ? conversation.profile_picture
-                      : "/teddy.webp"
-                  }
-                  alt={`imagen de perfil de ` + conversation.user_name}
-                  width={24}
-                  height={24}
-                  className="w-14 h-14 rounded-full"
-                />
-                <p>{conversation.user_name}</p>
+                <div className="flex items-center gap-4">
+                  <Image
+                    src={
+                      conversation.profile_picture
+                        ? conversation.profile_picture
+                        : "/teddy.webp"
+                    }
+                    alt={`imagen de perfil de ` + conversation.user_name}
+                    width={24}
+                    height={24}
+                    className="w-14 h-14 rounded-full"
+                  />
+                  <p>{conversation.user_name}</p>
+                </div>
+
+                {numberNotReadedMsg[conversation.id] > 0 && (
+                  <div className="flex rounded-full bg-lime-600 w-6 h-6 items-center justify-center text-center">
+                    <p className="text-sm text-white">
+                      {numberNotReadedMsg[conversation.id]}
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
         </ul>

@@ -81,6 +81,17 @@ func (s *APIServer) handleGetAllEvents(w http.ResponseWriter, r *http.Request) e
 	})
 }
 
+func (s *APIServer) handleGetClosestEvents(w http.ResponseWriter, r *http.Request) error {
+	events, err := s.store.GetClosestEvents()
+	if err != nil {
+		return err
+	}
+
+	return utils.WriteJSON(w, http.StatusOK, map[string]any{
+		"events": events,
+	})
+}
+
 func (s *APIServer) handleGetAllEventsByTopic(w http.ResponseWriter, r *http.Request) error {
 	topicID, err := strconv.Atoi(chi.URLParam(r, "topicID"))
 	if err != nil {
@@ -408,7 +419,6 @@ func (s *APIServer) handleGetUserSubscribedEvents(w http.ResponseWriter, r *http
 		},
 	})
 }
-
 
 func (s *APIServer) handleGetUserSubscribedEventsCount(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))

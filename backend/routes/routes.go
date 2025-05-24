@@ -44,6 +44,7 @@ func (s *APIServer) Run() {
 	router.Post("/api/register", utils.MakeHTTPHandleFunc(s.handleCreateUser))
 	router.Post("/api/login", utils.MakeHTTPHandleFunc(s.handleLogin))
 	router.Get("/api/topics", utils.MakeHTTPHandleFunc(s.handleGetAllTopics))
+	router.Get("/api/events/closest", utils.MakeHTTPHandleFunc(s.handleGetClosestEvents))
 
 	// User - WebSocket route
 	router.Get("/ws", s.handleWebSocket)
@@ -127,6 +128,8 @@ func (s *APIServer) Run() {
 	// User - Messages routes
 	protectedRouter.Get("/messages", utils.MakeHTTPHandleFunc(s.handleGetConversations))
 	protectedRouter.Get("/messages/{userID}", utils.MakeHTTPHandleFunc(s.handleGetConversationMessages))
+	protectedRouter.Get("/messages/{userID}/read", utils.MakeHTTPHandleFunc(s.handleGetNotReadedConversationMessages))
+	protectedRouter.Patch("/messages/{userID}/read", utils.MakeHTTPHandleFunc(s.handleReadConversation))
 
 	// Protected router for admin
 	adminRouter := chi.NewRouter()
