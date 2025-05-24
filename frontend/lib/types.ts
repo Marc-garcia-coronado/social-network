@@ -9,13 +9,12 @@ export type User = {
   id: number;
   user_name: string;
   full_name: string;
-  profile_picture: string;
   email: string;
   user_since: string;
   is_active: boolean;
   role: string;
   bio?: string;
-  profile_picture?: string;
+  profile_picture: string;
 };
 
 export type DataHTTPResponse = {
