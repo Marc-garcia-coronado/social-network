@@ -11,6 +11,11 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// export const config = {
-//   matcher: ["/((?!api|_next|static|login).*)"],
-// };
+export const config = {
+  matcher: [
+    "/:user_name/home",
+    "/:user_name/events",
+    "/:user_name/create",
+    "/:user_name/profile",
+  ],
+};
