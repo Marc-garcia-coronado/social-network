@@ -49,7 +49,7 @@ export default function Page() {
   useEffect(() => {
     const fetchMessages = async () => {
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/messages/${userId}`,
+        `https://social-network-production.up.railway.app/api/messages/${userId}`,
         {
           method: "GET",
           credentials: "include",

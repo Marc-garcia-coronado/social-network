@@ -10,7 +10,7 @@ import Image from "next/image";
 
 const fetchConversations = async (): Promise<User[]> => {
   try {
-    const response = await fetch(`http://social-network-production.up.railway.app/api/messages`, {
+    const response = await fetch(`https://social-network-production.up.railway.app/api/messages`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -46,7 +46,7 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
   ): Promise<number> => {
     try {
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/messages/${id}/read`,
+        `https://social-network-production.up.railway.app/api/messages/${id}/read`,
         {
           method: "GET",
           credentials: "include",
@@ -73,7 +73,7 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
     try {
       setShowNoResults(false); // Ocultar mensaje mientras se busca
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/users/search?query=${term}&limit=10`,
+        `https://social-network-production.up.railway.app/api/users/search?query=${term}&limit=10`,
         {
           method: "GET",
           credentials: "include",
@@ -216,7 +216,7 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
                     `/${user?.user_name}/messages/${conversation.id}`
                   );
                   fetch(
-                    `http://social-network-production.up.railway.app/api/messages/${conversation.id}/read`,
+                    `https://social-network-production.up.railway.app/api/messages/${conversation.id}/read`,
                     {
                       method: "PATCH",
                       credentials: "include",

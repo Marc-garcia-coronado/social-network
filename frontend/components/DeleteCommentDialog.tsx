@@ -29,7 +29,7 @@ export function DeleteCommentDialog({
     setLoading(true);
     try {
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/comments/${commentId}`,
+        `https://social-network-production.up.railway.app/api/comments/${commentId}`,
         {
           method: "DELETE",
           credentials: "include",

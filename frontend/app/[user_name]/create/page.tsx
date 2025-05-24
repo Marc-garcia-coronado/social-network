@@ -24,7 +24,7 @@ type QueryParamsType = {
 };
 
 const getTopicsFn = async (id: number) => {
-  const response = await fetch(`http://social-network-production.up.railway.app/api/users/${id}/topics`, {
+  const response = await fetch(`https://social-network-production.up.railway.app/api/users/${id}/topics`, {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
@@ -87,7 +87,7 @@ const createPostFn = async (body: FormPostData) => {
 
   const imageURL = await uploadImage(body.picture);
 
-  const response = await fetch("http://social-network-production.up.railway.app/api/posts", {
+  const response = await fetch("https://social-network-production.up.railway.app/api/posts", {
     method: "POST",
     credentials: "include",
     headers: {
@@ -115,7 +115,8 @@ const createEventFn = async (body: FormEventData) => {
     imageURL = await uploadImage(body.picture);
   }
 
-  const response = await fetch("http://social-network-production.up.railway.app/api/events", {
+
+  const response = await fetch("https://social-network-production.up.railway.app/api/events", {
     method: "POST",
     credentials: "include",
     headers: {

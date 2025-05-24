@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const fetchUserTopics = async (userID: number) => {
   const response = await fetch(
-    `http://social-network-production.up.railway.app/api/users/${userID}/topics`,
+    `https://social-network-production.up.railway.app/api/users/${userID}/topics`,
     {
       credentials: "include",
       headers: {
