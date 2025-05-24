@@ -37,7 +37,7 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		HttpOnly: true,
 		Expires:  time.Now().Add(7 * 24 * time.Hour), // 7 días
 		Secure:   true, // Secure only if request is HTTPS
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
 	})
 
