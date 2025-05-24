@@ -26,6 +26,7 @@ func main() {
 
 	log.Println("Todas las tablas se han creado exitosamente!")
 
-	server := routes.NewAPIServer(":"+os.Getenv("PORT"), store)
+	server := routes.NewAPIServer(":" + os.Getenv("PORT"), store)
+
 	server.Run()
 }
