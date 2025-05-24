@@ -12,7 +12,7 @@ export function useChatSocket(onMessage: (msg: Message) => void) {
 
   const connect = useCallback(() => {
     if (!senderId) return;
-    const ws = new WebSocket(`ws://localhost:3000/ws?userID=${senderId}`);
+    const ws = new WebSocket(`ws://social-network-production.up.railway.app/ws?userID=${senderId}`);
     socketRef.current = ws;
 
     ws.onmessage = (event) => {

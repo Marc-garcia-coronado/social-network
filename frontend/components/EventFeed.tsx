@@ -37,7 +37,7 @@ export async function getEventsPaginated({
   topic = "",
   page = 1,
 }: GetEventsPaginatedParams): Promise<GetEventsPaginatedResponse> {
-  const url = new URL("http://localhost:3000/api/events");
+  const url = new URL("http://social-network-production.up.railway.app/api/events");
   url.searchParams.set("page", page.toString());
   url.searchParams.set("limit", LIMIT.toString());
   if (search) url.searchParams.set("q", search);
@@ -66,7 +66,7 @@ export default function EventFeed({
     const fetchTopics = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/users/${user?.id}/topics`,
+          `http://social-network-production.up.railway.app/api/users/${user?.id}/topics`,
           {
             credentials: "include",
             headers: {
@@ -89,7 +89,7 @@ export default function EventFeed({
 
   const fetchSubscribedEvents = async (): Promise<number[]> => {
     const resSubs = await fetch(
-      `http://localhost:3000/api/users/${user?.id}/events/subscribed`,
+      `http://social-network-production.up.railway.app/api/users/${user?.id}/events/subscribed`,
       {
         credentials: "include",
       }
