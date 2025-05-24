@@ -436,8 +436,8 @@ export default function Page() {
         {/* Columna izquierda vacía */}
         <div />
         {/* Logo centrado en la columna del medio */}
-        <div className="flex justify-center items-center">
-          <h1 className="text-4xl md:text-5xl font-archivo text-white tracking-tighter text-center mb-9 md:mb-32">
+        <div className="flex justify-center items-center select-none">
+          <h1 className="text-4xl md:text-5xl font-archivo text-white tracking-tighter text-center mb-9 md:mb-32 ">
             Fle<span className="text-lime-400">X</span>in.
           </h1>
         </div>

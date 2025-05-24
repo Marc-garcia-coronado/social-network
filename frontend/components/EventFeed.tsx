@@ -142,7 +142,7 @@ export default function EventFeed({
         "
       >
         {/* Logo */}
-        <div className="flex justify-center md:justify-start items-center mb-2 md:mb-0">
+        <div className="flex justify-center md:justify-start items-center mb-2 md:mb-0 select-none">
           <h1 className="text-4xl md:text-5xl font-archivo text-white tracking-tighter text-center md:text-left">
             Fle<span className="text-lime-400">X</span>in.
           </h1>
