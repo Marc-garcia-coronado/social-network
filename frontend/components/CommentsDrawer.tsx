@@ -38,6 +38,7 @@ interface CommentsDrawerProps {
   toggleCommentLike: (commentId: number) => void;
   disableDoubleClick: () => void;
   enableDoubleClick: () => void;
+  commentsCount: number; // <-- agrega esto
 }
 export function CommentsDrawer({
   post,
@@ -51,6 +52,7 @@ export function CommentsDrawer({
   toggleCommentLike,
   disableDoubleClick,
   enableDoubleClick,
+  commentsCount,
 }: CommentsDrawerProps) {
   const openDrawer = async () => {
     disableDoubleClick();
@@ -70,9 +72,13 @@ export function CommentsDrawer({
       <DrawerTrigger asChild>
         <button
           onClick={openDrawer}
-          className="text-white hover:text-lime-400 transition-all"
+          className="flex items-center space-x-2"
         >
-          <MessageSquare />
+          {/* Contador de comentarios a la izquierda */}
+          <span>
+            {commentsCount}
+          </span>
+          <MessageSquare className="text-white hover:text-lime-400 transition-all" />
         </button>
       </DrawerTrigger>
       <DrawerContent>

@@ -654,6 +654,7 @@ export default function Home() {
                 addComment={addComment}
                 currentUser={userData}
                 refreshPosts={fetchNextPage}
+                commentsCount={postStats[post.id]?.comments ?? 0}
               />
             ))
           ) : (
