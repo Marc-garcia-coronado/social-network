@@ -136,7 +136,6 @@ export default function Home() {
       const endpoint = isLiked
         ? `https://social-network-production.up.railway.app/api/posts/${postID}/dislike`
         : `https://social-network-production.up.railway.app/api/posts/${postID}/like`;
-
       const method = isLiked ? "DELETE" : "POST";
 
       const response = await fetch(endpoint, {
