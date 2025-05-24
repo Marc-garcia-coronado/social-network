@@ -50,8 +50,8 @@ const updateSubscribedToEvent = async ({
   userID,
 }: UpdateSubscribedToEventType): Promise<any> => {
   const uri = !state
-    ? `http://social-network-production.up.railway.app/api/users/${userID}/events/${eventID}/unsubscribe`
-    : `http://social-network-production.up.railway.app/api/users/${userID}/events/${eventID}/subscribe`;
+    ? `https://social-network-production.up.railway.app/api/users/${userID}/events/${eventID}/unsubscribe`
+    : `https://social-network-production.up.railway.app/api/users/${userID}/events/${eventID}/subscribe`;
 
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
@@ -130,7 +130,7 @@ const updateEventFn = async ({
   }
 
   const response = await fetch(
-    `http://social-network-production.up.railway.app/api/users/${userID}/events/${eventID}`,
+    `https://social-network-production.up.railway.app/api/users/${userID}/events/${eventID}`,
     {
       method: "PATCH",
       credentials: "include",
@@ -253,7 +253,7 @@ export default function EventComponent({
     setLoadingDelete(true);
     try {
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/users/${user?.id}/events/${event.id}`,
+        `https://social-network-production.up.railway.app/api/users/${user?.id}/events/${event.id}`,
         {
           method: "DELETE",
           credentials: "include",
