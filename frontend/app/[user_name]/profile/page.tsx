@@ -45,8 +45,8 @@ export default function Profile() {
   const [subscribedEvents, setSubscribedEvents] = useState<Event[]>([]); // Nuevo estado
   const [userTopics, setuserTopics] = useState([]);
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading] = useState(false);
+  const [error] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch all topics and user topics
@@ -359,8 +359,6 @@ export default function Profile() {
       if (!response.ok) {
         throw new Error("Error adding comment");
       }
-
-      const newCommentData = await response.json();
 
       await fetchComments(postID);
 
@@ -890,6 +888,7 @@ export default function Profile() {
                     addComment={addComment}
                     currentUser={userData}
                     refreshPosts={refreshPosts}
+                    commentsCount={postStats[post.id]?.comments ?? 0}
                   />
                 ))
               ) : (

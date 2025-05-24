@@ -271,12 +271,12 @@ export function SettingsSheet({
       method: "POST", 
       credentials: "include", 
       headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-              "$1"
-            )}`,
-          },});
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${document.cookie.replace(
+          /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+          "$1"
+        )}`,
+      },});
     setUser(null);
     router.push("/login");
   };
@@ -296,27 +296,27 @@ export function SettingsSheet({
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-4">
-        <div className="grid grid-cols-1 items-center gap-4">
-          <section className="flex justify-center">
-            <Image
-            src={previewImage || user?.profile_picture || "/teddy.webp"}
-            alt={user?.user_name || "Avatar"}
-              width={1000}
-              height={1000}
-              className="w-24 h-24 rounded-full object-cover"
+          <div className="grid grid-cols-1 items-center gap-4">
+            <section className="flex justify-center">
+              <Image
+                src={previewImage || user?.profile_picture || "/teddy.webp"}
+                alt={user?.user_name || "Avatar"}
+                width={1000}
+                height={1000}
+                className="w-24 h-24 rounded-full object-cover"
+              />
+            </section>
+            <Label htmlFor="profile_picture" className="text-center">
+              Foto de Perfil
+            </Label>
+            <Input
+              id="profile_picture"
+              type="file"
+              accept="image/*"
+              className="bg-background hover:bg-accent"
+              onChange={handleProfilePictureChange}
             />
-          </section>
-          <Label htmlFor="profile_picture" className="text-center">
-            Foto de Perfil
-          </Label>
-          <Input
-            id="profile_picture"
-            type="file"
-            accept="image/*"
-            className="bg-background hover:bg-accent"
-            onChange={handleProfilePictureChange}
-          />
-        </div>
+          </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="full_name" className="text-right">
               Nombre
@@ -371,15 +371,15 @@ export function SettingsSheet({
         </SheetHeader>
         <div className="flex flex-col gap-3 mt-3">
           {/* User Topics */}
-            {/* Other Topics */}
-        <div>
-          <SelectMultipleComponent
-            topics={availableTopics}
-            value={selectedFromSelect}
-            onChange={handleSelectChange}
-            className="w-full hover:bg-accent"
-          />
-        </div>
+          {/* Other Topics */}
+          <div>
+            <SelectMultipleComponent
+              topics={availableTopics}
+              value={selectedFromSelect}
+              onChange={handleSelectChange}
+              className="w-full hover:bg-accent"
+            />
+          </div>
           <div>
             <h3 className="text-lg font-semibold text-center">Tus Gustos</h3>
             <ul className="list-none border p-4 flex flex-wrap gap-2 items-center">
@@ -388,10 +388,10 @@ export function SettingsSheet({
                   key={topic.id}
                   className="cursor-pointer"
                   onClick={() => handleRemoveTopic(topic)}
-            >
+                >
                   <Badge
                     className={`text-black bg-lime-400 hover:bg-lime-300 py-2 px-4 mb-3" cursor-pointer`}
-                    >                    
+                  >                    
                     {topic.name}
                   </Badge>
                 </li>
@@ -407,9 +407,9 @@ export function SettingsSheet({
         <SheetHeader>
           <SheetTitle>Cerrar Sessión</SheetTitle>
           <SheetDescription>
-          <SheetDescription className="mb-3">
-            Cierra tu sesión aquí.
-          </SheetDescription>
+            <SheetDescription className="mb-3">
+              Cierra tu sesión aquí.
+            </SheetDescription>
             {/* Botón de cerrar sesión abajo a la derecha */}
             <div className="flex justify-end">
               <Button

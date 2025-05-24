@@ -2,9 +2,8 @@
 import { useEffect, useState } from "react";
 import { useUserContext } from "@/contexts/UserContext";
 import useUser from "@/hooks/useUser";
-import { User } from "@/lib/types";
 import PostCard from "@/components/PostCard";
-import { MessageCircle, MessageSquare } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -194,12 +193,12 @@ export default function Home() {
       // Convertimos la lista de post IDs en un mapa para un acceso más rápido
       const likedPostsMap = likedPostsData
         ? likedPostsData.reduce(
-            (acc: Record<number, boolean>, postID: number) => {
-              acc[postID] = true;
-              return acc;
-            },
-            {}
-          )
+          (acc: Record<number, boolean>, postID: number) => {
+            acc[postID] = true;
+            return acc;
+          },
+          {}
+        )
         : [];
 
       setLikedPosts(likedPostsMap);
@@ -294,8 +293,6 @@ export default function Home() {
       if (!response.ok) {
         throw new Error("Error adding comment");
       }
-
-      const newCommentData = await response.json();
 
       await fetchComments(postID);
 
@@ -602,10 +599,10 @@ export default function Home() {
                 px-5 py-2 rounded-full text-sm font-semibold shadow-lg cursor-pointer border-2
                 flex items-center gap-2
                 ${
-                  selectedTopicId === topic.id
-                    ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
-                    : "bg-gradient-to-r from-white via-white to-gray-100 text-gray-700 border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"
-                }
+            selectedTopicId === topic.id
+              ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
+              : "bg-gradient-to-r from-white via-white to-gray-100 text-gray-700 border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"
+            }
               `}
               style={{
                 boxShadow:
