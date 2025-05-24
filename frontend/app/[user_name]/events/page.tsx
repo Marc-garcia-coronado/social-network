@@ -14,20 +14,23 @@ async function getTopics(): Promise<Topic[]> {
   return await res.json();
 }
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { q?: string; topic?: string };
-}) {
+// types.ts (opcional)
+export type PageProps = {
+  searchParams?: {
+    q?: string;
+    topic?: string;
+  };
+};
+
+
+export default async function Page({ searchParams }: PageProps) {
   const topics = await getTopics();
 
   return (
-    <>
-      <EventFeed
-        topics={topics}
-        initialSearch={searchParams.q || ""}
-        initialTopic={searchParams.topic || ""}
-      />
-    </>
+    <EventFeed
+      topics={topics}
+      initialSearch={searchParams?.q || ""}
+      initialTopic={searchParams?.topic || ""}
+    />
   );
 }
