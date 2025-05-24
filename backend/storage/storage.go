@@ -2,6 +2,8 @@ package storage
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
 
 	"github.com/Marc-Garcia-Coronado/socialNetwork/models"
 )
@@ -99,7 +101,9 @@ type PostgresStore struct {
 }
 
 func NewPostgresStore() (*PostgresStore, error) {
-	uri := "user=postgres dbname=postgres password=socialNetwork sslmode=disable"
+
+	uri := os.Getenv("DATABASE_URL")
+	fmt.Print(uri)
 	db, err := sql.Open("postgres", uri)
 
 	if err != nil {
