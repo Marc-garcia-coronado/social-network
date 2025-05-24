@@ -1,9 +1,11 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/Marc-Garcia-Coronado/socialNetwork/routes"
 	"github.com/Marc-Garcia-Coronado/socialNetwork/storage"
-	"log"
 )
 
 func main() {
@@ -19,6 +21,6 @@ func main() {
 
 	log.Println("Todas las tablas se han creado exitosamente!")
 
-	server := routes.NewAPIServer(":3000", store)
+	server := routes.NewAPIServer(":" + os.Getenv("PORT"), store)
 	server.Run()
 }
