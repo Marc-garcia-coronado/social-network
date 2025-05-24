@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import EventComponent from "@/components/EventComponent";
 import SearchBar from "@/components/SearchBar";
@@ -59,7 +59,35 @@ export default function EventFeed({
 }: Props) {
   const [search, setSearch] = useState(initialSearch);
   const [topic, setTopic] = useState(initialTopic);
-  const { user } = useUserContext()
+  const [userTopics, setuserTopics] = useState([]);
+
+  const { user } = useUserContext();
+
+  useEffect(() => {
+    // Fetch all topics and user topics
+    const fetchTopics = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/users/${user?.id}/topics`,
+          {
+            credentials: "include",
+            headers: {
+              Authorization: `Bearer ${document.cookie.replace(
+                /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+                "$1"
+              )}`,
+            },
+          }
+        );
+        const topics = await response.json();
+        setuserTopics(topics);
+      } catch (error) {
+        console.error("Error fetching topics:", error);
+      }
+    };
+
+    fetchTopics();
+  }, []);
 
   const fetchSubscribedEvents = async (): Promise<number[]> => {
     const resSubs = await fetch(
@@ -101,21 +129,46 @@ export default function EventFeed({
     data?.pages.flatMap((page: GetEventsPaginatedResponse) => page.events) ??
     [];
 
-
   return (
     <main className="mb-32">
-      <div className="flex flex-col items-center justify-center mb-10 md:mx-20 md:flex-row md:justify-between md:gap-3">
-        <SearchBar
-          value={search}
-          placeholder="Buscar evento..."
-          onChange={(val: string) => setSearch(val)}
-        />
-        <SelectComponent
-          topics={topics}
-          value={topic}
-          onChange={(val: string) => setTopic(val)}
-          className="w-3/6 md:w-[170px]"
-        />
+      <div
+        className="
+          grid grid-cols-1 md:grid-cols-3
+          items-center
+          gap-4
+          px-4 py-4 mt-10
+          w-full max-w-5xl mx-auto
+          mb-10
+        "
+      >
+        {/* Logo */}
+        <div className="flex justify-center md:justify-start items-center mb-2 md:mb-0 select-none">
+          <h1 className="text-4xl md:text-5xl font-archivo text-white tracking-tighter text-center md:text-left">
+            Fle<span className="text-lime-400">X</span>in.
+          </h1>
+        </div>
+
+        {/* SearchBar */}
+        <div className="relative w-full flex justify-center">
+          <div className="w-full max-w-md">
+            <SearchBar
+              value={search}
+              placeholder="Buscar evento..."
+              onChange={(val: string) => setSearch(val)}
+              className="w-full"
+            />
+          </div>
+        </div>
+
+        {/* SelectComponent */}
+        <div className="flex justify-center md:justify-end items-center mt-2 md:mt-0">
+          <SelectComponent
+            topics={userTopics}
+            value={topic}
+            onChange={(val: string) => setTopic(val)}
+            className="w-full max-w-xs md:w-[170px]"
+          />
+        </div>
       </div>
 
       {isLoading ? (
@@ -135,7 +188,7 @@ export default function EventFeed({
               key={event?.id ?? `event-${event?.name}`} // fallback para asegurar el key
               event={event}
               apuntado={subscribedIds.includes(event?.id)}
-              topics={topics}
+              topics={userTopics}
               refetchEvents={refetch}
             />
           ))}

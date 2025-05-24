@@ -23,15 +23,12 @@ export default async function Page({
   const topics = await getTopics();
 
   return (
-    <div className="container mx-auto">
-      <h1 className="text-3xl font-bold text-center mt-5 mb-10">
-        Eventos Disponibles
-      </h1>
+    <>
       <EventFeed
         topics={topics}
         initialSearch={searchParams.q || ""}
         initialTopic={searchParams.topic || ""}
       />
-    </div>
+    </>
   );
 }

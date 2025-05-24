@@ -4,7 +4,7 @@ import { useUserContext } from "@/contexts/UserContext";
 import useUser from "@/hooks/useUser";
 import { User } from "@/lib/types";
 import PostCard from "@/components/PostCard";
-import { MessageSquare } from "lucide-react";
+import { MessageCircle, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -477,67 +477,122 @@ export default function Home() {
 
   return (
     <div>
-      <div className="header grid grid-cols-3 items-center px-4 py-2 mt-20">
-  {/* Logo */}
-  <div className="logo bg-black flex justify-center items-center">
-    <h1 className="text-5xl font-archivo text-white tracking-tighter">
-      Fle<span className="text-lime-400">X</span>in.
-    </h1>
-  </div>
-
-        <div className="relative">
-          {/* Barra de búsqueda */}
-          <SearchBar
-            value={searchTerm}
-            placeholder="Buscar usuario..."
-            onChange={(val: string) => setSearchTerm(val)}
-            className="w-96"
-          />
-          {/* Lista de resultados */}
-          {filteredUsers.length > 0 && (
-            <ul className="mt-4 bg-white border rounded-md shadow divide-y divide-gray-200 z-20 absolute top-full w-full">
-              {filteredUsers.map((user) => (
-                <li
-                  key={user.id}
-                  className="flex items-center p-4 space-x-4 cursor-pointer"
-                  onClick={() => router.push(`/${user.user_name}/profile`)}
-                >
-                  <img
-                    src={user.profilePicture || "/teddy.webp"}
-                    alt={`${user.full_name}'s avatar`}
-                    className="w-10 h-10 rounded-full"
-                  />
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {user.full_name}
-                    </p>
-                    <p className="text-sm text-gray-500">@{user.user_name}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Mensaje si no hay resultados */}
-          {showNoResults && searchTerm && filteredUsers.length === 0 && (
-            <div className="mt-4 text-center text-gray-500">
-              No se encontraron usuarios.
-            </div>
-          )}
+      <div
+        className="
+          header
+          grid grid-cols-1 md:grid-cols-3
+          items-center
+          gap-4
+          px-4 py-4 mt-10
+          w-full max-w-5xl mx-auto
+        "
+      >
+        {/* Logo */}
+        <div className="flex justify-center md:justify-start items-center mb-2 md:mb-0 select-none">
+          <h1 className="text-4xl md:text-5xl font-archivo text-white tracking-tighter text-center md:text-left">
+            Fle<span className="text-lime-400">X</span>in.
+          </h1>
         </div>
 
-        {/* Messages Icon */}
-        <div className="messages">
+        {/* SearchBar + Messages (mobile) */}
+        <div className="flex w-full md:hidden flex-row items-center justify-center gap-2 relative">
+          <div className="w-full max-w-md">
+            <SearchBar
+              value={searchTerm}
+              placeholder="Buscar usuario..."
+              onChange={(val: string) => setSearchTerm(val)}
+              className="w-full"
+            />
+            {filteredUsers.length > 0 && (
+              <ul className="mt-2 border rounded-md shadow divide-y z-20 absolute top-full w-full bg-zinc-900">
+                {filteredUsers.map((user) => (
+                  <li
+                    key={user.id}
+                    className="flex items-center p-4 space-x-4 cursor-pointer"
+                    onClick={() => router.push(`/${user.user_name}/profile`)}
+                  >
+                    <Image
+                      src={user.profile_picture || "/teddy.webp"}
+                      alt={`${user.full_name}'s avatar`}
+                      width={1000}
+                      height={1000}
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <div>
+                      <p className="font-medium">{user.full_name}</p>
+                      <p className="text-sm">@{user.user_name}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {showNoResults && searchTerm && filteredUsers.length === 0 && (
+              <div className="mt-2 text-center text-sm text-gray-400 border rounded-md shadow divide-y z-20 absolute top-full w-full bg-zinc-900">
+                No se encontraron usuarios.
+              </div>
+            )}
+          </div>
+          {/* Messages Icon (mobile) */}
           <button
             onClick={() => router.push(`/${user?.user_name}/messages`)}
-            className="relative"
+            className="ml-2 text-white hover:text-lime-400 transition-all"
           >
-            <MessageSquare size={32} />
+            <MessageCircle size={32} />
+          </button>
+        </div>
+
+        {/* SearchBar (desktop) */}
+        <div className="relative w-full hidden md:flex justify-center">
+          <div className="w-full max-w-md">
+            <SearchBar
+              value={searchTerm}
+              placeholder="Buscar usuario..."
+              onChange={(val: string) => setSearchTerm(val)}
+              className="w-full"
+            />
+            {filteredUsers.length > 0 && (
+              <ul className="mt-2 border rounded-md shadow divide-y z-20 absolute top-full w-full bg-zinc-900">
+                {filteredUsers.map((user) => (
+                  <li
+                    key={user.id}
+                    className="flex items-center p-4 space-x-4 cursor-pointer"
+                    onClick={() => router.push(`/${user.user_name}/profile`)}
+                  >
+                    <Image
+                      src={user.profile_picture || "/teddy.webp"}
+                      alt={`${user.full_name}'s avatar`}
+                      width={1000}
+                      height={1000}
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <div>
+                      <p className="font-medium">{user.full_name}</p>
+                      <p className="text-sm">@{user.user_name}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {showNoResults && searchTerm && filteredUsers.length === 0 && (
+              <div className="mt-2 text-center text-sm text-gray-400 border rounded-md shadow divide-y z-20 absolute top-full w-full bg-zinc-900">
+                No se encontraron usuarios.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Messages Icon (desktop) */}
+        <div className="hidden md:flex justify-center md:justify-end items-center mt-2 md:mt-0">
+          <button
+            onClick={() => router.push(`/${user?.user_name}/messages`)}
+            className="relative text-white hover:text-lime-400 transition-all"
+          >
+            <MessageCircle size={32} />
           </button>
         </div>
       </div>
 
-      <ul className="flex flex-wrap gap-2 px-4 py-2">
+      <ul className="flex flex-wrap justify-center mb-3 gap-2 px-4 py-2">
         {userData ? (
           userData.map((topic: any) => (
             <li
@@ -546,14 +601,17 @@ export default function Home() {
                 transition-all duration-200
                 px-5 py-2 rounded-full text-sm font-semibold shadow-lg cursor-pointer border-2
                 flex items-center gap-2
-                ${selectedTopicId === topic.id
-                  ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
-                  : "bg-gradient-to-r from-white via-white to-gray-100 text-gray-700 border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"}
+                ${
+                  selectedTopicId === topic.id
+                    ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
+                    : "bg-gradient-to-r from-white via-white to-gray-100 text-gray-700 border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"
+                }
               `}
               style={{
-                boxShadow: selectedTopicId === topic.id
-                  ? "0 4px 20px 0 rgba(163, 230, 53, 0.25)"
-                  : "0 2px 8px 0 rgba(0,0,0,0.06)"
+                boxShadow:
+                  selectedTopicId === topic.id
+                    ? "0 4px 20px 0 rgba(163, 230, 53, 0.25)"
+                    : "0 2px 8px 0 rgba(0,0,0,0.06)",
               }}
               onClick={() =>
                 setSelectedTopicId((prev) =>
@@ -561,12 +619,12 @@ export default function Home() {
                 )
               }
             >
-              <span className="inline-block w-2 h-2 rounded-full mr-2"
+              <span
+                className="inline-block w-2 h-2 rounded-full mr-2"
                 style={{
-                  background: selectedTopicId === topic.id
-                    ? "#84cc16"
-                    : "#d1d5db"
-                }}
+                  background:
+                    selectedTopicId === topic.id ? "#84cc16" : "#d1d5db",
+                }}  
               ></span>
               {topic.name}
             </li>
@@ -596,6 +654,7 @@ export default function Home() {
                 addComment={addComment}
                 currentUser={userData}
                 refreshPosts={fetchNextPage}
+                commentsCount={postStats[post.id]?.comments ?? 0}
               />
             ))
           ) : (
