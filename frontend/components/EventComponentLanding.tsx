@@ -1,4 +1,4 @@
-import { Event, Topic } from "@/lib/types";
+import { Event } from "@/lib/types";
 import Image from "next/image";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
