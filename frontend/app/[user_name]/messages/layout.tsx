@@ -112,7 +112,6 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
 
   const {
     data: conversations,
-    error,
     isLoading,
     isError,
   } = useQuery({
