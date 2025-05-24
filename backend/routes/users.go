@@ -36,7 +36,7 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		Value:    token,
 		HttpOnly: true,
 		Secure:   r.TLS != nil, // Secure only if request is HTTPS
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
 	})
 
