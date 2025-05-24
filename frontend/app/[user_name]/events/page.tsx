@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { Topic } from "@/lib/types";
 import EventFeed from "@/components/EventFeed";
 

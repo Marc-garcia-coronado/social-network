@@ -13,10 +13,8 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import {
-  Ellipsis,
   Forward,
   Heart,
-  MessageCircle,
   MessageSquare,
   Trash,
 } from "lucide-react";
