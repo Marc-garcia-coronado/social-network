@@ -494,10 +494,10 @@ export default function EventComponent({
                 type="button"
                 className={`self-center mb-3
               ${
-                isApuntado
-                  ? "bg-lime-400 hover:bg-lime-500 text-black"
-                  : "bg-transparent border-2 text-black border-black hover:bg-black hover:text-white"
-              }
+        isApuntado
+          ? "bg-lime-400 hover:bg-lime-500 text-black"
+          : "bg-transparent border-2 text-black border-black hover:bg-black hover:text-white"
+        }
               `}
                 onClick={() => handleChangeIsApuntado()}
               >
