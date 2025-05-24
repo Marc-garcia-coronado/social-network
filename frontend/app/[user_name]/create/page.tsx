@@ -115,6 +115,7 @@ const createEventFn = async (body: FormEventData) => {
     imageURL = await uploadImage(body.picture);
   }
 
+
   const response = await fetch("https://social-network-production.up.railway.app/api/events", {
     method: "POST",
     credentials: "include",
