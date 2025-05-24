@@ -28,7 +28,7 @@ func (s *APIServer) Run() {
 	router := chi.NewRouter()
 	router.Use(chimw.Logger)
 	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3001"},
+		AllowedOrigins:   []string{"http://social-network-production.up.railway.app"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,
