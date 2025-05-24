@@ -477,59 +477,112 @@ export default function Home() {
 
   return (
     <div>
-      <div className="header grid grid-cols-3 items-center px-4 py-2 mt-20">
+      <div
+        className="
+          header
+          grid grid-cols-1 md:grid-cols-3
+          items-center
+          gap-4
+          px-4 py-4 mt-10
+          w-full max-w-5xl mx-auto
+        "
+      >
         {/* Logo */}
-        <div className="logo flex justify-center items-center">
-          <h1 className="text-5xl font-archivo text-white tracking-tighter">
+        <div className="flex justify-center md:justify-start items-center mb-2 md:mb-0">
+          <h1 className="text-4xl md:text-5xl font-archivo text-white tracking-tighter text-center md:text-left">
             Fle<span className="text-lime-400">X</span>in.
           </h1>
         </div>
 
-        <div className="relative">
-          {/* Barra de búsqueda */}
-          <SearchBar
-            value={searchTerm}
-            placeholder="Buscar usuario..."
-            onChange={(val: string) => setSearchTerm(val)}
-            className="w-96"
-          />
-          {/* Lista de resultados */}
-          {filteredUsers.length > 0 && (
-            <ul className="mt-4 border rounded-md shadow divide-y z-20 absolute top-full w-full bg-zinc-900">
-              {filteredUsers.map((user) => (
-                <li
-                  key={user.id}
-                  className="flex items-center p-4 space-x-4 cursor-pointer"
-                  onClick={() => router.push(`/${user.user_name}/profile`)}
-                >
-                  <Image
-                    src={user.profile_picture || "/teddy.webp"}
-                    alt={`${user.full_name}'s avatar`}
-                    width={1000}
-                    height={1000}
-                    className="w-10 h-10 rounded-full"
-                  />
-                  <div>
-                    <p className="font-medium">
-                      {user.full_name}
-                    </p>
-                    <p className="text-sm">@{user.user_name}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Mensaje si no hay resultados */}
-          {showNoResults && searchTerm && filteredUsers.length === 0 && (
-            <div className="mt-4 text-center ">
-              No se encontraron usuarios.
-            </div>
-          )}
+        {/* SearchBar + Messages (mobile) */}
+        <div className="flex w-full md:hidden flex-row items-center justify-center gap-2 relative">
+          <div className="w-full max-w-md">
+            <SearchBar
+              value={searchTerm}
+              placeholder="Buscar usuario..."
+              onChange={(val: string) => setSearchTerm(val)}
+              className="w-full"
+            />
+            {filteredUsers.length > 0 && (
+              <ul className="mt-2 border rounded-md shadow divide-y z-20 absolute top-full w-full bg-zinc-900">
+                {filteredUsers.map((user) => (
+                  <li
+                    key={user.id}
+                    className="flex items-center p-4 space-x-4 cursor-pointer"
+                    onClick={() => router.push(`/${user.user_name}/profile`)}
+                  >
+                    <Image
+                      src={user.profile_picture || "/teddy.webp"}
+                      alt={`${user.full_name}'s avatar`}
+                      width={1000}
+                      height={1000}
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <div>
+                      <p className="font-medium">{user.full_name}</p>
+                      <p className="text-sm">@{user.user_name}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {showNoResults && searchTerm && filteredUsers.length === 0 && (
+              <div className="mt-2 text-center text-sm text-gray-400 border rounded-md shadow divide-y z-20 absolute top-full w-full bg-zinc-900">
+                No se encontraron usuarios.
+              </div>
+            )}
+          </div>
+          {/* Messages Icon (mobile) */}
+          <button
+            onClick={() => router.push(`/${user?.user_name}/messages`)}
+            className="ml-2 text-white hover:text-lime-400 transition-all"
+          >
+            <MessageCircle size={32} />
+          </button>
         </div>
 
-        {/* Messages Icon */}
-        <div className="messages">
+        {/* SearchBar (desktop) */}
+        <div className="relative w-full hidden md:flex justify-center">
+          <div className="w-full max-w-md">
+            <SearchBar
+              value={searchTerm}
+              placeholder="Buscar usuario..."
+              onChange={(val: string) => setSearchTerm(val)}
+              className="w-full"
+            />
+            {filteredUsers.length > 0 && (
+              <ul className="mt-2 border rounded-md shadow divide-y z-20 absolute top-full w-full bg-zinc-900">
+                {filteredUsers.map((user) => (
+                  <li
+                    key={user.id}
+                    className="flex items-center p-4 space-x-4 cursor-pointer"
+                    onClick={() => router.push(`/${user.user_name}/profile`)}
+                  >
+                    <Image
+                      src={user.profile_picture || "/teddy.webp"}
+                      alt={`${user.full_name}'s avatar`}
+                      width={1000}
+                      height={1000}
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <div>
+                      <p className="font-medium">{user.full_name}</p>
+                      <p className="text-sm">@{user.user_name}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {showNoResults && searchTerm && filteredUsers.length === 0 && (
+              <div className="mt-2 text-center text-sm text-gray-400 border rounded-md shadow divide-y z-20 absolute top-full w-full bg-zinc-900">
+                No se encontraron usuarios.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Messages Icon (desktop) */}
+        <div className="hidden md:flex justify-center md:justify-end items-center mt-2 md:mt-0">
           <button
             onClick={() => router.push(`/${user?.user_name}/messages`)}
             className="relative text-white hover:text-lime-400 transition-all"
@@ -539,7 +592,7 @@ export default function Home() {
         </div>
       </div>
 
-      <ul className="flex flex-wrap gap-2 px-4 py-2">
+      <ul className="flex flex-wrap justify-center mb-3 gap-2 px-4 py-2">
         {userData ? (
           userData.map((topic: any) => (
             <li
@@ -571,7 +624,7 @@ export default function Home() {
                 style={{
                   background:
                     selectedTopicId === topic.id ? "#84cc16" : "#d1d5db",
-                }}
+                }}  
               ></span>
               {topic.name}
             </li>

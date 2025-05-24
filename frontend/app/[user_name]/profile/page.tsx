@@ -37,15 +37,15 @@ export default function Profile() {
   const [followingCount, setFollowingCount] = useState<number>(0);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
 
-  const [activeTab, setActiveTab] = useState<"posts" | "events" | "subscribed">("posts");
+  const [activeTab, setActiveTab] = useState<"posts" | "events" | "subscribed">(
+    "posts"
+  );
   const [userEvents, setUserEvents] = useState<Event[]>([]);
   const [subscribedEvents, setSubscribedEvents] = useState<Event[]>([]); // Nuevo estado
   const [userTopics, setuserTopics] = useState([]);
 
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
 
   useEffect(() => {
     // Fetch all topics and user topics
@@ -170,7 +170,11 @@ export default function Profile() {
 
   // Llama a fetchSubscribedEventsList cuando el usuario cambie y la pestaña sea "subscribed"
   useEffect(() => {
-    if (userData?.id && activeTab === "subscribed" && userData?.id === user?.id) {
+    if (
+      userData?.id &&
+      activeTab === "subscribed" &&
+      userData?.id === user?.id
+    ) {
       fetchSubscribedEventsList(userData.id);
     }
   }, [userData, activeTab, user]);
@@ -683,7 +687,7 @@ export default function Profile() {
       console.error("Error fetching user comment likes:", error);
     }
   };
-  
+
   const fetchSubscribedEvents = async (): Promise<number[]> => {
     const res = await fetch(
       `http://localhost:3000/api/users/${user?.id}/events/subscribed`,
@@ -753,12 +757,24 @@ export default function Profile() {
     return <div>Error: {error}</div>;
   }
   return (
-    <div className="min-h-screen pt-8 px-8">
-      <div className="w-100 flex justify-end">
-        {userData?.id === user?.id && (
-          <SettingsSheet refreshUserData={refreshUserData} />
-        )}
+    <div className="min-h-screen px-8">
+      <div className="w-full mb-8 grid grid-cols-3 items-center gap-4 px-4 py-4 mt-10 relative">
+        {/* Columna izquierda vacía */}
+        <div />
+        {/* Logo centrado en la columna del medio */}
+        <div className="flex justify-center items-center">
+          <h1 className="text-4xl md:text-5xl font-archivo text-white tracking-tighter text-center">
+            Fle<span className="text-lime-400">X</span>in.
+          </h1>
+        </div>
+        {/* Settings a la derecha */}
+        <div className="flex justify-end items-center">
+          {userData?.id === user?.id && (
+            <SettingsSheet refreshUserData={refreshUserData} />
+          )}
+        </div>
       </div>
+      {/* ...resto del código... */}
       <header className="flex flex-col justify-center">
         <section className="flex justify-center">
           <Image
@@ -773,7 +789,9 @@ export default function Profile() {
           <h2 className="text-center">
             <strong>{userData?.full_name || "Nombre"}</strong>
           </h2>
-          <p className="text-center text-gray-300">{"@" + userData?.user_name || ""}</p>
+          <p className="text-center text-gray-300">
+            {"@" + userData?.user_name || ""}
+          </p>
           <p className="text-center">{userData?.bio || ""}</p>
           <p className="text-center">
             <strong>
@@ -799,7 +817,7 @@ export default function Profile() {
               <button
                 onClick={() =>
                   router.push(
-                    `/${user?.user_name}/messages/${userData.id}` /* Aqui despues otra barra con id de mensaje y cambiar userData por user */,
+                    `/${user?.user_name}/messages/${userData.id}` /* user */
                   )
                 }
                 className={`mt-4 px-4 py-2 rounded-full bg-primary text-white`}
@@ -810,21 +828,21 @@ export default function Profile() {
           )}
         </section>
       </header>
-      <section>
+      <section className="pb-6">
         {/* Tabs */}
-        <div className="flex justify-center gap-8 mb-6">
+        <div className="flex justify-center gap-4 mb-6">
           <button
-            className={`text-2xl font-semibold pb-1 transition-all ${
+            className={`text-xl font-semibold pb-1 transition-all ${
               activeTab === "posts"
-              ? "underline underline-offset-4 text-white"
-              : "text-gray-400 hover:text-white"
+                ? "underline underline-offset-4 text-white"
+                : "text-gray-400 hover:text-white"
             }`}
             onClick={() => setActiveTab("posts")}
           >
             Publicaciones
           </button>
           <button
-            className={`text-2xl font-semibold pb-1 transition-all ${
+            className={`text-xl font-semibold pb-1 transition-all ${
               activeTab === "events"
                 ? "underline underline-offset-4 text-white"
                 : "text-gray-400 hover:text-white"
@@ -835,7 +853,7 @@ export default function Profile() {
           </button>
           {userData?.id === user?.id && (
             <button
-              className={`text-2xl font-semibold pb-1 transition-all ${
+              className={`text-xl font-semibold pb-1 transition-all ${
                 activeTab === "subscribed"
                   ? "underline underline-offset-4 text-white"
                   : "text-gray-400 hover:text-white"
