@@ -35,6 +35,7 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		Name:     "token",
 		Value:    token,
 		HttpOnly: true,
+		Expires:  time.Now().Add(7 * 24 * time.Hour), // 7 días
 		Secure:   true, // Secure only if request is HTTPS
 		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
@@ -52,8 +53,8 @@ func (s *APIServer) handleLogout(w http.ResponseWriter, r *http.Request) error {
         Expires:  time.Unix(0, 0), // Expira en el pasado
         MaxAge:   -1,
         HttpOnly: true,
-        Secure:   false, // true si usas HTTPS en producción
-        SameSite: http.SameSiteLaxMode,
+        Secure:   true, // true si usas HTTPS en producción
+        SameSite: http.SameSiteNoneMode,
     })
     w.WriteHeader(http.StatusOK)
     w.Header().Set("Content-Type", "application/json")
