@@ -12,7 +12,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
 	}
 	store, err := storage.NewPostgresStore()
 	if err != nil {
@@ -26,7 +26,12 @@ func main() {
 
 	log.Println("Todas las tablas se han creado exitosamente!")
 
-	server := routes.NewAPIServer(":" + os.Getenv("PORT"), store)
+	// Leer el puerto desde la variable de entorno o usar uno por defecto
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Por defecto en local
+	}
 
+	server := routes.NewAPIServer(":"+port, store)
 	server.Run()
 }
