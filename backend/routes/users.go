@@ -39,7 +39,6 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		Secure:   true, // Secure only if request is HTTPS
 		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
-		Domain:   ".vercel.app",
 	})
 
 	return utils.WriteJSON(w, http.StatusOK, map[string]any{
