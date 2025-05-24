@@ -45,16 +45,16 @@ export default function Home() {
         <p className="text-center text-lg font-normal text-neutral-600 dark:text-neutral-300">
           Próximos eventos...
         </p>
-        {events.length === 0 && !error && <p>Cargando...</p>}
+        {events?.length === 0 && !error && <p>Cargando...</p>}
         {error && (
           <p className="text-red-500 text-center">
             ¡Ha ocurrido un error al obtener los próximos eventos!
           </p>
         )}
-        {Array.isArray(events) && events.length > 0 && (
+        {Array?.isArray(events) && events?.length > 0 && (
           <ul className="flex flex-wrap gap-4 justify-center">
-            {events.map((event) => (
-              <li key={event.id}>
+            {events?.map((event) => (
+              <li key={event?.id}>
                 <EventComponentLanding event={event} />
               </li>
             ))}
