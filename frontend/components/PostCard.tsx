@@ -25,6 +25,7 @@ interface PostCardProps {
   addComment: (postId: number) => void;
   currentUser: { id: number };
   refreshPosts: () => void;
+  commentsCount: number;
 }
 const PostCard: React.FC<PostCardProps> = ({
   currentUser,
@@ -42,6 +43,7 @@ const PostCard: React.FC<PostCardProps> = ({
   likedComments,
   addComment,
   refreshPosts,
+  commentsCount,
 }) => {
   const { user } = useUserContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,7 +70,7 @@ const PostCard: React.FC<PostCardProps> = ({
             alt="Post Image"
             width={1000}
             height={1000}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover pointer-events-none "
             priority
           />
         </div>
@@ -144,92 +146,12 @@ const PostCard: React.FC<PostCardProps> = ({
             likedComments={likedComments}
             fetchComments={fetchComments}
             toggleCommentLike={toggleCommentLike}
+            commentsCount={commentsCount ?? 0}
             disableDoubleClick={() => setIsDoubleClickEnabled(false)}
             enableDoubleClick={() => setIsDoubleClickEnabled(true)}
           />
-          <button className="text-white hover:text-lime-400 transition-all">
-            {/* Placeholder for future icon */}
-            <Send />
-          </button>
         </div>
       </div>
-
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-2xl">
-            {/* Modal Header */}
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Comentarios
-              </h2>
-              <button
-                onClick={handleCloseModal}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Comments List */}
-            <ul className="space-y-4 max-h-96 overflow-y-auto">
-              {Array.isArray(comments?.[post.id]) &&
-                comments[post.id]
-                  .filter((comment: any) => comment?.id != null)
-                  .map((comment: any, index: number) => {
-                    return (
-                      <li
-                        key={`${post.id}-${comment.id}`}
-                        className="border-b pb-2"
-                      >
-                        <p className="text-white-700">{comment?.body}</p>
-                        <div className="text-sm text-white-500">
-                          Likes:{" "}
-                          {commentLikesCount?.[comment.id] ?? "Loading..."}
-                        </div>
-                        {comment?.id !== undefined && (
-                          <button
-                            onClick={() => toggleCommentLike(comment.id)}
-                            className={`text-sm ${
-                              likedComments?.[comment.id]
-                                ? "text-red-500"
-                                : "text-blue-500"
-                            }`}
-                          >
-                            {likedComments?.[comment.id]
-                              ? "Quitar Like"
-                              : "Dar Like"}
-                          </button>
-                        )}
-                      </li>
-                    );
-                  })}
-            </ul>
-
-            {/* Add Comment Section */}
-            <div className="mt-4">
-              <input
-                type="text"
-                value={newComment[post.id] || ""}
-                onChange={(e) =>
-                  setNewComment((prevNewComment) => ({
-                    ...prevNewComment,
-                    [post.id]: e.target.value,
-                  }))
-                }
-                placeholder="Escribe un comentario..."
-                className="w-full border rounded p-2"
-              />
-              <button
-                onClick={() => addComment(post.id)}
-                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Enviar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </li>
   );
 };

@@ -133,3 +133,40 @@
 .animate-like {
   animation: like 0.3s ease-in-out;
 }
+
+html,
+body {  
+  font-family: "Cal Sans";
+}
+/* usage samples with adjusted letter spacings */
+h1 {
+  font-size: 56px;
+}
+h2 {
+  font-size: 40px;
+  letter-spacing: 0.01em;
+}
+h3 {
+  font-size: 36px;
+  letter-spacing: 0.015em;
+}
+h4 {
+  font-size: 28px;
+  letter-spacing: 0.02em;
+}
+h5 {
+  font-size: 20px;
+  letter-spacing: 0.03em;
+}
+h6 {
+  font-size: 16px;
+  letter-spacing: 0.04em;
+}
+.quote {
+  font-size: 24px;
+  letter-spacing: 0.02em;
+}
+.smaller_cal_sans {
+  font-size: 18px;
+  letter-spacing: 0.045em;
+}

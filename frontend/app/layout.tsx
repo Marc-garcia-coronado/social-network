@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "cal-sans";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientProvider from "@/components/ClientProvider";

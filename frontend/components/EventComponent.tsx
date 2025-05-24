@@ -292,13 +292,13 @@ export default function EventComponent({
   }, [event, setValue]);
 
   return (
-    <li className="flex flex-col w-[350px] md:w-[400px] min-h-[350px] overflow-hidden border-transparent rounded-md shadow ">
+    <li className="flex flex-col w-[350px] md:w-[400px] min-h-[350px] overflow-hidden border border-[rgba(120,120,120,0.15)] dark:border-[rgba(255,255,255,0.08)] bg-white dark:bg-zinc-900 rounded-xl shadow-xl transition-colors">
       <Image
         src={event?.picture ? event.picture : "/globe.svg"}
         alt={event?.description || "Evento"}
         width={1000}
         height={1000}
-        className="w-full max-h-40 rounded-t-md object-cover"
+        className="w-full max-h-40 rounded-t-md object-cover pointer-events-none"
       />
       <Badge className="w-fit mt-5 mx-5">{event?.topic.name}</Badge>
       <div className="px-5 py-1 flex flex-col ">
@@ -452,7 +452,7 @@ export default function EventComponent({
                   <Label htmlFor="topics">
                     Selecciona el tema para el evento:
                   </Label>
-                  <ul className="list-none flex gap-4" id="topics">
+                  <ul className="list-none flex gap-4 flex-wrap" id="topics">
                     {topics?.map((topic: Topic) => (
                       <li
                         key={topic.id}
@@ -466,7 +466,7 @@ export default function EventComponent({
                         <Badge
                           className={`${
                             watch("topicID") === topic.id
-                              ? "bg-yellow-600 hover:bg-yellow-500"
+                              ? "bg-lime-400 hover:bg-lime-300"
                               : ""
                           } cursor-pointer py-2 px-4`}
                         >
