@@ -374,18 +374,18 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
         </Step>
         <Step>
           <div className="p-1">
-          <Label htmlFor="profile_picture" className="dark:text-black">
-          Foto de Perfil
-        </Label>
-        <Input
-          type="file"
-          id="profile_picture"
-          accept="image/png, image/jpeg"
-          {...register("profile_picture")}
-        />
-        {errors.profile_picture && (
-          <p className="text-red-500">{String(errors.profile_picture.message)}</p>
-        )}
+            <Label htmlFor="profile_picture" className="dark:text-black">
+              Foto de Perfil
+            </Label>
+            <Input
+              type="file"
+              id="profile_picture"
+              accept="image/png, image/jpeg"
+              {...register("profile_picture")}
+            />
+            {errors.profile_picture && (
+              <p className="text-red-500">{String(errors.profile_picture.message)}</p>
+            )}
           </div>
         </Step>
         <Step>
