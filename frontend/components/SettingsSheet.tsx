@@ -48,7 +48,7 @@ export function SettingsSheet({
     const fetchTopics = async () => {
       try {
         const allTopicsResponse = await fetch(
-          "http://social-network-production.up.railway.app/api/topics",
+          "https://social-network-production.up.railway.app/api/topics",
           {
             credentials: "include",
             headers: {
@@ -60,7 +60,7 @@ export function SettingsSheet({
           }
         );
         const userTopicsResponse = await fetch(
-          `http://social-network-production.up.railway.app/api/users/${user?.id}/topics`,
+          `https://social-network-production.up.railway.app/api/users/${user?.id}/topics`,
           {
             credentials: "include",
             headers: {
@@ -116,7 +116,7 @@ export function SettingsSheet({
 
       // Seguir nuevos topics
       if (toFollow.length > 0) {
-        await fetch("http://social-network-production.up.railway.app/api/topics/follow", {
+        await fetch("https://social-network-production.up.railway.app/api/topics/follow", {
           method: "POST",
           credentials: "include",
           headers: {
@@ -133,7 +133,7 @@ export function SettingsSheet({
       // Dejar de seguir topics eliminados
       if (toUnfollow.length > 0) {
         for (const topic of toUnfollow) {
-          await fetch(`http://social-network-production.up.railway.app/api/topics/unfollow`, {
+          await fetch(`https://social-network-production.up.railway.app/api/topics/unfollow`, {
             method: "DELETE",
             credentials: "include",
             headers: {
@@ -233,7 +233,7 @@ export function SettingsSheet({
       }
 
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/users/${user?.id}`,
+        `https://social-network-production.up.railway.app/api/users/${user?.id}`,
         {
           method: "PATCH",
           credentials: "include",
@@ -267,7 +267,7 @@ export function SettingsSheet({
   };
 
   const handleLogout = async () => {
-    await fetch("http://social-network-production.up.railway.app/api/logout", {
+    await fetch("https://social-network-production.up.railway.app/api/logout", {
       method: "POST", 
       credentials: "include", 
       headers: {

@@ -21,7 +21,7 @@ const fetchPosts = async ({
   pagination: { page: number; limit: number; total_count: number };
 }> => {
   const response = await fetch(
-    `http://social-network-production.up.railway.app/api/feed?page=${pageParam}`,
+    `https://social-network-production.up.railway.app/api/feed?page=${pageParam}`,
     {
       credentials: "include",
       headers: {
@@ -97,13 +97,13 @@ export default function Home() {
   const fetchPostStats = async (postID: number) => {
     try {
       const [likesResponse, commentsResponse] = await Promise.all([
-        fetch(`http://social-network-production.up.railway.app/api/likes/posts/${postID}/count`, {
+        fetch(`https://social-network-production.up.railway.app/api/likes/posts/${postID}/count`, {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
         }),
-        fetch(`http://social-network-production.up.railway.app/api/posts/${postID}/comments/count`, {
+        fetch(`https://social-network-production.up.railway.app/api/posts/${postID}/comments/count`, {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
@@ -134,8 +134,8 @@ export default function Home() {
     try {
       const isLiked = likedPosts[postID];
       const endpoint = isLiked
-        ? `http://social-network-production.up.railway.app/api/posts/${postID}/dislike`
-        : `http://social-network-production.up.railway.app/api/posts/${postID}/like`;
+        ? `https://social-network-production.up.railway.app/api/posts/${postID}/dislike`
+        : `https://social-network-production.up.railway.app/api/posts/${postID}/like`;
 
       const method = isLiked ? "DELETE" : "POST";
 
@@ -175,7 +175,7 @@ export default function Home() {
   const fetchUserLikes = async () => {
     try {
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/users/likes/posts`,
+        `https://social-network-production.up.railway.app/api/users/likes/posts`,
         {
           credentials: "include",
           headers: {
@@ -211,7 +211,7 @@ export default function Home() {
   const fetchComments = async (postID: number) => {
     try {
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/posts/${postID}/comments`,
+        `https://social-network-production.up.railway.app/api/posts/${postID}/comments`,
         {
           credentials: "include",
           headers: {
@@ -244,7 +244,7 @@ export default function Home() {
   const fetchCommentLikesCount = async (commentID: number) => {
     try {
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/likes/comments/${commentID}/count`,
+        `https://social-network-production.up.railway.app/api/likes/comments/${commentID}/count`,
         {
           credentials: "include",
           headers: {
@@ -279,7 +279,7 @@ export default function Home() {
       if (!commentText) return;
 
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/posts/${postID}/comments`,
+        `https://social-network-production.up.railway.app/api/posts/${postID}/comments`,
         {
           method: "POST",
           credentials: "include",
@@ -320,8 +320,8 @@ export default function Home() {
     try {
       const isLiked = likedComments ? likedComments[commentID] : false;
       const endpoint = isLiked
-        ? `http://social-network-production.up.railway.app/api/comments/${commentID}/dislike`
-        : `http://social-network-production.up.railway.app/api/comments/${commentID}/like`;
+        ? `https://social-network-production.up.railway.app/api/comments/${commentID}/dislike`
+        : `https://social-network-production.up.railway.app/api/comments/${commentID}/like`;
 
       const method = isLiked ? "DELETE" : "POST";
 
@@ -356,7 +356,7 @@ export default function Home() {
   const fetchUserCommentLikes = async () => {
     try {
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/users/likes/comments`,
+        `https://social-network-production.up.railway.app/api/users/likes/comments`,
         {
           credentials: "include",
           headers: {
@@ -410,7 +410,7 @@ export default function Home() {
     try {
       setShowNoResults(false); // Ocultar mensaje mientras se busca
       const response = await fetch(
-        `http://social-network-production.up.railway.app/api/users/search?query=${term}&limit=10`,
+        `https://social-network-production.up.railway.app/api/users/search?query=${term}&limit=10`,
         {
           method: "GET",
           credentials: "include",
