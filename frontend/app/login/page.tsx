@@ -8,7 +8,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Stepper, { Step } from "@/components/StepForm";
 import { motion } from "framer-motion";
 import { useUserContext } from "@/contexts/UserContext";
@@ -291,6 +291,14 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
     }
   };
 
+  useEffect(() => {
+    if (isError) {
+      toast({
+        description: "❌ ¡Ha habido un error al obtener los gustos!",
+      });
+    }
+  }, [isError]);
+
   return (
     <form
       id="formRegister"
@@ -399,10 +407,6 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
               </p>
             </div>
             {isLoading && <p>Loading...</p>}
-            {isError &&
-              toast({
-                description: "❌ ¡Ha habido un error al obtener los gustos!",
-              })}
             {!isLoading && !isError && data && (
               <ul className="flex items-center flex-wrap gap-2">
                 {data.map((topic: Topic) => (
