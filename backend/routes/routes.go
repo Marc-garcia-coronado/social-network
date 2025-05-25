@@ -41,7 +41,7 @@ func (s *APIServer) Run() {
 	router.Get("/api/events/closest", utils.MakeHTTPHandleFunc(s.handleGetClosestEvents))
 
 	// User - WebSocket route
-	router.Get("/ws", s.handleWebSocket)
+	router.Get("/wss", s.handleWebSocket)
 
 	// Protected router for not admin users
 	protectedRouter := chi.NewRouter()
