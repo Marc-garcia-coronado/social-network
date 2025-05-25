@@ -129,6 +129,6 @@ JWT_SECRET=supersecretkey
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-
-
+## 📄 Documentació de l'API
+🔗 **API DOC:** [https://documenter.getpostman.com/view/19610185/2sB2qcC1Ti](https://documenter.getpostman.com/view/19610185/2sB2qcC1Ti)
 
