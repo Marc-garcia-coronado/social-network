@@ -1,55 +1,49 @@
-# 🏋️‍♂️ FleXin – Xarxa Social Esportiva
+# 🏋️‍♂️ FleXin – Red Social Deportiva
 
-**FleXin** és una xarxa social enfocada a persones apassionades per l'esport. Permet compartir publicacions, seguir altres usuaris, organitzar esdeveniments esportius i comunicar-se en temps real.
+**FleXin** es una red social enfocada a personas apasionadas por el deporte. Permite compartir publicaciones, seguir a otros usuarios, organizar eventos deportivos y comunicarse en tiempo real.
 
 🔗 **Demo:** [https://flexin-frontend-production.up.railway.app](https://flexin-frontend-production.up.railway.app/)
 
----
-
-## 🚀 Tecnologies Utilitzades
+## 🚀 Tecnologías Utilizadas
 
 - **Frontend:** [Next.js](https://nextjs.org/) + [TypeScript](https://www.typescriptlang.org/)
-- **Backend:** [Go](https://golang.org/) amb [Chi Router](https://github.com/go-chi/chi)
-- **Base de dades:** [PostgreSQL](https://www.postgresql.org/)
-- **Autenticació:** JWT (JSON Web Tokens)
-- **Temps real:** WebSockets per a la missatgeria
-- **Contenidors:** [Docker](https://www.docker.com/)
-- **Desplegament:** [Railway](https://railway.app/)
+- **Backend:** [Go](https://golang.org/) con [Chi Router](https://github.com/go-chi/chi)
+- **Base de datos:** [PostgreSQL](https://www.postgresql.org/)
+- **Autenticación:** JWT (JSON Web Tokens)
+- **Tiempo real:** WebSockets para mensajería
+- **Contenedores:** [Docker](https://www.docker.com/)
+- **Despliegue:** [Railway](https://railway.app/)
 
----
+## ✅ Funcionalidades Implementadas
 
-## ✅ Funcionalitats Implementades
+- [x] Registro de usuario
+- [x] Inicio de sesión
+- [x] Restablecimiento de contraseña
+- [x] Edición de perfil
+- [x] Publicación de imágenes
+- [x] Modificación y eliminación de publicaciones
+- [x] Fijar publicación en el perfil
+- [x] Comentarios en publicaciones
+- [x] "Me gusta" en publicaciones
+- [x] Seguir y dejar de seguir usuarios
+- [x] Mensajería privada (en tiempo real)
+- [x] Búsqueda de usuarios
+- [x] Crear, modificar y eliminar eventos deportivos
+- [x] Visualizar eventos deportivos próximos
+- [x] Inscribirse a eventos deportivos
+- [x] Filtrar por categoría deportiva
 
-- [x] Registre d'usuari
-- [x] Inici de sessió
-- [x] Restabliment de contrasenya
-- [x] Edició de perfil
-- [x] Publicació d’imatges
-- [x] Modificació i eliminació de publicacions
-- [x] Fixar publicació al perfil
-- [x] Comentaris a publicacions
-- [x] "M'agrada" a publicacions
-- [x] Seguiment i deixar de seguir usuaris
-- [x] Missatgeria privada (temps real)
-- [x] Cerca d'usuaris
-- [x] Creació, modificació i eliminació d'esdeveniments esportius
-- [x] Visualització d'esdeveniments propers
-- [x] Inscripció a esdeveniments esportius
-- [x] Filtratge per categoria esportiva
+## 🛠️ Instalación Manual Paso a Paso
 
----
+### 1. Requisitos Previos
 
-## 🛠️ Instal·lació Manual Pas a Pas
+Asegúrate de tener instalado:
 
-### 1. 🧰 Requisits previs
+- Go (versión recomendada: 1.21+): https://go.dev/doc/install  
+- Node.js (versión recomendada: 18+): https://nodejs.org/  
+- PostgreSQL: https://www.postgresql.org/download  
 
-Abans de començar, assegura’t de tenir instal·lat:
-
-- **Go** (versió recomanada: 1.21+): https://go.dev/doc/install
-- **Node.js** (versió recomanada: 18+): https://nodejs.org/
-- **PostgreSQL**: https://www.postgresql.org/download
-
-#### Alternativa per macOS amb Homebrew:
+Alternativa en macOS con Homebrew:
 
 ```bash
 brew install go
@@ -57,78 +51,65 @@ brew install node
 brew install postgresql
 ```
 
-### 2. 🗄️ Configurar la base de dades
-#### 2.1 Inicia PostgreSQL (segons el teu sistema operatiu).
-#### 2.2 Crea la base de dades per al projecte:
+### 2. Configurar la base de datos
 
 ```bash
 psql -U postgres
 CREATE DATABASE flexin;
 ```
 
---- 
+### 3. Backend (Go)
 
-### 3. 🔙 Backend amb Go
-#### 3.1 📁 Entra a la carpeta del backend:
 ```bash
 cd backend
 ```
 
-#### 3.2 🧪 Crear el fitxer .env:
-```bash
+Crear archivo `.env`:
+
+```env
 PORT=8000
-DATABASE_URL=postgres://postgres:contrasenya@localhost:5432/flexin
+DATABASE_URL=postgres://postgres:tu_contraseña@localhost:5432/flexin
 JWT_SECRET=supersecretkey
 ```
 
-#### 3.3 📦 Installa les dependències:
+Instalar dependencias:
+
 ```bash
 go mod tidy
 ```
 
-#### 3.4 ▶️ Executa el servidor:
+Ejecutar servidor:
+
 ```bash
 go run main.go
 ```
 
----
+### 4. Frontend (Next.js + TypeScript)
 
-### 4. 🎨 Frontend (Next.js + TypeScript)
-#### 4.1 📁 Entra a la carpeta del frontend:
 ```bash
 cd ../frontend
 ```
 
-#### 4.2 🧪 Crea el fitxer .env.local:
-```bash
+Crear archivo `.env.local`:
+
+```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-##3# 4.3📦 Installa les dependències:
+Instalar dependencias:
+
 ```bash
 npm install
 ```
 
-#### 4.4 ▶️ Executa l’aplicació:
+Ejecutar aplicación:
+
 ```bash
 npm run dev
 ```
-##### El frontend estarà actiu a http://localhost:3000
 
---- 
+La app estará disponible en http://localhost:3000
 
-### 5 🧪 Exemple de .env Backend
-```bash
-PORT=8000
-DATABASE_URL=postgres://postgres:contrasenya@localhost:5432/flexin
-JWT_SECRET=supersecretkey
-```
+## 📄 Documentación de la API
 
-### 6 🧪 Exemple de .env.local Frontend
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-## 📄 Documentació de l'API
-🔗 **API DOC:** [https://documenter.getpostman.com/view/19610185/2sB2qcC1Ti](https://documenter.getpostman.com/view/19610185/2sB2qcC1Ti)
-
+🔗 [https://documenter.getpostman.com/view/19610185/2sB2qcC1Ti](https://documenter.getpostman.com/view/19610185/2sB2qcC1Ti)
