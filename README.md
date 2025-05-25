@@ -88,8 +88,43 @@ go mod tidy
 ```bash
 go run main.go
 ```
+---
 
+### 4. 🎨 Frontend (Next.js + TypeScript)
+### 4.1 📁 Entra a la carpeta del frontend:
+```bash
+cd ../frontend
+```
 
+### 4.2 🧪 Crea el fitxer .env.local:
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+### 4.3📦 Installa les dependències:
+```bash
+npm install
+```
+
+### 4.4 ▶️ Executa l’aplicació:
+```bash
+npm run dev
+```
+#### El frontend estarà actiu a http://localhost:3000
+
+--- 
+
+### 5 🧪 Exemple de .env Backend
+```bash
+PORT=8000
+DATABASE_URL=postgres://postgres:contrasenya@localhost:5432/flexin
+JWT_SECRET=supersecretkey
+```
+
+### 6 🧪 Exemple de .env.local Frontend
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
 
 
