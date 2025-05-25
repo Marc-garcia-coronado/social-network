@@ -58,7 +58,7 @@ brew install postgresql
 ```
 
 ### 2. Configurar la base de dades
-### 2.1 Inicia PostgreSQL (segons el teu sistema operatiu).
+#### 2.1 Inicia PostgreSQL (segons el teu sistema operatiu).
 ### 2.2 Crea la base de dades per al projecte:
 
 ```bash
