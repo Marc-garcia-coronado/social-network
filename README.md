@@ -57,60 +57,63 @@ brew install node
 brew install postgresql
 ```
 
-### 2. Configurar la base de dades
+### 2. 🗄️ Configurar la base de dades
 #### 2.1 Inicia PostgreSQL (segons el teu sistema operatiu).
-### 2.2 Crea la base de dades per al projecte:
+#### 2.2 Crea la base de dades per al projecte:
 
 ```bash
 psql -U postgres
 CREATE DATABASE flexin;
 ```
 
-### 3. Backend amb Go
+--- 
 
+### 3. 🔙 Backend amb Go
+#### 3.1 📁 Entra a la carpeta del backend:
 ```bash
 cd backend
 ```
 
-### 3.1 Crear el fitxer .env:
+#### 3.2 🧪 Crear el fitxer .env:
 ```bash
 PORT=8000
 DATABASE_URL=postgres://postgres:contrasenya@localhost:5432/flexin
 JWT_SECRET=supersecretkey
 ```
 
-### 3.2 Installa les dependències:
+#### 3.3 📦 Installa les dependències:
 ```bash
 go mod tidy
 ```
 
-### 3.3 Executa el servidor:
+#### 3.4 ▶️ Executa el servidor:
 ```bash
 go run main.go
 ```
+
 ---
 
 ### 4. 🎨 Frontend (Next.js + TypeScript)
-### 4.1 📁 Entra a la carpeta del frontend:
+#### 4.1 📁 Entra a la carpeta del frontend:
 ```bash
 cd ../frontend
 ```
 
-### 4.2 🧪 Crea el fitxer .env.local:
+#### 4.2 🧪 Crea el fitxer .env.local:
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-### 4.3📦 Installa les dependències:
+##3# 4.3📦 Installa les dependències:
 ```bash
 npm install
 ```
 
-### 4.4 ▶️ Executa l’aplicació:
+#### 4.4 ▶️ Executa l’aplicació:
 ```bash
 npm run dev
 ```
-#### El frontend estarà actiu a http://localhost:3000
+##### El frontend estarà actiu a http://localhost:3000
 
 --- 
 
