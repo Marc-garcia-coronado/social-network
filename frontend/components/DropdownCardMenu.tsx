@@ -28,16 +28,19 @@ import { Badge } from "@/components/ui/badge";
 import { Topic } from "@/lib/types";
 
 const getTopicsFn = async (id: number) => {
-  const response = await fetch(`https://social-network-production.up.railway.app/api/users/${id}/topics`, {
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${document.cookie.replace(
-        /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-        "$1"
-      )}`,
-    },
-  });
+  const response = await fetch(
+    `https://social-network-production.up.railway.app/api/users/${id}/topics`,
+    {
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${document.cookie.replace(
+          /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
+          "$1"
+        )}`,
+      },
+    }
+  );
 
   const data = await response.json();
 
@@ -60,7 +63,6 @@ export function DropdownCardMenu({
   refreshPosts: () => void;
   postTitle: string;
   postTopicId: number;
-
 }) {
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -143,7 +145,7 @@ export function DropdownCardMenu({
     <>
       {/* Dialogo Editar */}
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Editar Post</DialogTitle>
             <DialogDescription>
@@ -168,7 +170,10 @@ export function DropdownCardMenu({
 
               <div className="space-y-1">
                 <Label htmlFor="topics">Selecciona el tema para el post:</Label>
-                <ul className="list-none flex gap-4 overflow-x-scroll" id="topics">
+                <ul
+                  className="list-none flex gap-4 overflow-x-scroll max-w-min"
+                  id="topics"
+                >
                   {isLoading ? (
                     <p>Loading...</p>
                   ) : isError ? (
@@ -201,7 +206,9 @@ export function DropdownCardMenu({
             </div>
 
             <DialogFooter>
-              <Button type="submit" className="mt-3">Guardar cambios</Button>
+              <Button type="submit" className="mt-3">
+                Guardar cambios
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
