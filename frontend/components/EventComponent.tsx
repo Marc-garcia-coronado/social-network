@@ -55,10 +55,10 @@ const updateSubscribedToEvent = async ({
 
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
-  headers.append("Credentials", "include");
 
   const res = await fetch(uri, {
     method: state ? "POST" : "DELETE",
+    credentials: "include",
     headers,
   });
 
@@ -357,7 +357,11 @@ export default function EventComponent({
             </Dialog>
             <Dialog modal={false} open={openEdit} onOpenChange={setOpenEdit}>
               <DialogTrigger asChild>
-                <Button variant="default" className="w-fit mx-auto mb-5" onClick={() => setOpenEdit(true)}>
+                <Button
+                  variant="default"
+                  className="w-fit mx-auto mb-5"
+                  onClick={() => setOpenEdit(true)}
+                >
                   Editar
                 </Button>
               </DialogTrigger>
@@ -451,7 +455,10 @@ export default function EventComponent({
                   <Label htmlFor="topics">
                     Selecciona el tema para el evento:
                   </Label>
-                  <ul className="list-none flex gap-4 overflow-x-scroll" id="topics">
+                  <ul
+                    className="list-none flex gap-4 overflow-x-scroll"
+                    id="topics"
+                  >
                     {topics?.map((topic: Topic) => (
                       <li
                         key={topic.id}
@@ -492,11 +499,7 @@ export default function EventComponent({
               <Button
                 type="button"
                 className={`self-center mb-3
-              ${
-        isApuntado
-          ? "bg-lime-400 hover:bg-lime-300"
-          : ""
-        }
+              ${isApuntado ? "bg-lime-400 hover:bg-lime-300" : ""}
               `}
                 onClick={() => handleChangeIsApuntado()}
               >
