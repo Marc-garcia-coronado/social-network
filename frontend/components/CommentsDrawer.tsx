@@ -12,12 +12,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import {
-  Forward,
-  Heart,
-  MessageSquare,
-  Trash,
-} from "lucide-react";
+import { Forward, Heart, MessageSquare, Trash } from "lucide-react";
 import Image from "next/image";
 import { Textarea } from "./ui/textarea";
 import { formatDistanceToNow } from "date-fns";
@@ -68,14 +63,9 @@ export function CommentsDrawer({
   return (
     <Drawer onOpenChange={(isOpen) => !isOpen && closeDrawer()}>
       <DrawerTrigger asChild>
-        <button
-          onClick={openDrawer}
-          className="flex items-center space-x-2"
-        >
+        <button onClick={openDrawer} className="flex items-center space-x-2">
           {/* Contador de comentarios a la izquierda */}
-          <span>
-            {commentsCount}
-          </span>
+          <span>{commentsCount}</span>
           <MessageSquare className="text-white hover:text-lime-400 transition-all" />
         </button>
       </DrawerTrigger>
@@ -144,7 +134,7 @@ export function CommentsDrawer({
                       }`}
                     />
                   </button>
-                  <div className="text-gray-700 ml-2">
+                  <div className="text-white ml-2">
                     <span>{commentLikesCount[comment.id] ?? 0}</span>
                   </div>
                 </div>
