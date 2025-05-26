@@ -21,9 +21,9 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/:user_name/home",
-    "/:user_name/events",
-    "/:user_name/create",
-    "/:user_name/profile",
+   // "/:user_name/home",
+   // "/:user_name/events",
+   // "/:user_name/create",
+    // "/:user_name/profile",
   ],
 };
