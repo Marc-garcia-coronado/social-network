@@ -24,12 +24,15 @@ type QueryParamsType = {
 };
 
 const getTopicsFn = async (id: number) => {
-  const response = await fetch(`https://social-network-production.up.railway.app/api/users/${id}/topics`, {
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  const response = await fetch(
+    `https://social-network-production.up.railway.app/api/users/${id}/topics`,
+    {
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   const data = await response.json();
 
@@ -87,18 +90,21 @@ const createPostFn = async (body: FormPostData) => {
 
   const imageURL = await uploadImage(body.picture);
 
-  const response = await fetch("https://social-network-production.up.railway.app/api/posts", {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      title: body.title,
-      topic_id: body.topicID,
-      picture: imageURL,
-    }),
-  });
+  const response = await fetch(
+    "https://social-network-production.up.railway.app/api/posts",
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: body.title,
+        topic_id: body.topicID,
+        picture: imageURL,
+      }),
+    }
+  );
 
   if (!response.ok) {
     throw new Error("fallo al crear el post");
@@ -115,22 +121,24 @@ const createEventFn = async (body: FormEventData) => {
     imageURL = await uploadImage(body.picture);
   }
 
-
-  const response = await fetch("https://social-network-production.up.railway.app/api/events", {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: body.name,
-      description: body.description ?? "",
-      topic_id: body.topicID,
-      picture: imageURL, // Usar la URL de la imagen subida
-      location: body.location,
-      date: body.date,
-    }),
-  });
+  const response = await fetch(
+    "https://social-network-production.up.railway.app/api/events",
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: body.name,
+        description: body.description ?? "",
+        topic_id: body.topicID,
+        picture: imageURL, // Usar la URL de la imagen subida
+        location: body.location,
+        date: body.date,
+      }),
+    }
+  );
 
   if (!response.ok) {
     throw new Error("fallo al crear el evento");
@@ -205,7 +213,7 @@ function FormPost({ data, isLoading, isError, error }: QueryParamsType) {
         </div>
         <div className="space-y-1">
           <Label htmlFor="topics">Selecciona el tema para el post:</Label>
-          <ul className="list-none flex gap-4" id="topics">
+          <ul className="list-none flex gap-4 overflow-x-scroll" id="topics">
             {isLoading ? (
               <li>Loading...</li>
             ) : (
@@ -366,7 +374,7 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
         </div>
         <div className="space-y-1">
           <Label htmlFor="topics">Selecciona el tema para el evento:</Label>
-          <ul className="list-none flex gap-4" id="topics">
+          <ul className="list-none flex gap-4 overflow-x-scroll" id="topics">
             {isLoading ? (
               <li>Loading...</li>
             ) : (

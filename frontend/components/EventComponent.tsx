@@ -451,7 +451,7 @@ export default function EventComponent({
                   <Label htmlFor="topics">
                     Selecciona el tema para el evento:
                   </Label>
-                  <ul className="list-none flex gap-4 flex-wrap" id="topics">
+                  <ul className="list-none flex gap-4 overflow-x-scroll" id="topics">
                     {topics?.map((topic: Topic) => (
                       <li
                         key={topic.id}
@@ -494,8 +494,8 @@ export default function EventComponent({
                 className={`self-center mb-3
               ${
         isApuntado
-          ? "bg-lime-400 hover:bg-lime-500 text-black"
-          : "bg-transparent border-2 text-black border-black hover:bg-black hover:text-white"
+          ? "bg-lime-400 hover:bg-lime-300"
+          : ""
         }
               `}
                 onClick={() => handleChangeIsApuntado()}
