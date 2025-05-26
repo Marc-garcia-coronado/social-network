@@ -382,7 +382,7 @@ export function SettingsSheet({
           </div>
           <div>
             <h3 className="text-lg font-semibold text-center">Tus Gustos</h3>
-            <ul className="list-none border p-4 flex flex-wrap gap-2 items-center">
+            <ul className="list-none border p-4 flex overflow-x-scroll gap-2 items-center">
               {selectedTopics.map((topic) => (
                 <li
                   key={topic.id}

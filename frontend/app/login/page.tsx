@@ -66,38 +66,61 @@ export default function Login() {
   const [isLoginSelected, setIsLoginSelected] = useState<boolean>(true);
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-gray-100 text-black ">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <div className="relative flex justify-between mb-5 bg-gray-200 rounded-sm overflow-hidden">
-          <motion.div
-            className="absolute top-0 bottom-0 w-1/2 bg-slate-800 rounded-sm"
-            animate={{ x: isLoginSelected ? "0%" : "100%" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          />
-
-          <p
-            className="relative flex-1 text-center py-3 cursor-pointer z-10"
-            style={{ color: isLoginSelected ? "white" : "black" }}
-            onClick={() => setIsLoginSelected(true)}
-          >
-            Login
-          </p>
-
-          <p
-            className="relative flex-1 text-center py-3 cursor-pointer z-10"
-            style={{ color: !isLoginSelected ? "white" : "black" }}
-            onClick={() => setIsLoginSelected(false)}
-          >
-            Registrarse
-          </p>
+    <>
+      <div
+        className="
+          grid grid-cols-3
+          items-center
+          gap-4
+          px-4 py-4 mt-10
+          w-full max-w-5xl mx-auto
+        "
+      >
+        {/* Columna izquierda vacía */}
+        <div />
+        {/* Logo centrado en la columna del medio */}
+        <div className="flex justify-center items-center select-none">
+          <h1 className="text-4xl md:text-5xl font-archivo text-white tracking-tighter text-center mb-9 md:mb-32 ">
+            Fle<span className="text-lime-400">X</span>in.
+          </h1>
         </div>
-        {isLoginSelected ? (
-          <LoginForm />
-        ) : (
-          <RegisterForm setIsLoginSelected={setIsLoginSelected} />
-        )}
+        {/* Columna derecha vacía */}
+        <div />
       </div>
-    </div>
+
+      <div className=" w-full flex items-center justify-center">
+        <div className="w-full max-w-md bg-zinc-900 p-8 rounded-lg shadow-lg">
+          <div className="relative flex justify-between mb-5 hover:bg-accent rounded-sm overflow-hidden">
+            <motion.div
+              className="absolute top-0 bottom-0 w-1/2 bg-lime-400 rounded-sm"
+              animate={{ x: isLoginSelected ? "0%" : "100%" }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            />
+
+            <p
+              className="relative flex-1 text-center py-3 cursor-pointer z-10 "
+              style={{ color: isLoginSelected ? "black" : "white" }}
+              onClick={() => setIsLoginSelected(true)}
+            >
+              Login
+            </p>
+
+            <p
+              className="relative flex-1 text-center py-3 cursor-pointer z-10"
+              style={{ color: !isLoginSelected ? "black" : "white" }}
+              onClick={() => setIsLoginSelected(false)}
+            >
+              Registrarse
+            </p>
+          </div>
+          {isLoginSelected ? (
+            <LoginForm />
+          ) : (
+            <RegisterForm setIsLoginSelected={setIsLoginSelected} />
+          )}
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -161,17 +184,22 @@ const LoginForm = ({ className }: FormProps) => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <div>
-        <Label htmlFor="email" className="dark:text-black">
-          Email
-        </Label>
-        <Input {...register("email")} />
+        <Label htmlFor="email">Email</Label>
+        <Input
+          {...register("email")}
+          className="bg-background hover:bg-accent"
+          placeholder="email@example.com"
+        />
         {errors.email && <p className="text-red-500">{errors.email.message}</p>}
       </div>
       <div>
-        <Label htmlFor="password" className="dark:text-black">
-          Contraseña
-        </Label>
-        <Input {...register("password")} type="password" />
+        <Label htmlFor="password">Contraseña</Label>
+        <Input
+          {...register("password")}
+          type="password"
+          className="bg-background hover:bg-accent"
+          placeholder="********"
+        />
         {errors.password && (
           <p className="text-red-500">{errors.password.message}</p>
         )}
@@ -334,33 +362,27 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
         <Step>
           <div className="p-1">
             <div className="space-y-1 mb-3">
-              <p className="text-xl font-medium">¡Elige tu nickname!</p>
-              <p className="text-sm text-neutral-600">
-                Escribe el nombre con el que quieres que tus seguidores vean
+              <p className="text-xl font-medium">¡Elige tus nombres!</p>
+              <p className="text-sm text-neutral-300">
+                Escribe el nombre de usuario con el que quieres que tus
+                seguidores vean y tu nombre completo.
               </p>
             </div>
-            <Label htmlFor="userName" className="dark:text-black">
-              Nombre de Usuario
-            </Label>
-            <Input {...register("userName")} />
+            <Label htmlFor="userName">Nombre de Usuario</Label>
+            <Input
+              {...register("userName")}
+              className="bg-background hover:bg-accent mb-3"
+              placeholder="Nombre de Usuaro"
+            />
             {errors.userName && (
               <p className="text-red-500">{errors.userName.message}</p>
             )}
-          </div>
-        </Step>
-        <Step>
-          <div className="p-1">
-            <div className="space-y-1 mb-3">
-              <p className="text-xl font-medium">Dinos tu nombre</p>
-              <p className="text-sm text-neutral-600">
-                Pon tu nombre completo para que la gente te reconozca
-              </p>
-            </div>
-
-            <Label htmlFor="fullName" className="dark:text-black">
-              Nombre Completo
-            </Label>
-            <Input {...register("fullName")} />
+            <Label htmlFor="fullName">Nombre Completo</Label>
+            <Input
+              {...register("fullName")}
+              className="bg-background hover:bg-accent"
+              placeholder="Nombre Completo"
+            />
             {errors.fullName && (
               <p className="text-red-500">{errors.fullName.message}</p>
             )}
@@ -368,10 +390,18 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
         </Step>
         <Step>
           <div className="p-1">
-            <Label htmlFor="email" className="dark:text-black">
-              Email
-            </Label>
-            <Input {...register("email")} />
+            <div className="space-y-1 mb-3">
+              <p className="text-xl font-medium">¡Pon tu correo!</p>
+              <p className="text-sm text-neutral-300">
+                Escribe tu correo electrónico con el que quieras registrarte.
+              </p>
+            </div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              {...register("email")}
+              className="bg-background hover:bg-accent"
+              placeholder="email@example.com"
+            />
             {errors.email && (
               <p className="text-red-500">{errors.email.message}</p>
             )}
@@ -379,27 +409,21 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
         </Step>
         <Step>
           <div className="p-1">
-            <Label htmlFor="bio" className="dark:text-black">
-              Biografía
-            </Label>
-            <textarea
-              {...register("bio")}
-              className="w-full p-2 border rounded-md dark:text-black"
-              rows={4}
-              placeholder="Escribe algo sobre ti..."
-            />
-            {errors.bio && <p className="text-red-500">{errors.bio.message}</p>}
-          </div>
-        </Step>
-        <Step>
-          <div className="p-1">
-            <Label htmlFor="profile_picture" className="dark:text-black">
-              Foto de Perfil
-            </Label>
+            <div className="space-y-1 mb-3">
+              <p className="text-xl font-medium">
+                Escoge tu mejor Foto de Perfil y Biografía!
+              </p>
+              <p className="text-sm text-neutral-300">
+                Selecciona tu mejor imagen para que se visualice en tu perfil
+                junto a una biografia a tu gusto.
+              </p>
+            </div>
+            <Label htmlFor="profile_picture">Foto de Perfil</Label>
             <Input
               type="file"
               id="profile_picture"
               accept="image/png, image/jpeg"
+              className="bg-background hover:bg-accent mb-3"
               {...register("profile_picture")}
             />
             {errors.profile_picture && (
@@ -407,26 +431,38 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
                 {String(errors.profile_picture.message)}
               </p>
             )}
+            <div className="p-1">
+              <Label htmlFor="bio">Biografía</Label>
+              <textarea
+                {...register("bio")}
+                className="w-full p-2 border rounded-md  bg-background hover:bg-accent"
+                rows={1}
+                placeholder="Escribe algo sobre ti..."
+              />
+              {errors.bio && (
+                <p className="text-red-500">{errors.bio.message}</p>
+              )}
+            </div>
           </div>
         </Step>
         <Step>
           <div className="p-1">
             <div className="space-y-1 mb-3">
               <p className="text-xl font-medium">Personaliza tu feed</p>
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-neutral-300">
                 Selecciona los temas que más te interesan para ver solo
                 publicaciones relacionadas con ellos.
               </p>
             </div>
             {isLoading && <p>Loading...</p>}
             {!isLoading && !isError && data && (
-              <ul className="flex items-center flex-wrap gap-2">
+              <ul className="flex items-center gap-2 overflow-x-scroll">
                 {data.map((topic: Topic) => (
                   <li key={topic.id}>
                     <Button
-                      className={`cursor-pointer capitalize outline-transparent shadow-none border border-black bg-transparent text-black hover:text-white hover:border-white hover:bg-black ${
+                      className={`cursor-pointer capitalize outline-transparent shadow-none border ${
                         topicsIDsSelected.includes(topic.id)
-                          ? "bg-black text-white border-white hover:bg-gray-800"
+                          ? "bg-lime-400 hover:bg-lime-300"
                           : ""
                       } `}
                       onClick={() =>
@@ -451,24 +487,30 @@ const RegisterForm = ({ className, setIsLoginSelected }: RegisterFormProps) => {
           <div className="space-y-3 mb-1 p-1">
             <div className="space-y-1 mb-3">
               <p className="text-xl font-medium">Ultimos pasos...</p>
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-neutral-300">
                 Selecciona una contraseña segura para tu cuenta
               </p>
             </div>
             <div>
-              <Label htmlFor="password" className="dark:text-black">
-                Contraseña
-              </Label>
-              <Input {...register("password")} type="password" />
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                {...register("password")}
+                type="password"
+                className="bg-background hover:bg-accent"
+                placeholder="********"
+              />
               {errors.password && (
                 <p className="text-red-500">{errors.password.message}</p>
               )}
             </div>
             <div>
-              <Label htmlFor="confirmPassword" className="dark:text-black">
-                Confirma Contraseña
-              </Label>
-              <Input {...register("confirmPassword")} type="password" />
+              <Label htmlFor="confirmPassword">Confirma Contraseña</Label>
+              <Input
+                {...register("confirmPassword")}
+                type="password"
+                className="bg-background hover:bg-accent"
+                placeholder="********"
+              />
               {errors.confirmPassword && (
                 <p className="text-red-500">{errors.confirmPassword.message}</p>
               )}
