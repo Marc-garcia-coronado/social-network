@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get("token")?.value;
-  console.log(token);
+  
+  const response = await fetch("https://social-network-production.up.railway.app/api/validate-token", {
+    method: "GET",
+    credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+  });
 
-  if (!token) {
+  const data = await response.json();
+
+  if (!data.valid) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -13,10 +21,9 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // "/:user_name/home",
-    // "/:user_name/events",
-    // "/:user_name/create",
-    // "/:user_name/profile",
+   // "/:user_name/home",
+   // "/:user_name/events",
+   // "/:user_name/create",
     // "/:user_name/profile",
   ],
 };

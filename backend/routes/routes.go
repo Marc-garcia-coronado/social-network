@@ -39,7 +39,7 @@ func (s *APIServer) Run() {
 	router.Post("/api/login", utils.MakeHTTPHandleFunc(s.handleLogin))
 	router.Get("/api/topics", utils.MakeHTTPHandleFunc(s.handleGetAllTopics))
 	router.Get("/api/events/closest", utils.MakeHTTPHandleFunc(s.handleGetClosestEvents))
-
+	router.Get("/api/validate-token", utils.MakeHTTPHandleFunc(s.handleValidateToken))
 	// User - WebSocket route
 	router.Get("/wss", s.handleWebSocket)
 
