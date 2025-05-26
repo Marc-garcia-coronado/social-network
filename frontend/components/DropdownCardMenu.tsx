@@ -168,7 +168,7 @@ export function DropdownCardMenu({
 
               <div className="space-y-1">
                 <Label htmlFor="topics">Selecciona el tema para el post:</Label>
-                <ul className="list-none flex gap-4" id="topics">
+                <ul className="list-none flex gap-4 overflow-x-scroll" id="topics">
                   {isLoading ? (
                     <p>Loading...</p>
                   ) : isError ? (
