@@ -45,6 +45,23 @@ func (s *APIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
 		"user": loggedUser,
 	})
 }
+
+func (s *APIServer) handleValidateToken(w http.ResponseWriter, r *http.Request) error {
+    token := r.Header.Get("Authorization")
+    if token == "" {
+        http.Error(w, "Missing token", http.StatusUnauthorized)
+        return nil
+    }
+
+    // Validar el token usando el middleware JWT
+    _, err := middleware.ValidateJWT(token)
+    if err != nil {
+        return utils.WriteJSON(w, http.StatusOK, map[string]bool{"valid": false})
+    }
+
+    return utils.WriteJSON(w, http.StatusOK, map[string]bool{"valid": true})
+}
+
 func (s *APIServer) handleLogout(w http.ResponseWriter, r *http.Request) error {
     http.SetCookie(w, &http.Cookie{
         Name:     "token",

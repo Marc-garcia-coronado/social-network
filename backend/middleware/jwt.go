@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"context"
 	"net/http"
 	"os"
@@ -83,4 +84,17 @@ func JWTMiddleware(next http.Handler) http.Handler {
 		ctx = context.WithValue(ctx, UserRoleKey, userRole)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+func ValidateJWT(tokenString string) (*jwt.Token, error) {
+    secret := os.Getenv("JWT_SECRET")
+    token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+            return nil, errors.New("unexpected signing method")
+        }
+        return []byte(secret), nil
+    })
+    if err != nil || !token.Valid {
+        return nil, err
+    }
+    return token, nil
 }
