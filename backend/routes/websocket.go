@@ -16,7 +16,7 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		origin := r.Header.Get("Origin")
 		// Permitir solo desde tu frontend (cambia al dominio que uses)
-		return origin == "http://localhost:3001" || origin == "https://https://flexin-frontend-production.up.railway.app"
+		return origin == "http://localhost:3001" || origin == "https://flexin-frontend-production.up.railway.app"
 	},
 }
 
