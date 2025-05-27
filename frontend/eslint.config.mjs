@@ -13,7 +13,7 @@ const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
-      indent: ['error', 2],
+      //indent: ['error', 2],
       'react/jsx-indent': ['error', 2],
 
       // 🚫 Desactivar errores de optimización
