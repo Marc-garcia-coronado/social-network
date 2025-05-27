@@ -35,10 +35,6 @@ export default function Home() {
         <BentoGridSecondComponent />
       </section>
       <section className="flex flex-col gap-10 my-20">
-        <h2 className="text-5xl font-extrabold text-center w-4/6 mx-auto">Vista Previa de la feed... TODO</h2>
-        {/* TODO: Hacer seccion de vista previa de la feed */}
-      </section>
-      <section className="flex flex-col gap-10 my-20">
         <h2 className="text-5xl font-extrabold text-center w-4/6 mx-auto">
           No solo se habla de deporte. ¡Se vive!
         </h2>
