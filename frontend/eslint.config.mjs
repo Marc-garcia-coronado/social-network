@@ -15,10 +15,11 @@ const eslintConfig = [
     rules: {
       indent: ['error', 2],
       'react/jsx-indent': ['error', 2],
-      'react/jsx-indent-props': ['error', 2],
 
       // 🚫 Desactivar errores de optimización
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      'react/jsx-indent-props': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       // Agrega más reglas que quieras ignorar aquí
