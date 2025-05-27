@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, ReactNode } from "react";
+import React, { useEffect, useState, ReactNode } from "react";
 import { User } from "@/lib/types";
 import SearchBar from "@/components/SearchBar";
 import { useRouter } from "next/navigation";
@@ -10,13 +10,16 @@ import Image from "next/image";
 
 const fetchConversations = async (): Promise<User[]> => {
   try {
-    const response = await fetch(`https://social-network-production.up.railway.app/api/messages`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `https://social-network-production.up.railway.app/api/messages`,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Error fetching conversations");
@@ -260,7 +263,11 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
             ))}
         </ul>
       </aside>
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        {React.cloneElement(children as React.ReactElement, {
+          setNumberNotReadedMsg,
+        })}
+      </main>
     </div>
   );
 }
