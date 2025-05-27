@@ -12,6 +12,7 @@ import {
   IconSwimming,
   IconUser,
 } from "@tabler/icons-react";
+import Image from "next/image";
 
 export function BentoGridSecondComponent() {
   return (
@@ -190,7 +191,7 @@ const SkeletonFour = () => {
         className="h-full w-1/3 rounded-2xl bg-white p-4 dark:bg-black dark:border-white/[0.1] border border-neutral-200 flex flex-col items-center justify-center"
       >
         <img
-          src="https://pbs.twimg.com/profile_images/1417752099488636931/cs2R59eW_400x400.jpg"
+          src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="avatar"
           height="100"
           width="100"
@@ -198,18 +199,18 @@ const SkeletonFour = () => {
           loading="lazy"
         />
         <p className="sm:text-sm text-xs text-center font-semibold text-neutral-500 mt-4">
-          Marc Garcia
+          Martí Serra
         </p>
         <p className="border border-red-500 bg-red-100 dark:bg-red-900/20 text-red-600 text-xs rounded-full px-2 py-0.5 mt-4">
           Golf
         </p>
       </motion.div>
       <motion.div className="h-full relative z-20 w-1/3 rounded-2xl bg-white p-4 dark:bg-black dark:border-white/[0.1] border border-neutral-200 flex flex-col items-center justify-center">
-        <img
-          src="https://pbs.twimg.com/profile_images/1417752099488636931/cs2R59eW_400x400.jpg"
+      <Image
+          src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="avatar"
-          height="100"
-          width="100"
+          height={100}
+          width={100}
           className="rounded-full h-10 w-10"
           loading="lazy"
         />
@@ -225,7 +226,7 @@ const SkeletonFour = () => {
         className="h-full w-1/3 rounded-2xl bg-white p-4 dark:bg-black dark:border-white/[0.1] border border-neutral-200 flex flex-col items-center justify-center"
       >
         <img
-          src="https://pbs.twimg.com/profile_images/1417752099488636931/cs2R59eW_400x400.jpg"
+          src="https://images.unsplash.com/photo-1586299485759-f62264d6b63f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="avatar"
           height="100"
           width="100"
@@ -233,7 +234,7 @@ const SkeletonFour = () => {
           loading="lazy"
         />
         <p className="sm:text-sm text-xs text-center font-semibold text-neutral-500 mt-4">
-          Alejandro Martínez
+          Sandra Jimenez
         </p>
         <p className="border border-orange-500 bg-orange-100 dark:bg-orange-900/20 text-orange-600 text-xs rounded-full px-2 py-0.5 mt-4">
           Football
@@ -278,11 +279,11 @@ const SkeletonFive = () => {
         variants={variants}
         className="flex flex-row rounded-2xl border border-neutral-100 dark:border-white/[0.2] p-2  items-center space-x-2 bg-white dark:bg-black"
       >
-        <img
-          src="https://pbs.twimg.com/profile_images/1417752099488636931/cs2R59eW_400x400.jpg"
+        <Image
+          src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="avatar"
-          height="100"
-          width="100"
+          height={100}
+          width={100}
           className="rounded-full h-10 w-10"
           loading="lazy"
         />
