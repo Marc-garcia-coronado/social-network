@@ -8,7 +8,6 @@ import { useUserContext } from "@/contexts/UserContext";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import {
-  MessagesProvider,
   useMessagesContext,
 } from "@/contexts/MessagesContext";
 
@@ -156,118 +155,116 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-screen">
-      <MessagesProvider>
-        <aside className="min-w-96 border-r flex flex-col">
-          <h1 className="ps-4 mb-4 text-3xl mt-4">Chats</h1>
-          <div className="relative">
-            <SearchBar
-              value={search}
-              placeholder="Buscar usuario..."
-              onChange={(val: string) => setSearch(val)}
-              className="px-4"
-            />
-            {/* Lista de resultados */}
-            {filteredUsers.length > 0 ? (
-              <ul className="mt-4 bg-white border shadow divide-y divide-gray-200 absolute top-full left-0 w-full">
-                {filteredUsers.map((searchedUser) => (
-                  <li
-                    key={searchedUser.id}
-                    className="flex items-center p-4 space-x-4 cursor-pointer"
-                    onClick={() => {
-                      setSearch("");
-                      router.push(
-                        `/${user?.user_name}/messages/${searchedUser.id}`
-                      );
-                    }}
-                  >
-                    <Image
-                      src={searchedUser.profile_picture || "/teddy.webp"}
-                      alt={`${searchedUser.full_name}'s avatar`}
-                      width={24}
-                      height={24}
-                      className="w-10 h-10 rounded-full"
-                    />
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {searchedUser.full_name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        @{searchedUser.user_name}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              showNoResults && (
-                <p className="self-center text-red-500">
-                  No hay resultados con &apos;{search}&apos;
-                </p>
-              )
-            )}
-          </div>
-          {isLoading && (
-            <p className="text-gray-400">Cargando tus conversaciones...</p>
-          )}
-          {isError && <p className="text-red-500">Ha ocurrido un error</p>}
-          <ul className="mt-4 border-y divide-y divide-gray-200 overflow-y-auto ">
-            {Array.isArray(conversations) &&
-              conversations.length > 0 &&
-              conversations.map((conversation: User) => (
-                <div
-                  key={conversation.id}
-                  className="flex justify-between items-center cursor-pointer p-4 w-full"
+      <aside className="min-w-96 border-r flex flex-col">
+        <h1 className="ps-4 mb-4 text-3xl mt-4">Chats</h1>
+        <div className="relative">
+          <SearchBar
+            value={search}
+            placeholder="Buscar usuario..."
+            onChange={(val: string) => setSearch(val)}
+            className="px-4"
+          />
+          {/* Lista de resultados */}
+          {filteredUsers.length > 0 ? (
+            <ul className="mt-4 bg-white border shadow divide-y divide-gray-200 absolute top-full left-0 w-full">
+              {filteredUsers.map((searchedUser) => (
+                <li
+                  key={searchedUser.id}
+                  className="flex items-center p-4 space-x-4 cursor-pointer"
                   onClick={() => {
+                    setSearch("");
                     router.push(
-                      `/${user?.user_name}/messages/${conversation.id}`
+                      `/${user?.user_name}/messages/${searchedUser.id}`
                     );
-                    fetch(
-                      `https://social-network-production.up.railway.app/api/messages/${conversation.id}/read`,
-                      {
-                        method: "PATCH",
-                        credentials: "include",
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                      }
-                    ).then((res) => {
-                      if (res.ok) {
-                        setNumberNotReadedMsg((prev) => ({
-                          ...prev,
-                          [conversation.id]: 0,
-                        }));
-                      }
-                    });
                   }}
                 >
-                  <div className="flex items-center gap-4">
-                    <Image
-                      src={
-                        conversation.profile_picture
-                          ? conversation.profile_picture
-                          : "/teddy.webp"
-                      }
-                      alt={`imagen de perfil de ` + conversation.user_name}
-                      width={24}
-                      height={24}
-                      className="w-14 h-14 rounded-full"
-                    />
-                    <p>{conversation.user_name}</p>
+                  <Image
+                    src={searchedUser.profile_picture || "/teddy.webp"}
+                    alt={`${searchedUser.full_name}'s avatar`}
+                    width={24}
+                    height={24}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {searchedUser.full_name}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      @{searchedUser.user_name}
+                    </p>
                   </div>
-
-                  {numberNotReadedMsg[conversation.id] > 0 && (
-                    <div className="flex rounded-full bg-lime-600 w-6 h-6 items-center justify-center text-center">
-                      <p className="text-sm text-white">
-                        {numberNotReadedMsg[conversation.id]}
-                      </p>
-                    </div>
-                  )}
-                </div>
+                </li>
               ))}
-          </ul>
-        </aside>
-        <main className="flex-1">{children}</main>
-      </MessagesProvider>
+            </ul>
+          ) : (
+            showNoResults && (
+              <p className="self-center text-red-500">
+                No hay resultados con &apos;{search}&apos;
+              </p>
+            )
+          )}
+        </div>
+        {isLoading && (
+          <p className="text-gray-400">Cargando tus conversaciones...</p>
+        )}
+        {isError && <p className="text-red-500">Ha ocurrido un error</p>}
+        <ul className="mt-4 border-y divide-y divide-gray-200 overflow-y-auto ">
+          {Array.isArray(conversations) &&
+            conversations.length > 0 &&
+            conversations.map((conversation: User) => (
+              <div
+                key={conversation.id}
+                className="flex justify-between items-center cursor-pointer p-4 w-full"
+                onClick={() => {
+                  router.push(
+                    `/${user?.user_name}/messages/${conversation.id}`
+                  );
+                  fetch(
+                    `https://social-network-production.up.railway.app/api/messages/${conversation.id}/read`,
+                    {
+                      method: "PATCH",
+                      credentials: "include",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                    }
+                  ).then((res) => {
+                    if (res.ok) {
+                      setNumberNotReadedMsg((prev) => ({
+                        ...prev,
+                        [conversation.id]: 0,
+                      }));
+                    }
+                  });
+                }}
+              >
+                <div className="flex items-center gap-4">
+                  <Image
+                    src={
+                      conversation.profile_picture
+                        ? conversation.profile_picture
+                        : "/teddy.webp"
+                    }
+                    alt={`imagen de perfil de ` + conversation.user_name}
+                    width={24}
+                    height={24}
+                    className="w-14 h-14 rounded-full"
+                  />
+                  <p>{conversation.user_name}</p>
+                </div>
+
+                {numberNotReadedMsg[conversation.id] > 0 && (
+                  <div className="flex rounded-full bg-lime-600 w-6 h-6 items-center justify-center text-center">
+                    <p className="text-sm text-white">
+                      {numberNotReadedMsg[conversation.id]}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
+        </ul>
+      </aside>
+      <main className="flex-1">{children}</main>
     </div>
   );
 }
