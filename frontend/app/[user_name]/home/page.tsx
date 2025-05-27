@@ -606,7 +606,7 @@ export default function Home() {
                 ${
                   selectedTopicId === topic.id
                     ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
-                    : "bg-gradient-to-r from-white via-white to-gray-100 text-white border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"
+                    : "bg-gradient-to-r from-white via-white to-gray-100 border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"
                 }
               `}
               style={{
