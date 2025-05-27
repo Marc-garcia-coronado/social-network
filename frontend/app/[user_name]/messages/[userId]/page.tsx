@@ -9,7 +9,7 @@ import { Message, User } from "@/lib/types";
 import { Send } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 export default function Page({
   setNumberNotReadedMsg,
