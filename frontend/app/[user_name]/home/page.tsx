@@ -600,7 +600,7 @@ export default function Home() {
             <li
               key={topic.id}
               className={`
-                transition-all duration-200
+                text-black transition-all duration-200
                 px-5 py-2 rounded-full text-sm font-semibold shadow-lg cursor-pointer border-2
                 flex items-center gap-2
                 ${
