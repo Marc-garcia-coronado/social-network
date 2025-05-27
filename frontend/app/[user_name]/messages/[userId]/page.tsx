@@ -11,7 +11,13 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-export default function Page() {
+export default function Page({
+  setNumberNotReadedMsg,
+}: {
+  setNumberNotReadedMsg: React.Dispatch<
+    React.SetStateAction<Record<number, number>>
+  >;
+}) {
   const { userId } = useParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +53,23 @@ export default function Page() {
   }, [messages]);
 
   useEffect(() => {
+    fetch(
+      `https://social-network-production.up.railway.app/api/messages/${userId}/read`,
+      {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    ).then((res) => {
+      if (res.ok) {
+        setNumberNotReadedMsg((prev) => ({
+          ...prev,
+          [Number(userId)]: 0,
+        }));
+      }
+    });
     const fetchMessages = async () => {
       const response = await fetch(
         `https://social-network-production.up.railway.app/api/messages/${userId}`,
@@ -62,8 +85,6 @@ export default function Page() {
       setMessages(Array.isArray(data.messages) ? data.messages.reverse() : []);
     };
     fetchMessages();
-
-    
   }, [userId]);
 
   const talkingTo: User | null = useMemo(() => {
