@@ -1,5 +1,4 @@
 import { motion } from "motion/react";
-import React from "react";
 import { BentoGrid, BentoGridItem } from "./ui/bento-grid";
 import {
   IconBallBasketball,
@@ -124,7 +123,10 @@ const SkeletonThree = () => {
           Natación
         </p>
       </motion.div>
-      <motion.div variants={second} className="h-fit relative z-20 w-1/6 rounded-2xl bg-white p-4 dark:bg-black dark:border-white/[0.1] border border-neutral-200 flex flex-col items-center justify-center">
+      <motion.div
+        variants={second}
+        className="h-fit relative z-20 w-1/6 rounded-2xl bg-white p-4 dark:bg-black dark:border-white/[0.1] border border-neutral-200 flex flex-col items-center justify-center"
+      >
         <IconBike className="h-10 w-10" />
         <p className="border border-emerald-500 bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 text-xs rounded-full px-2 py-0.5 mt-4">
           Ciclismo
@@ -148,13 +150,15 @@ const SkeletonThree = () => {
           Atletismo
         </p>
       </motion.div>
-      <motion.div variants={first} className="h-fit relative z-20 w-1/6 rounded-2xl bg-white p-4 dark:bg-black dark:border-white/[0.1] border border-neutral-200 flex flex-col items-center justify-center">
+      <motion.div
+        variants={first}
+        className="h-fit relative z-20 w-1/6 rounded-2xl bg-white p-4 dark:bg-black dark:border-white/[0.1] border border-neutral-200 flex flex-col items-center justify-center"
+      >
         <IconGymnastics className="h-10 w-10" />
         <p className="border border-rose-500 bg-rose-100 dark:bg-rose-900/20 text-rose-600 text-xs rounded-full px-2 py-0.5 mt-4">
           Gimnasia
         </p>
       </motion.div>
-
     </motion.div>
   );
 };
@@ -190,11 +194,11 @@ const SkeletonFour = () => {
         variants={first}
         className="h-full w-1/3 rounded-2xl bg-white p-4 dark:bg-black dark:border-white/[0.1] border border-neutral-200 flex flex-col items-center justify-center"
       >
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="avatar"
-          height="100"
-          width="100"
+          height={100}
+          width={100}
           className="rounded-full h-10 w-10"
           loading="lazy"
         />
@@ -206,7 +210,7 @@ const SkeletonFour = () => {
         </p>
       </motion.div>
       <motion.div className="h-full relative z-20 w-1/3 rounded-2xl bg-white p-4 dark:bg-black dark:border-white/[0.1] border border-neutral-200 flex flex-col items-center justify-center">
-      <Image
+        <Image
           src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="avatar"
           height={100}
@@ -225,11 +229,11 @@ const SkeletonFour = () => {
         variants={second}
         className="h-full w-1/3 rounded-2xl bg-white p-4 dark:bg-black dark:border-white/[0.1] border border-neutral-200 flex flex-col items-center justify-center"
       >
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1586299485759-f62264d6b63f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="avatar"
-          height="100"
-          width="100"
+          height={100}
+          width={100}
           className="rounded-full h-10 w-10"
           loading="lazy"
         />
