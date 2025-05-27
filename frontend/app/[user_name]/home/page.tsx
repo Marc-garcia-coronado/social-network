@@ -97,18 +97,24 @@ export default function Home() {
   const fetchPostStats = async (postID: number) => {
     try {
       const [likesResponse, commentsResponse] = await Promise.all([
-        fetch(`https://social-network-production.up.railway.app/api/likes/posts/${postID}/count`, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }),
-        fetch(`https://social-network-production.up.railway.app/api/posts/${postID}/comments/count`, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }),
+        fetch(
+          `https://social-network-production.up.railway.app/api/likes/posts/${postID}/count`,
+          {
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        ),
+        fetch(
+          `https://social-network-production.up.railway.app/api/posts/${postID}/comments/count`,
+          {
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        ),
       ]);
 
       if (!likesResponse.ok || !commentsResponse.ok) {
@@ -192,12 +198,12 @@ export default function Home() {
       // Convertimos la lista de post IDs en un mapa para un acceso más rápido
       const likedPostsMap = likedPostsData
         ? likedPostsData.reduce(
-          (acc: Record<number, boolean>, postID: number) => {
-            acc[postID] = true;
-            return acc;
-          },
-          {}
-        )
+            (acc: Record<number, boolean>, postID: number) => {
+              acc[postID] = true;
+              return acc;
+            },
+            {}
+          )
         : [];
 
       setLikedPosts(likedPostsMap);
@@ -588,7 +594,7 @@ export default function Home() {
         </div>
       </div>
 
-      <ul className="flex flex-wrap justify-center mb-3 gap-2 px-4 py-2">
+      <ul className="flex overflow-x-scroll justify-center mb-3 gap-2 px-4 py-2">
         {userData ? (
           userData.map((topic: any) => (
             <li
@@ -598,10 +604,10 @@ export default function Home() {
                 px-5 py-2 rounded-full text-sm font-semibold shadow-lg cursor-pointer border-2
                 flex items-center gap-2
                 ${
-            selectedTopicId === topic.id
-              ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
-              : "bg-gradient-to-r from-white via-white to-gray-100 text-gray-700 border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"
-            }
+                  selectedTopicId === topic.id
+                    ? "bg-gradient-to-r from-lime-300 via-lime-400 to-lime-500 text-black border-lime-600 scale-105 ring-2 ring-lime-400"
+                    : "bg-gradient-to-r from-white via-white to-gray-100 text-white border-gray-200 hover:scale-105 hover:ring-2 hover:ring-gray-200"
+                }
               `}
               style={{
                 boxShadow:
@@ -620,7 +626,7 @@ export default function Home() {
                 style={{
                   background:
                     selectedTopicId === topic.id ? "#84cc16" : "#d1d5db",
-                }}  
+                }}
               ></span>
               {topic.name}
             </li>
