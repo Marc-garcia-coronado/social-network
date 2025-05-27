@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useMessagesContext } from "@/contexts/MessagesContext";
 import { useUserContext } from "@/contexts/UserContext";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import { Message, User } from "@/lib/types";
@@ -11,17 +12,12 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-export default function Page({
-  setNumberNotReadedMsg,
-}: {
-  setNumberNotReadedMsg: React.Dispatch<
-    React.SetStateAction<Record<number, number>>
-  >;
-}) {
+export default function Page() {
   const { userId } = useParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useUserContext();
+  const { setNumberNotReadedMsg } = useMessagesContext();
 
   // Aquí recibimos mensajes entrantes y los añadimos a la lista
   const { sendMessage, senderId } = useChatSocket((msg) => {
