@@ -93,11 +93,12 @@ export function HeroSectionOne() {
         >
           <div className="w-full overflow-hidden rounded-xl border border-gray-300 dark:border-gray-700">
             <Image
-              src="https://assets.aceternity.com/pro/aceternity-landing.webp"
+              src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Landing page preview"
               className="aspect-[16/9] h-auto w-full object-cover"
               height={1000}
               width={1000}
+              loading="eager"
             />
           </div>
         </motion.div>
