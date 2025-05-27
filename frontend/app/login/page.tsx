@@ -72,7 +72,7 @@ export default function Login() {
           grid grid-cols-3
           items-center
           gap-4
-          px-4 py-4 mt-10
+          px-4 py-4 md:mt-10
           w-full max-w-5xl mx-auto
         "
       >
