@@ -29,6 +29,7 @@ export function BentoGridSecondComponent() {
     </BentoGrid>
   );
 }
+
 const SkeletonOne = () => {
   const variants = {
     initial: {
