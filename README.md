@@ -113,5 +113,3 @@ La app estará disponible en http://localhost:3000
 ## 📄 Documentación de la API
 
 🔗 [https://documenter.getpostman.com/view/19610185/2sB2qcC1Ti](https://documenter.getpostman.com/view/19610185/2sB2qcC1Ti)
-
-
