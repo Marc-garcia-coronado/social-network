@@ -30,6 +30,7 @@ import { CalendarDemo } from "./CalendarComponent";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadImage } from "@/hooks/useUploadImage";
+import SelectComponent from "./SelectComponentTopics";
 
 type EventComponentProps = {
   event: Event;
@@ -161,6 +162,8 @@ export default function EventComponent({
 }: EventComponentProps) {
   const [isApuntado, setIsApuntado] = useState<boolean>(apuntado);
   const [openEdit, setOpenEdit] = useState(false);
+  const [topic, setTopic] = useState("");
+  const [userTopics, setuserTopics] = useState([]);
   const { user } = useUserContext();
   const {
     register,
@@ -457,32 +460,12 @@ export default function EventComponent({
                   <Label htmlFor="topics">
                     Selecciona el tema para el evento:
                   </Label>
-                  <ul
-                    className="list-none flex gap-4 overflow-x-scroll"
-                    id="topics"
-                  >
-                    {topics?.map((topic: Topic) => (
-                      <li
-                        key={topic.id}
-                        onClick={() =>
-                          setValue(
-                            "topicID",
-                            watch("topicID") === topic.id ? null : topic.id
-                          )
-                        }
-                      >
-                        <Badge
-                          className={`${
-                            watch("topicID") === topic.id
-                              ? "bg-lime-400 hover:bg-lime-300"
-                              : ""
-                          } cursor-pointer py-2 px-4`}
-                        >
-                          {topic.name}
-                        </Badge>
-                      </li>
-                    ))}
-                  </ul>
+                  <SelectComponent
+                    topics={userTopics}
+                    value={topic}
+                    onChange={(val: string) => setTopic(val)}
+                    className="w-full max-w-xs md:w-[170px]"
+                  />
                   {errors.topicID && (
                     <p className="text-red-600">{errors.topicID.message}</p>
                   )}
