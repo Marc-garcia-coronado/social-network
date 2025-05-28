@@ -410,6 +410,26 @@ export default function Home() {
     fetchData();
   }, [homeData]);
 
+  const fetchData = async () => {
+    if (homeData?.pages) {
+      // Fetch stats and creator info for all posts
+      homeData.pages.forEach((page) => {
+        page.posts.forEach((post: any) => {
+          fetchPostStats(post.id);
+        });
+      });
+  
+      // Fetch user likes
+      await fetchUserLikes();
+      await fetchUserCommentLikes();
+    }
+  };
+  
+  // Llama a fetchData cuando homeData cambie
+  useEffect(() => {
+    fetchData();
+  }, [homeData]);
+
   // Función para buscar usuarios en el backend
   const fetchFilteredUsers = async (term: string) => {
     try {
@@ -655,7 +675,7 @@ export default function Home() {
                 likedComments={likedComments}
                 addComment={addComment}
                 currentUser={userData}
-                refreshPosts={() => fetchPosts({ pageParam: 1 })}
+                refreshPosts={fetchData}
                 commentsCount={postStats[post.id]?.comments ?? 0}
               />
             ))
