@@ -655,7 +655,7 @@ export default function Home() {
                 likedComments={likedComments}
                 addComment={addComment}
                 currentUser={userData}
-                refreshPosts={fetchNextPage}
+                refreshPosts={() => fetchPosts({ pageParam: 1 })}
                 commentsCount={postStats[post.id]?.comments ?? 0}
               />
             ))
