@@ -85,9 +85,9 @@ export function DropdownCardMenu({
       topic_id: postTopicId || null,
     },
   });
-  const [formValues, setFormValues] = useState<{ [key: string]: any }>({
-    topic_id: postTopicId || null,
-  });
+  // const [formValues, setFormValues] = useState<{ [key: string]: any }>({
+  //   topic_id: postTopicId || null,
+  // });
 
   const savePostChanges = async (
     postId: string,
