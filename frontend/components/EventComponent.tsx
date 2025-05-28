@@ -461,7 +461,7 @@ export default function EventComponent({
                   </Label>
                   <SelectComponent
                     topics={topics}
-                    value={selectedTopic.toString()}
+                    value={selectedTopic.toString() ?? ""}
                     onChange={(val: string) => setValue("topicID", Number(val))}
                     className="w-full max-w-xs md:w-[170px]"
                   />
