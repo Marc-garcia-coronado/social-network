@@ -95,25 +95,25 @@ export default function Page() {
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="flex items-center gap-4 sticky top-0 z-10 px-4 py-6 border-b bg-white">
+      <header className="flex items-center gap-4 sticky top-0 z-10 px-4 py-6 border-b">
         <Image
           src={talkingTo?.profile_picture ?? "/teddy.webp"}
           alt={`imagen de perfil de ${talkingTo?.user_name}`}
           width={1000}
           height={1000}
-          className="w-12 h-12 rounded-full"
+          className="w-14 h-14 rounded-full"
         />
-        <p className="text-lg md:text-2xl font-normal">{talkingTo?.user_name}</p>
+        <p className="text-2xl font-normal">{talkingTo?.user_name}</p>
       </header>
 
       <div className="flex flex-col gap-2 px-4 flex-1 overflow-y-auto">
-        {messages.length === 0 && <p className="text-center text-gray-500">No hay mensajes todavía</p>}
+        {messages.length === 0 && <p>No hay mensajes todavía</p>}
         {Array.isArray(messages) &&
           messages.length > 0 &&
           messages?.map((msg) => (
             <Badge
               key={msg.id}
-              className={`w-fit max-w-full py-2 flex flex-col rounded-xl ${
+              className={`w-fit max-w-96 py-2 flex flex-col rounded-xl ${
                 msg.sender.id === user?.id
                   ? "self-end items-end"
                   : "items-start"
@@ -121,19 +121,21 @@ export default function Page() {
             >
               <p className="text-sm">{msg.content}</p>
               <p className="text-xs text-gray-300 dark:text-gray-500">
-                {new Date(msg.created_at).toLocaleTimeString()}
+                {new Date(msg.created_at).getHours()}:
+                {new Date(msg.created_at).getMinutes() > 10
+                  ? new Date(msg.created_at).getMinutes()
+                  : `0${new Date(msg.created_at).getMinutes()}`}
               </p>
             </Badge>
           ))}
         <div ref={messagesEndRef} />
       </div>
 
-      <footer className="sticky bottom-0 pb-4 flex gap-2 px-4 bg-white">
+      <footer className="sticky bottom-0 pb-24 flex mt-4 gap-2 px-4">
         <Input
           ref={inputRef}
           type="text"
           placeholder="Escribe un mensaje..."
-          className="flex-1"
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
         />
 

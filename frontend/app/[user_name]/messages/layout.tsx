@@ -40,6 +40,7 @@ const fetchConversations = async (): Promise<User[]> => {
 export default function MessagesLayout({ children }: { children: ReactNode }) {
   const [search, setSearch] = useState<string>("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [showNoResults, setShowNoResults] = useState<boolean>(false);
   const { numberNotReadedMsg, setNumberNotReadedMsg } = useMessagesContext();
   const router = useRouter();
   const { user } = useUserContext();
@@ -74,6 +75,7 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
   // Función para buscar usuarios en el backend
   const fetchFilteredUsers = async (term: string) => {
     try {
+      setShowNoResults(false); // Ocultar mensaje mientras se busca
       const response = await fetch(
         `https://social-network-production.up.railway.app/api/users/search?query=${term}&limit=10`,
         {
@@ -94,22 +96,28 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
       // Validar que data.users exista y sea un array
       if (!data || !Array.isArray(data.users)) {
         setFilteredUsers([]);
+        setShowNoResults(true);
         return;
       }
       // Mostrar mensaje de "No se encontraron usuarios" después de un retraso si no hay resultados
       if (data.users.length === 0) {
         setTimeout(() => {
+          setShowNoResults(true);
         }, 500); // Retraso de 500ms
       } else {
+        setShowNoResults(false);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
       setFilteredUsers([]);
+      setShowNoResults(true);
     }
   };
 
   const {
     data: conversations,
+    isLoading,
+    isError,
   } = useQuery({
     queryKey: ["conversations"],
     queryFn: () => fetchConversations(),
@@ -119,6 +127,7 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (search.trim() === "") {
       setFilteredUsers([]);
+      setShowNoResults(false); // Ocultar mensaje si no hay texto
     } else {
       const delayDebounceFn = setTimeout(() => {
         fetchFilteredUsers(search);
@@ -146,17 +155,17 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-screen">
-      <aside className="w-full md:min-w-96 md:border-r flex flex-col">
-        <h1 className="ps-4 mb-4 text-2xl md:text-3xl mt-4">Chats</h1>
-        <div className="relative px-4">
+      <aside className="min-w-96 border-r flex flex-col">
+        <h1 className="ps-4 mb-4 text-3xl mt-4">Chats</h1>
+        <div className="relative">
           <SearchBar
             value={search}
             placeholder="Buscar usuario..."
             onChange={(val: string) => setSearch(val)}
-            className="w-full"
+            className="px-4"
           />
           {/* Lista de resultados */}
-          {filteredUsers.length > 0 && (
+          {filteredUsers.length > 0 ? (
             <ul className="mt-4 bg-white border shadow divide-y divide-gray-200 absolute top-full left-0 w-full">
               {filteredUsers.map((searchedUser) => (
                 <li
@@ -187,32 +196,63 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
                 </li>
               ))}
             </ul>
+          ) : (
+            showNoResults && (
+              <p className="self-center text-red-500">
+                No hay resultados con &apos;{search}&apos;
+              </p>
+            )
           )}
         </div>
-        <ul className="mt-4 border-y divide-y divide-gray-200 overflow-y-auto">
+        {isLoading && (
+          <p className="text-gray-400">Cargando tus conversaciones...</p>
+        )}
+        {isError && <p className="text-red-500">Ha ocurrido un error</p>}
+        <ul className="mt-4 border-y divide-y divide-gray-200 overflow-y-auto ">
           {Array.isArray(conversations) &&
+            conversations.length > 0 &&
             conversations.map((conversation: User) => (
               <div
                 key={conversation.id}
                 className="flex justify-between items-center cursor-pointer p-4 w-full"
-                onClick={() =>
+                onClick={() => {
                   router.push(
                     `/${user?.user_name}/messages/${conversation.id}`
-                  )
-                }
+                  );
+                  fetch(
+                    `https://social-network-production.up.railway.app/api/messages/${conversation.id}/read`,
+                    {
+                      method: "PATCH",
+                      credentials: "include",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                    }
+                  ).then((res) => {
+                    if (res.ok) {
+                      setNumberNotReadedMsg((prev) => ({
+                        ...prev,
+                        [conversation.id]: 0,
+                      }));
+                    }
+                  });
+                }}
               >
                 <div className="flex items-center gap-4">
                   <Image
                     src={
-                      conversation.profile_picture || "/teddy.webp"
+                      conversation.profile_picture
+                        ? conversation.profile_picture
+                        : "/teddy.webp"
                     }
-                    alt={`imagen de perfil de ${conversation.user_name}`}
+                    alt={`imagen de perfil de ` + conversation.user_name}
                     width={1000}
                     height={1000}
                     className="w-14 h-14 rounded-full"
                   />
                   <p>{conversation.user_name}</p>
                 </div>
+
                 {numberNotReadedMsg[conversation.id] > 0 && (
                   <div className="flex rounded-full bg-lime-600 w-6 h-6 items-center justify-center text-center">
                     <p className="text-sm text-white">
