@@ -302,8 +302,8 @@ export default function EventComponent({
       <Badge className="w-fit mt-5 mx-5">{event?.topic.name}</Badge>
       <div className="px-5 py-1 flex flex-col flex-1">
         <h2 className="capitalize font-bold my-3">{event?.name}</h2>
-        <div className="flex gap-2 pt-1">
-          <Label htmlFor="desc">Descripción:</Label>
+        <div className="flex gap-2">
+          <Label htmlFor="desc" className="pt-1">Descripción:</Label>
           <p id="desc">{event?.description}</p>
         </div>
         <div className="flex gap-2 items-center">
