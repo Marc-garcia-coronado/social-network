@@ -44,7 +44,7 @@ const getTopicsFn = async (id: number) => {
 };
 
 const postSchema = z.object({
-  title: z.string().min(1, "Debe tener más de 1 carácter de longitud"),
+  title: z.string().min(1, "Debe tener más de 1 carácter de longitud").max(45, "Deben ser máximo 45 caracteres"),
   picture: z
     .any()
     .refine((file) => file instanceof File, {
@@ -61,9 +61,9 @@ const postSchema = z.object({
 });
 
 const eventSchema = z.object({
-  name: z.string().min(1, "Debe tener más de 1 carácter de longitud"),
-  description: z.string().optional(),
-  location: z.string().min(2, "Debe tener más de 2 carácteres de longitud"),
+  name: z.string().min(1, "Debe tener más de 1 carácter de longitud").max(30, "Deben ser máximo 30 caracteres"),
+  description: z.string().max(150, "Deben ser máximo 150 caracteres").optional(),
+  location: z.string().min(2, "Debe tener más de 2 carácteres de longitud").max(45, "Deben ser máximo 30 caracteres"),
   date: z.date(),
   picture: z
     .any()
