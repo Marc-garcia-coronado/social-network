@@ -1,13 +1,38 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"log"
+	"os"
+
+	"github.com/Marc-Garcia-Coronado/socialNetwork/routes"
+	"github.com/Marc-Garcia-Coronado/socialNetwork/storage"
+	"github.com/joho/godotenv"
+)
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run(":3001")
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
+	}
+	store, err := storage.NewPostgresStore()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer store.Db.Close()
+
+	if err := store.Init(); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Todas las tablas se han creado exitosamente!")
+
+	// Leer el puerto desde la variable de entorno o usar uno por defecto
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Por defecto en local
+	}
+
+	server := routes.NewAPIServer(":"+port, store)
+	server.Run()
 }
+
