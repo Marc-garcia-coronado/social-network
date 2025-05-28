@@ -88,7 +88,7 @@ const PostCard: React.FC<PostCardProps> = ({
           </button>
           <span>{postStats[post.id]?.likes ?? "Loading..."}</span>
         </div>
-        {post.user.id === user?.id && (
+        {(post.user.id === user?.id || user?.role === 'admin') && (
           <DropdownCardMenu
             postId={post.id}
             userId={post.user.id}
