@@ -135,6 +135,16 @@ export default function Home() {
       console.error(`Error fetching stats for post ${postID}:`, error);
     }
   };
+  const refreshPosts = async () => {
+    try {
+      const postsData = await fetchPosts({ pageParam: 1 });
+      // Aquí puedes actualizar el estado con los datos obtenidos
+      console.log("Posts refreshed:", postsData);
+    } catch (error) {
+      console.error("Error refreshing posts:", error);
+    }
+  };
+
   // Función para manejar el toggle de likes
   const toggleLike = async (postID: number) => {
     try {
@@ -410,26 +420,6 @@ export default function Home() {
     fetchData();
   }, [homeData]);
 
-  const fetchData = async () => {
-    if (homeData?.pages) {
-      // Fetch stats and creator info for all posts
-      homeData.pages.forEach((page) => {
-        page.posts.forEach((post: any) => {
-          fetchPostStats(post.id);
-        });
-      });
-  
-      // Fetch user likes
-      await fetchUserLikes();
-      await fetchUserCommentLikes();
-    }
-  };
-  
-  // Llama a fetchData cuando homeData cambie
-  useEffect(() => {
-    fetchData();
-  }, [homeData]);
-
   // Función para buscar usuarios en el backend
   const fetchFilteredUsers = async (term: string) => {
     try {
@@ -675,7 +665,7 @@ export default function Home() {
                 likedComments={likedComments}
                 addComment={addComment}
                 currentUser={userData}
-                refreshPosts={fetchData}
+                refreshPosts={refreshPosts}
                 commentsCount={postStats[post.id]?.comments ?? 0}
               />
             ))
