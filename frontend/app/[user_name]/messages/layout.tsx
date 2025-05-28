@@ -181,8 +181,8 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
                   <Image
                     src={searchedUser.profile_picture || "/teddy.webp"}
                     alt={`${searchedUser.full_name}'s avatar`}
-                    width={24}
-                    height={24}
+                    width={1000}
+                    height={1000}
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
@@ -246,8 +246,8 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
                         : "/teddy.webp"
                     }
                     alt={`imagen de perfil de ` + conversation.user_name}
-                    width={24}
-                    height={24}
+                    width={1000}
+                    height={1000}
                     className="w-14 h-14 rounded-full"
                   />
                   <p>{conversation.user_name}</p>

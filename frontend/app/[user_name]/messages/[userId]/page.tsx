@@ -99,8 +99,8 @@ export default function Page() {
         <Image
           src={talkingTo?.profile_picture ?? "/teddy.webp"}
           alt={`imagen de perfil de ${talkingTo?.user_name}`}
-          width={40}
-          height={40}
+          width={1000}
+          height={1000}
           className="w-14 h-14 rounded-full"
         />
         <p className="text-2xl font-normal">{talkingTo?.user_name}</p>

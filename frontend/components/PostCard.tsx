@@ -106,8 +106,8 @@ const PostCard: React.FC<PostCardProps> = ({
           <Image
             src={post.user.profile_picture || "/teddy.webp"}
             alt="User Avatar"
-            width={24}
-            height={24}
+            width={1000}
+            height={1000}
             className="w-10 h-10 rounded-full cursor-pointer"
             onClick={() => router.push(`/${post.user.user_name}/profile`)}
           />
