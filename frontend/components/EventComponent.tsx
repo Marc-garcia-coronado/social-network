@@ -316,7 +316,7 @@ export default function EventComponent({
         </div>
       </div>
       {event?.creator?.id === user?.id ? (
-        <div className="flex flex-col items-center gap-2 mb-5">
+        <div className="flex flex-col items-center gap-2 mb-3">
           <div className="flex gap-3">
             {/* Botón y diálogo para borrar evento */}
             <Dialog open={openDelete} onOpenChange={setOpenDelete}>
@@ -359,7 +359,7 @@ export default function EventComponent({
               <DialogTrigger asChild>
                 <Button
                   variant="default"
-                  className="w-fit mx-auto mb-5"
+                  className="w-fit mx-auto"
                   onClick={() => setOpenEdit(true)}
                 >
                   Editar
