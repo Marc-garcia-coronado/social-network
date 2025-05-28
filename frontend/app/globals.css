@@ -170,3 +170,11 @@ h6 {
   font-size: 18px;
   letter-spacing: 0.045em;
 }
+
+.textAbrev{
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
