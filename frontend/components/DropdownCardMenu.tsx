@@ -26,6 +26,7 @@ import { Ellipsis, SquarePen, Trash2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Topic } from "@/lib/types";
+import SelectComponentTopics from "./SelectComponentTopics";
 
 const getTopicsFn = async (id: number) => {
   const response = await fetch(
@@ -141,6 +142,8 @@ export function DropdownCardMenu({
     }
   };
 
+  const selectedTopic = watch("topicID");
+
   return (
     <>
       {/* Dialogo Editar */}
@@ -170,38 +173,12 @@ export function DropdownCardMenu({
 
               <div className="space-y-1">
                 <Label htmlFor="topics">Selecciona el tema para el post:</Label>
-                <ul
-                  className="list-none flex gap-4 overflow-x-scroll max-w-min"
-                  id="topics"
-                >
-                  {isLoading ? (
-                    <p>Loading...</p>
-                  ) : isError ? (
-                    <p className="text-red-600">{(error as Error)?.message}</p>
-                  ) : (
-                    data?.map((topic: Topic) => (
-                      <li
-                        key={topic.id}
-                        onClick={() =>
-                          setValue(
-                            "topic_id",
-                            watch("topic_id") === topic.id ? null : topic.id
-                          )
-                        }
-                      >
-                        <Badge
-                          className={`${
-                            watch("topic_id") === topic.id
-                              ? "bg-lime-400 hover:bg-lime-300"
-                              : ""
-                          } cursor-pointer py-2 px-4`}
-                        >
-                          {topic.name}
-                        </Badge>
-                      </li>
-                    ))
-                  )}
-                </ul>
+                <SelectComponentTopics
+                  topics={data?.topics}
+                  value={selectedTopic?.toString() ?? ""}
+                  onChange={(val: string) => setValue("topicID", Number(val))}
+                  className="w-full mb-2"
+                />
               </div>
             </div>
 
