@@ -105,7 +105,6 @@ const PostCard: React.FC<PostCardProps> = ({
         {/* User Info */}
         <div
           className="flex items-center space-x-2 cursor-pointer"
-          onClick={() => router.push(`/${post.user.user_name}/profile`)}
         >
           <Image
             src={post.user.profile_picture || "/teddy.webp"}
@@ -113,18 +112,19 @@ const PostCard: React.FC<PostCardProps> = ({
             width={24}
             height={24}
             className="w-10 h-10 rounded-full"
+            onClick={() => router.push(`/${post.user.user_name}/profile`)}
           />
           <div className="flex flex-col">
             <div>
-              <span className="text-sm font-medium textAbrev">{post.title}</span>
-              <span className="text-xs text-gray-300 font-extralight">
+              <span className="text-sm font-medium max-w-60 textAbrev">{post.title}</span>
+              <span className="text-xs text-gray-300 font-extralight w-6">
                 {
                   formatDistanceToNow(new Date(post.created_at), {
                     addSuffix: true,
                   })}
               </span>
             </div>
-            <span className="text-sm font-light">{post.user.user_name}</span>
+            <span className="text-sm font-light" onClick={() => router.push(`/${post.user.user_name}/profile`)}>{post.user.user_name}</span>
           </div>
         </div>
 
