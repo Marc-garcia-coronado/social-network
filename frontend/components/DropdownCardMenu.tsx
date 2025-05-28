@@ -33,10 +33,6 @@ const getTopicsFn = async (id: number) => {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${document.cookie.replace(
-          /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-          "$1"
-        )}`,
       },
     }
   );
@@ -47,7 +43,7 @@ const getTopicsFn = async (id: number) => {
     throw new Error(data.error || "No se ha podido obtener los topics");
   }
 
-  return data;
+  return data.topics;
 };
 
 export function DropdownCardMenu({
@@ -75,27 +71,18 @@ export function DropdownCardMenu({
   const {
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm({
     defaultValues: {
       title: postTitle || "",
       topic_id: postTopicId || null,
     },
   });
-  const [formValues, setFormValues] = useState<{ [key: string]: any }>({
-    topic_id: postTopicId || null,
-  });
-  function setValue(key: string, value: number | null): void {
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [key]: value,
-    }));
-  }
-  function watch(key: string): any {
-    return formValues[key];
-  }
+
   const savePostChanges = async (
     postId: string,
-    updatedData: { title?: string; topic_id?: string }
+    updatedData: { title?: string; topic_id?: number }
   ) => {
     try {
       const response = await fetch(
@@ -105,10 +92,6 @@ export function DropdownCardMenu({
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${document.cookie.replace(
-              /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
-              "$1"
-            )}`,
           },
           body: JSON.stringify(updatedData),
         }
@@ -140,7 +123,7 @@ export function DropdownCardMenu({
     }
   };
 
-  const selectedTopic = watch("topicID");
+  const selectedTopic = watch("topic_id");
 
   return (
     <>
@@ -172,9 +155,9 @@ export function DropdownCardMenu({
               <div className="space-y-1">
                 <Label htmlFor="topics">Selecciona el tema para el post:</Label>
                 <SelectComponentTopics
-                  topics={data?.topics}
+                  topics={data}
                   value={selectedTopic?.toString() ?? ""}
-                  onChange={(val: string) => setValue("topicID", Number(val))}
+                  onChange={(val: string) => setValue("topic_id", Number(val))}
                   className="w-full mb-2"
                 />
               </div>
@@ -213,10 +196,6 @@ export function DropdownCardMenu({
                       credentials: "include",
                       headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${document.cookie.replace(
-                          /(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/,
-                          "$1"
-                        )}`,
                       },
                     }
                   );
