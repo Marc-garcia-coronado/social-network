@@ -70,7 +70,7 @@ const PostCard: React.FC<PostCardProps> = ({
       )}
 
       {/* Likes Section */}
-      <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start bg-gradient-to-b from-black/50 to-transparent z-10">
+      <div className="absolute top-0 left-0 right-0 p-2 flex justify-between items-start bg-gradient-to-b from-black/50 to-transparent z-10">
         <div className="text-white text-sm font-medium flex items-center space-x-2">
           <button
             onClick={() => toggleLike(post.id)}
@@ -100,7 +100,7 @@ const PostCard: React.FC<PostCardProps> = ({
       </div>
 
       {/* Footer Section */}
-      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-4 flex items-center justify-between z-10">
+      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 flex items-center justify-between z-10">
         {/* User Info */}
         <div className="flex items-center space-x-2">
           <Image
