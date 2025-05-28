@@ -14,7 +14,7 @@ const eslintConfig = [
   {
     rules: {
       //indent: ['error', 2],
-      'react/jsx-indent': ['error', 2],
+      //'react/jsx-indent': ['error', 2],
 
       // 🚫 Desactivar errores de optimización
       '@typescript-eslint/no-explicit-any': 'off',
