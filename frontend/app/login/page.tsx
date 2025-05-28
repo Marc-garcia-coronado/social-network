@@ -43,14 +43,14 @@ const schemaLogin = z.object({
 
 const schemaRegister = z
   .object({
-    userName: z.string().min(2, "Debe tener más de 2 carácteres de longitud"),
-    fullName: z.string().min(2, "Debe tener más de 2 carácteres de longitud"),
+    userName: z.string().min(2, "Debe tener más de 2 carácteres de longitud").max(30, "Debe tener máximo 30 carácteres de longitud"),
+    fullName: z.string().min(2, "Debe tener más de 2 carácteres de longitud").max(30, "Debe tener máximo 30 carácteres de longitud"),
     email: z.string().email(),
     password: z.string().min(4, "Debe tener mínimo de 4 carácteres"),
     confirmPassword: z.string(),
     bio: z
       .string()
-      .max(500, "La biografía no debe superar 500 caracteres")
+      .max(200, "La biografía no debe superar 200 caracteres")
       .optional(),
     profile_picture: z.any().optional(),
   })
