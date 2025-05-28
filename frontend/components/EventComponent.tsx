@@ -162,7 +162,6 @@ export default function EventComponent({
 }: EventComponentProps) {
   const [isApuntado, setIsApuntado] = useState<boolean>(apuntado);
   const [openEdit, setOpenEdit] = useState(false);
-  const [topic, setTopic] = useState("");
   const { user } = useUserContext();
   const {
     register,
@@ -232,6 +231,7 @@ export default function EventComponent({
   };
 
   const selectedDate = watch("date");
+  const selectedTopic = watch("topicID")
 
   const onSubmit = (dataForm: FormEventData) => {
     // Crear una copia de los datos del formulario
@@ -461,7 +461,7 @@ export default function EventComponent({
                   </Label>
                   <SelectComponent
                     topics={topics}
-                    value={topic}
+                    value={selectedTopic.toString()}
                     onChange={(val: string) => setValue("topicID", Number(val))}
                     className="w-full max-w-xs md:w-[170px]"
                   />
