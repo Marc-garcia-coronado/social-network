@@ -116,8 +116,8 @@ const PostCard: React.FC<PostCardProps> = ({
           />
           <div className="flex flex-col">
             <div>
-              <span className="text-sm font-medium">{post.title}</span>
-              <span className="text-sm font-extralight textAbrev">
+              <span className="text-sm font-medium textAbrev">{post.title}</span>
+              <span className="text-sm font-extralight">
                 {" - " +
                   formatDistanceToNow(new Date(post.created_at), {
                     addSuffix: true,
