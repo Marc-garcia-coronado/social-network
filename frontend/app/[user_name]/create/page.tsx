@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +14,7 @@ import { z } from "zod";
 import { motion } from "framer-motion";
 import { Topic } from "@/lib/types";
 import { uploadImage } from "@/hooks/useUploadImage";
+import SelectComponentTopics from "@/components/SelectComponentTopics";
 
 type QueryParamsType = {
   data: Array<Topic>;
@@ -44,7 +44,10 @@ const getTopicsFn = async (id: number) => {
 };
 
 const postSchema = z.object({
-  title: z.string().min(1, "Debe tener más de 1 carácter de longitud").max(45, "Deben ser máximo 45 caracteres"),
+  title: z
+    .string()
+    .min(1, "Debe tener más de 1 carácter de longitud")
+    .max(45, "Deben ser máximo 45 caracteres"),
   picture: z
     .any()
     .refine((file) => file instanceof File, {
@@ -61,9 +64,18 @@ const postSchema = z.object({
 });
 
 const eventSchema = z.object({
-  name: z.string().min(1, "Debe tener más de 1 carácter de longitud").max(30, "Deben ser máximo 30 caracteres"),
-  description: z.string().max(150, "Deben ser máximo 150 caracteres").optional(),
-  location: z.string().min(2, "Debe tener más de 2 carácteres de longitud").max(45, "Deben ser máximo 30 caracteres"),
+  name: z
+    .string()
+    .min(1, "Debe tener más de 1 carácter de longitud")
+    .max(30, "Deben ser máximo 30 caracteres"),
+  description: z
+    .string()
+    .max(150, "Deben ser máximo 150 caracteres")
+    .optional(),
+  location: z
+    .string()
+    .min(2, "Debe tener más de 2 carácteres de longitud")
+    .max(45, "Deben ser máximo 30 caracteres"),
   date: z.date(),
   picture: z
     .any()
@@ -181,6 +193,8 @@ function FormPost({ data, isLoading, isError, error }: QueryParamsType) {
     }
   };
 
+  const selectedTopic = watch("topicID");
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <h2 className="text-4xl font-bold text-center mb-6">Crear Publicación</h2>
@@ -213,34 +227,12 @@ function FormPost({ data, isLoading, isError, error }: QueryParamsType) {
         </div>
         <div className="space-y-1">
           <Label htmlFor="topics">Selecciona el tema para el post:</Label>
-          <ul className="list-none flex gap-4 overflow-x-scroll" id="topics">
-            {isLoading ? (
-              <li>Loading...</li>
-            ) : (
-              data?.map((topic: Topic) => (
-                <li
-                  key={topic.id}
-                  onClick={() =>
-                    setValue(
-                      "topicID",
-                      watch("topicID") === topic.id ? null : topic.id
-                    )
-                  }
-                  className="cursor-pointer"
-                >
-                  <Badge
-                    className={
-                      watch("topicID") === topic.id
-                        ? "bg-lime-400 hover:bg-lime-300 py-2 px-4 mb-3"
-                        : "py-2 px-4 mb-3"
-                    }
-                  >
-                    {topic.name}
-                  </Badge>
-                </li>
-              ))
-            )}
-          </ul>
+          <SelectComponentTopics
+            topics={data}
+            value={selectedTopic?.toString() ?? ""}
+            onChange={(val: string) => setValue("topicID", Number(val))}
+            className="w-full mb-2"
+          />
           {errors.topicID && (
             <p className="text-red-600">{errors.topicID.message}</p>
           )}
@@ -301,6 +293,7 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
   };
 
   const selectedDate = watch("date");
+  const selectedTopic = watch("topicID");
 
   return (
     <form id="formEvents" onSubmit={handleSubmit(onSubmit)}>
@@ -374,34 +367,12 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
         </div>
         <div className="space-y-1">
           <Label htmlFor="topics">Selecciona el tema para el evento:</Label>
-          <ul className="list-none flex gap-4 overflow-x-scroll" id="topics">
-            {isLoading ? (
-              <li>Loading...</li>
-            ) : (
-              data?.map((topic: Topic) => (
-                <li
-                  key={topic.id}
-                  onClick={() =>
-                    setValue(
-                      "topicID",
-                      watch("topicID") === topic.id ? null : topic.id
-                    )
-                  }
-                  className="cursor-pointer"
-                >
-                  <Badge
-                    className={
-                      watch("topicID") === topic.id
-                        ? "bg-lime-400 hover:bg-lime-300 py-2 px-4 mb-3"
-                        : "py-2 px-4 mb-3"
-                    }
-                  >
-                    {topic.name}
-                  </Badge>
-                </li>
-              ))
-            )}
-          </ul>
+          <SelectComponentTopics
+            topics={data}
+            value={selectedTopic?.toString() ?? ""}
+            onChange={(val: string) => setValue("topicID", Number(val))}
+            className="w-full mb-2"
+          />
           {errors.topicID && (
             <p className="text-red-600">{errors.topicID.message}</p>
           )}
