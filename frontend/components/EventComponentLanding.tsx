@@ -22,7 +22,7 @@ export default function EventComponentLanding({
       <Badge className="w-fit mt-5 mx-5">{event?.topic.name}</Badge>
       <div className="px-5 py-1 flex flex-col ">
         <h2 className="capitalize font-bold my-3">{event?.name}</h2>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 pt-1">
           <Label htmlFor="desc">Descripción:</Label>
           <p id="desc">{event?.description}</p>
         </div>
