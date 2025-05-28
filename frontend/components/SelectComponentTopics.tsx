@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { Topic } from "@/lib/types";
 
-export default function SelectComponent({
+export default function SelectComponentTopics({
   topics,
   value,
   onChange,

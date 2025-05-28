@@ -163,7 +163,6 @@ export default function EventComponent({
   const [isApuntado, setIsApuntado] = useState<boolean>(apuntado);
   const [openEdit, setOpenEdit] = useState(false);
   const [topic, setTopic] = useState("");
-  const [userTopics, setuserTopics] = useState([]);
   const { user } = useUserContext();
   const {
     register,
@@ -461,9 +460,9 @@ export default function EventComponent({
                     Selecciona el tema para el evento:
                   </Label>
                   <SelectComponent
-                    topics={userTopics}
+                    topics={topics}
                     value={topic}
-                    onChange={(val: string) => setTopic(val)}
+                    onChange={(val: string) => setValue("topicID", Number(val))}
                     className="w-full max-w-xs md:w-[170px]"
                   />
                   {errors.topicID && (
