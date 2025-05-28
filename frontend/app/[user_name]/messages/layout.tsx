@@ -40,7 +40,6 @@ const fetchConversations = async (): Promise<User[]> => {
 export default function MessagesLayout({ children }: { children: ReactNode }) {
   const [search, setSearch] = useState<string>("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [showNoResults, setShowNoResults] = useState<boolean>(false);
   const { numberNotReadedMsg, setNumberNotReadedMsg } = useMessagesContext();
   const router = useRouter();
   const { user } = useUserContext();
@@ -75,7 +74,6 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
   // Función para buscar usuarios en el backend
   const fetchFilteredUsers = async (term: string) => {
     try {
-      setShowNoResults(false); // Ocultar mensaje mientras se busca
       const response = await fetch(
         `https://social-network-production.up.railway.app/api/users/search?query=${term}&limit=10`,
         {
@@ -96,28 +94,22 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
       // Validar que data.users exista y sea un array
       if (!data || !Array.isArray(data.users)) {
         setFilteredUsers([]);
-        setShowNoResults(true);
         return;
       }
       // Mostrar mensaje de "No se encontraron usuarios" después de un retraso si no hay resultados
       if (data.users.length === 0) {
         setTimeout(() => {
-          setShowNoResults(true);
         }, 500); // Retraso de 500ms
       } else {
-        setShowNoResults(false);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
       setFilteredUsers([]);
-      setShowNoResults(true);
     }
   };
 
   const {
     data: conversations,
-    isLoading,
-    isError,
   } = useQuery({
     queryKey: ["conversations"],
     queryFn: () => fetchConversations(),
@@ -127,7 +119,6 @@ export default function MessagesLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (search.trim() === "") {
       setFilteredUsers([]);
-      setShowNoResults(false); // Ocultar mensaje si no hay texto
     } else {
       const delayDebounceFn = setTimeout(() => {
         fetchFilteredUsers(search);
