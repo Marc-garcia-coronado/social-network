@@ -24,8 +24,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis, SquarePen, Trash2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Badge } from "@/components/ui/badge";
-import { Topic } from "@/lib/types";
 import SelectComponentTopics from "./SelectComponentTopics";
 
 const getTopicsFn = async (id: number) => {
@@ -69,7 +67,7 @@ export function DropdownCardMenu({
   const [openDelete, setOpenDelete] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [title, setTitle] = useState(postTitle || "");
-  const { data, isLoading, isError, error } = useQuery({
+  const { data } = useQuery({
     queryKey: ["topics", userId],
     queryFn: () => getTopicsFn(Number(userId)),
     enabled: !!userId,
