@@ -48,6 +48,7 @@ export default function Home() {
     isFetchingNextPage,
     isLoading: homeLoading,
     error: homeError,
+    refetch,
   } = useInfiniteQuery({
     queryKey: ["posts"],
     queryFn: fetchPosts,
@@ -133,15 +134,6 @@ export default function Home() {
       }));
     } catch (error) {
       console.error(`Error fetching stats for post ${postID}:`, error);
-    }
-  };
-  const refreshPosts = async () => {
-    try {
-      const postsData = await fetchPosts({ pageParam: 1 });
-      // Aquí puedes actualizar el estado con los datos obtenidos
-      console.log("Posts refreshed:", postsData);
-    } catch (error) {
-      console.error("Error refreshing posts:", error);
     }
   };
 
@@ -665,7 +657,7 @@ export default function Home() {
                 likedComments={likedComments}
                 addComment={addComment}
                 currentUser={userData}
-                refreshPosts={refreshPosts}
+                refreshPosts={refetch}
                 commentsCount={postStats[post.id]?.comments ?? 0}
               />
             ))
