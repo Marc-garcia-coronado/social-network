@@ -756,7 +756,7 @@ export default function Profile() {
     return <div>Error: {error}</div>;
   }
   return (
-    <div className="min-h-screen px-8">
+    <div className="min-h-screen">
       <div className="w-full mb-8 grid grid-cols-3 items-center gap-4 px-4 py-4 md:mt-10 relative">
         {/* Columna izquierda vacía */}
         <div />
