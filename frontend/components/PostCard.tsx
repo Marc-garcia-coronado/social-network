@@ -47,7 +47,6 @@ const PostCard: React.FC<PostCardProps> = ({
   const [isDoubleClickEnabled, setIsDoubleClickEnabled] = useState(true);
   const router = useRouter();
 
-
   return (
     <li
       key={post.id}
@@ -103,28 +102,32 @@ const PostCard: React.FC<PostCardProps> = ({
       {/* Footer Section */}
       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-4 flex items-center justify-between z-10">
         {/* User Info */}
-        <div
-          className="flex items-center space-x-2 cursor-pointer"
-        >
+        <div className="flex items-center space-x-2">
           <Image
             src={post.user.profile_picture || "/teddy.webp"}
             alt="User Avatar"
             width={24}
             height={24}
-            className="w-10 h-10 rounded-full"
+            className="w-10 h-10 rounded-full cursor-pointer"
             onClick={() => router.push(`/${post.user.user_name}/profile`)}
           />
           <div className="flex flex-col">
             <div>
-              <span className="text-sm font-medium max-w-60 textAbrev">{post.title}</span>
+              <span className="text-sm font-medium max-w-60 textAbrev">
+                {post.title}
+              </span>
               <span className="text-xs text-gray-300 font-extralight w-6">
-                {
-                  formatDistanceToNow(new Date(post.created_at), {
-                    addSuffix: true,
-                  })}
+                {formatDistanceToNow(new Date(post.created_at), {
+                  addSuffix: true,
+                })}
               </span>
             </div>
-            <span className="text-sm font-light" onClick={() => router.push(`/${post.user.user_name}/profile`)}>{post.user.user_name}</span>
+            <span
+              className="text-sm font-light cursor-pointer"
+              onClick={() => router.push(`/${post.user.user_name}/profile`)}
+            >
+              {post.user.user_name}
+            </span>
           </div>
         </div>
 
