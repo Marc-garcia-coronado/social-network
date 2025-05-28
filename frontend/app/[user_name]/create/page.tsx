@@ -243,7 +243,7 @@ function FormPost({ data, isLoading, isError, error }: QueryParamsType) {
           disabled={
             isError || isLoading || typeof watch("topicID") !== "number"
           }
-          className="w-full"
+          className="w-full mt-3"
         >
           Crear
         </Button>
@@ -383,7 +383,7 @@ function FormEvent({ data, isLoading, isError, error }: QueryParamsType) {
           disabled={
             isError || isLoading || typeof watch("topicID") !== "number"
           }
-          className="w-full"
+          className="w-full mt-3"
         >
           Crear
         </Button>
