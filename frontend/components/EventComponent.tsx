@@ -231,7 +231,7 @@ export default function EventComponent({
   };
 
   const selectedDate = watch("date");
-  const selectedTopic = watch("topicID")
+  const selectedTopic = watch("topicID");
 
   const onSubmit = (dataForm: FormEventData) => {
     // Crear una copia de los datos del formulario
@@ -481,7 +481,7 @@ export default function EventComponent({
           <div className="flex gap-3">
             <Button
               type="button"
-              className={`self-center mb-3 ${
+              className={`self-center ${
                 isApuntado ? "bg-lime-400 hover:bg-lime-300" : ""
               }`}
               onClick={() => handleChangeIsApuntado()}
