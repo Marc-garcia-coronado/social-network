@@ -747,7 +747,6 @@ export default function Profile() {
       checkIfFollowing();
     }
   }, [userData, isFollowing]);
-  console.log(userData);
   if (loading) {
     return <div>Loading...</div>;
   }
